@@ -52,3 +52,5 @@ Start prompting: **"Use FAF to initialize your project"**
 ---
 
 **Built with F1-inspired engineering principles** 🏎️⚡
+
+**"It's so logical if it didn't exist, AI would have built it itself"** — Claude
