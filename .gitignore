@@ -8,3 +8,23 @@ dist/
 coverage/
 .vscode/
 .idea/
+
+# Strategy docs (keep local only - NOT for public repo)
+ENTERPRISE-VISION.md
+LAUNCH-DISTRIBUTION.md
+**/ANTI-SAAS-POSITIONING.md
+**/BI-SYNC-STATUS.md
+**/CHAMPIONSHIP-POSITIONING.md
+**/CROSS-PLATFORM-STRATEGY.md
+**/FAF-MCP-SOCIAL-MEDIA-POSTS.md
+**/LAUNCH-STRATEGY.md
+**/MARKETPLACE-SUBMISSIONS.md
+**/NAMING-ANALYSIS.md
+**/READY-TO-SHIP.md
+**/SUBMISSION-STEPS.md
+**/TAGLINE-OPTIONS.md
+**/submissions/
+
+# FAF backups
+*.backup-*
+.faf-dna
