@@ -6,7 +6,7 @@
   </div>
 </div>
 
-> Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Persistent project context for Claude Desktop, Cursor, Windsurf, and all MCP-compatible platforms
+> Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Persistent project context for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms (including [Claude Desktop](https://github.com/Wolfe-Jam/claude-faf-mcp))
 
 ## 💡 Quick Start
 
@@ -75,13 +75,15 @@ At 55% you are building your project with half a blueprint and basically flippin
 
 ### Platform-Specific Setup
 
-**Claude Desktop:** Add to `claude_desktop_config.json` ([location guide](https://wolfe-jam.github.io/claude-faf-mcp/))
-
 **Cursor IDE:** Add to `~/.cursor/mcp.json` ([setup guide](https://docs.cursor.com/context/model-context-protocol))
 
 **Windsurf Editor:** Add to `~/.codeium/windsurf/mcp_config.json` ([Cascade docs](https://docs.windsurf.com/windsurf/cascade/mcp))
 
+**Cline:** Add to Cline's MCP settings
+
 **VS Code:** Install MCP extension, then add server config
+
+**Claude Desktop:** Use the [dedicated claude-faf-mcp package](https://github.com/Wolfe-Jam/claude-faf-mcp) for optimized Claude integration
 
 ---
 
