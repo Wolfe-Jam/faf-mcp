@@ -1,0 +1,20 @@
+{
+  "name": "faf-mcp-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FAF MCP servers for all platforms",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "publish:all": "npm run publish --workspaces"
+  },
+  "author": {
+    "name": "wolfejam",
+    "email": "team@faf.one",
+    "url": "https://wolfejam.dev"
+  },
+  "license": "MIT"
+}
