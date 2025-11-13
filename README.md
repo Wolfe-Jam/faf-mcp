@@ -1,62 +1,54 @@
-# FAF MCP - IANA .faf format for AI context
-
-Universal MCP servers for persistent AI context across all platforms.
-
-<div align="center">
-  <img src="./assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
-  <p><em>project.faf lives at the project root, between package.json and README.md</em></p>
+<div style="display: flex; align-items: center; gap: 12px;">
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" />
+  <div>
+    <h1 style="margin: 0; color: #FF8C00;">faf-mcp</h1>
+    <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
+  </div>
 </div>
 
-## Packages
+> Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Persistent project context for Claude Desktop, Cursor, Windsurf, and all MCP-compatible platforms
 
-### Published
-- **[faf-mcp](./packages/faf-mcp)** - Universal MCP server (all platforms)
+---
 
-### Planned
-- **cursor-faf-mcp** - Cursor IDE specific package (on demand)
-- **gemini-faf-mcp** - Google Gemini integration (Beta)
-- **codex-faf-mcp** - Microsoft Codex/VS Code (Beta)
-- **windsurf-faf-mcp** - Windsurf Editor (on demand)
-- **any-faf-mcp** - Request any IDE integration (on demand)
+## 📦 Main Package
 
-## Architecture
+**[→ faf-mcp package documentation](./packages/faf-mcp#readme)**
 
-```
-faf-mcp-monorepo/
-├── packages/
-│   ├── faf-mcp/          # Universal package
-│   ├── cursor-faf-mcp/   # Future: Cursor-specific
-│   └── gemini-faf-mcp/   # Future: Gemini-specific
-└── (shared code in future if needed)
-```
+Full README with installation, features, and usage examples.
 
-## Development
+---
+
+## 🔗 Quick Links
+
+- 🌐 **Website:** [faf.one](https://faf.one)
+- 💬 **Discord:** [Join Community](https://discord.com/invite/3pjzpKsP)
+- 📦 **npm:** [faf-mcp](https://www.npmjs.com/package/faf-mcp)
+- 🏪 **Chrome Extension:** [FAF Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)
+- 📚 **About this repo:** [ABOUT.md](./ABOUT.md)
+
+---
+
+## ⚡ Quick Install
 
 ```bash
-# Install all dependencies
-npm install
-
-# Build all packages
-npm run build
-
-# Publish all packages
-npm run publish:all
+npm install -g faf-mcp
 ```
 
-## Strategy
+Then add to your MCP config:
 
-Start with universal `faf-mcp`. Add platform-specific packages based on:
-1. User demand (GitHub issues)
-2. Platform complexity (requires custom implementation)
-3. Strategic priority (BIG-3: Gemini → Codex)
+```json
+{
+  "mcpServers": {
+    "faf": {
+      "command": "npx",
+      "args": ["-y", "faf-mcp"]
+    }
+  }
+}
+```
 
-## Relationship to claude-faf-mcp
-
-`claude-faf-mcp` remains separate - maintained under Anthropic stewardship.
-This monorepo is for universal and non-Claude platforms.
+Start prompting: **"Use FAF to initialize your project"**
 
 ---
 
 **Built with F1-inspired engineering principles** 🏎️⚡
-
-**"It's so logical if it didn't exist, AI would have built it itself" — Claude
