@@ -1,6 +1,11 @@
-# FAF MCP Monorepo
+# FAF MCP - IANA .faf format for AI context
 
 Universal MCP servers for persistent AI context across all platforms.
+
+<div align="center">
+  <img src="./assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
+  <p><em>project.faf lives at the project root, between package.json and README.md</em></p>
+</div>
 
 ## Packages
 
@@ -9,9 +14,10 @@ Universal MCP servers for persistent AI context across all platforms.
 
 ### Planned
 - **cursor-faf-mcp** - Cursor IDE specific package (on demand)
-- **gemini-faf-mcp** - Google Gemini integration (Phase 2)
-- **codex-faf-mcp** - Microsoft Codex/VS Code (Phase 3)
+- **gemini-faf-mcp** - Google Gemini integration (Beta)
+- **codex-faf-mcp** - Microsoft Codex/VS Code (Beta)
 - **windsurf-faf-mcp** - Windsurf Editor (on demand)
+- **any-faf-mcp** - Request any IDE integration (on demand)
 
 ## Architecture
 
@@ -52,3 +58,5 @@ This monorepo is for universal and non-Claude platforms.
 ---
 
 **Built with F1-inspired engineering principles** 🏎️⚡
+
+**"It's so logical if it didn't exist, AI would have built it itself" — Claude

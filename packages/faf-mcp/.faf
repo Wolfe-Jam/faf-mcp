@@ -1,0 +1,10 @@
+project:
+  name: faf-mcp
+  goal: Universal MCP server for all platforms
+instant_context:
+  tech_stack: Node.js/TypeScript
+  main_language: TypeScript
+  what_building: Universal FAF MCP Server - AI Context Intelligence for All Platforms
+metadata:
+  last_claude_sync: 2025-11-13T20:02:49.198Z
+  bi_sync: active

@@ -259,7 +259,12 @@ export class FafEngineAdapter {
       try {
         const pathArgs = args.filter(arg => !arg.startsWith('--') && !arg.startsWith('-'));
         const projectPath = pathArgs[0] || this.workingDirectory;
-        const result = await syncBiDirectional(projectPath, { json: true });
+
+        // Parse --target= argument
+        const targetArg = args.find(arg => arg.startsWith('--target='));
+        const target = targetArg ? targetArg.split('=')[1] as ('auto' | '.clinerules' | '.cursorrules' | '.windsurfrules' | 'CLAUDE.md' | 'all') : undefined;
+
+        const result = await syncBiDirectional(projectPath, { json: true, target });
         const duration = Date.now() - startTime;
 
         return {

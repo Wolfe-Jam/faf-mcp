@@ -1,0 +1,103 @@
+{
+  "birthCertificate": {
+    "born": "2025-11-13T20:02:03.306Z",
+    "birthDNA": 22,
+    "birthDNASource": "CLAUDE.md",
+    "projectDNA": "3f54db3ec43244b6",
+    "authenticated": false,
+    "certificate": "FAF-2025-FAFMCP-NR94"
+  },
+  "versions": [
+    {
+      "version": "v1.0.0",
+      "timestamp": "2025-11-13T20:02:03.306Z",
+      "score": 22,
+      "changes": [
+        "Initial context from CLAUDE.md"
+      ],
+      "approved": false,
+      "growth": 0,
+      "growthRate": 0
+    },
+    {
+      "version": "v1.0.1",
+      "timestamp": "2025-11-13T20:02:03.335Z",
+      "score": 83,
+      "changes": [
+        "Initial .faf generation from project"
+      ],
+      "approved": false,
+      "growth": 61,
+      "growthRate": 61
+    }
+  ],
+  "current": {
+    "version": "v1.0.1",
+    "score": 83,
+    "approved": false,
+    "lastSync": "2025-11-13T20:02:03.335Z"
+  },
+  "recovery": {
+    "claudeMD": "/Users/wolfejam/FAF/faf-mcp/packages/faf-mcp/CLAUDE.md",
+    "lastBackup": "2025-11-13T20:02:03.306Z",
+    "syncStatus": "active",
+    "autoRecover": true
+  },
+  "growth": {
+    "totalGrowth": 61,
+    "daysActive": 0,
+    "averageDailyGrowth": 61,
+    "bestDay": {
+      "date": "2025-11-13T20:02:03.335Z",
+      "growth": 61
+    },
+    "bestWeek": {
+      "start": "2025-11-13T20:02:03.306Z",
+      "growth": 0
+    },
+    "milestones": [
+      {
+        "type": "birth",
+        "score": 22,
+        "date": "2025-11-13T20:02:03.306Z",
+        "version": "v1.0.0",
+        "label": "Birth",
+        "emoji": "🐣"
+      },
+      {
+        "type": "doubled",
+        "score": 83,
+        "date": "2025-11-13T20:02:03.335Z",
+        "version": "v1.0.1",
+        "label": "Doubled",
+        "emoji": "2️⃣"
+      },
+      {
+        "type": "championship",
+        "score": 83,
+        "date": "2025-11-13T20:02:03.335Z",
+        "version": "v1.0.1",
+        "label": "Championship",
+        "emoji": "🏆"
+      },
+      {
+        "type": "peak",
+        "score": 83,
+        "date": "2025-11-13T20:02:03.335Z",
+        "version": "v1.0.1",
+        "label": "Peak",
+        "emoji": "🏔️"
+      },
+      {
+        "type": "current",
+        "score": 83,
+        "date": "2025-11-13T20:02:03.335Z",
+        "version": "v1.0.1",
+        "label": "Current",
+        "emoji": "📍"
+      }
+    ]
+  },
+  "lastModified": "2025-11-13T20:02:03.335Z",
+  "format": "faf-dna-v1"
+}

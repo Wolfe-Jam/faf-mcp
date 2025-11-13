@@ -1,8 +1,8 @@
 {
   "name": "faf-mcp",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "mcpName": "io.github.Wolfe-Jam/faf-mcp",
-  "description": "IANA-registered format (application/vnd.faf+yaml) • Persistent project context • MCP server for all platforms • MIT License",
+  "description": "USE>FAF™ - IANA-registered format (application/vnd.faf+yaml) • Universal AI context • MCP server for all platforms • Start with 'Use FAF'",
   "icon": "./assets/icons/faf-icon-256.png",
   "logo": "./assets/icons/faf-icon-256.png",
   "displayName": ".faf 🧡⚡️",

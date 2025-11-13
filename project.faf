@@ -1,0 +1,131 @@
+faf_version: 2.5.0
+ai_scoring_system: 2025-09-20
+ai_score: 56%
+ai_confidence: LOW
+ai_value: 30_seconds_replaces_20_minutes_of_questions
+ai_tldr:
+  project: FAF MCP Monorepo - FAF MCP servers for all platforms
+  stack: JavaScript
+  quality_bar: ZERO_ERRORS_F1_STANDARDS
+  current_focus: Production deployment preparation
+  your_role: Build features with perfect context
+instant_context:
+  what_building: FAF MCP servers for all platforms
+  tech_stack: JavaScript
+  main_language: JavaScript
+  deployment: None
+  key_files:
+    - package.json
+    - tsconfig.json
+context_quality:
+  slots_filled: 10/21 (48%)
+  ai_confidence: LOW
+  handoff_ready: false
+  missing_context:
+    - CI/CD pipeline
+    - Database
+project:
+  name: FAF MCP Monorepo
+  goal: FAF MCP servers for all platforms
+  main_language: JavaScript
+  type: python-generic
+  generated: 2025-11-13T15:38:50.099Z
+  mission: 🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖
+  revolution: 30 seconds replaces 20 minutes of questions
+  brand: F1-Inspired Software Engineering - Championship AI Context
+ai_instructions:
+  priority_order:
+    - 1. Read THIS .faf file first
+    - 2. Check CLAUDE.md for session context
+    - 3. Review package.json for dependencies
+  working_style:
+    code_first: true
+    explanations: minimal
+    quality_bar: zero_errors
+    testing: required
+  warnings:
+    - Never modify dial components without approval
+    - All TypeScript must pass strict mode
+    - Test coverage required for new features
+stack:
+  frontend: None
+  css_framework: None
+  ui_library: None
+  state_management: None
+  backend: None
+  runtime: None
+  database: None
+  build: None
+  package_manager: npm
+  api_type: REST
+  hosting: None
+  cicd: None
+  targetUser: developers
+  coreProblem: understanding project
+  missionPurpose: project documentation
+  packageManager: npm/yarn/pnpm
+  mainLanguage: JavaScript/TypeScript
+preferences:
+  quality_bar: zero_errors
+  commit_style: conventional_emoji
+  response_style: concise_code_first
+  explanation_level: minimal
+  communication: direct
+  testing: required
+  documentation: as_needed
+state:
+  phase: development
+  version: 1.0.0
+  focus: production_deployment
+  status: green_flag
+  next_milestone: npm_publication
+  blockers: null
+tags:
+  auto_generated:
+    - faf-mcp-monorepo
+    - none
+    - javascript
+  smart_defaults:
+    - .faf
+    - ai-ready
+    - "2025"
+    - software
+    - open-source
+  user_defined: null
+human_context:
+  who: Development teams
+  what: FAF MCP servers for all platforms
+  why: Improve development efficiency
+  where: Cloud platform
+  when: Production/Stable
+  how: Modern development practices
+  additional_context: null
+  context_score: 0
+  total_prd_score: 56
+  success_rate: 50%
+ai_scoring_details:
+  system_date: 2025-09-20
+  slot_based_percentage: 48
+  ai_score: 56
+  total_slots: 21
+  filled_slots: 10
+  scoring_method: Honest percentage - no fake minimums
+  trust_embedded: COUNT ONCE architecture - trust MY embedded scores
+faf_dna:
+  birth_dna: 0
+  birth_certificate: FAF-2025-FAFMCPMO-L4AY
+  birth_date: 2025-11-13T15:38:50.148Z
+  current_score: 42
+projectName: faf-mcp
+projectGoal: USE>FAF™ - IANA-registered format (application/vnd.faf+yaml) •
+  Universal AI context • MCP server for all platforms • Start with 'Use FAF'
+generated: 2025-11-13T20:01:29.188Z
+stack_signature: typescript-nodejs-javascript
+detected_frameworks:
+  - Node.js
+  - JavaScript
+  - TypeScript
+turbo_cat_intelligence: 290
+stats:
+  last_auto_time: 0.2
+  times_run: 3

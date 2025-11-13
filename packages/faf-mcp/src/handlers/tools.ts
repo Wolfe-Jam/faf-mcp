@@ -100,13 +100,18 @@ export class FafToolHandler {
         },
         {
           name: 'faf_bi_sync',
-          description: 'Bi-directional sync between project.faf context and claude.md for persistent Claude collaboration',
+          description: 'Platform-aware sync: project.faf to .cursorrules, .clinerules, .windsurfrules, CLAUDE.md',
           inputSchema: {
             type: 'object',
             properties: {
               auto: { type: 'boolean', description: 'Enable automatic synchronization' },
               watch: { type: 'boolean', description: 'Start real-time file watching for changes' },
-              force: { type: 'boolean', description: 'Force overwrite conflicting changes' }
+              force: { type: 'boolean', description: 'Force overwrite conflicting changes' },
+              target: {
+                type: 'string',
+                enum: ['auto', '.clinerules', '.cursorrules', '.windsurfrules', 'CLAUDE.md', 'all'],
+                description: 'Sync target: auto (detect existing), specific platform, or all'
+              }
             },
             additionalProperties: false
           }
@@ -550,7 +555,8 @@ export class FafToolHandler {
       }
 
       // Create enhanced .faf content
-      const fafContent = `# FAF - Foundational AI Context
+      const fafContent = `# USE>FAF - call FAF-MCP (or faf/cli)
+# FAF - Foundational AI Context
 project: ${projectData.project}
 type: ${projectData.project_type}${chromeDetection.detected ? ' 🎯' : ''}
 context: I⚡🍊
@@ -704,6 +710,9 @@ package_manager: ${projectData.package_manager}` : ''}
     }
     if (args?.force) {
       biSyncArgs.push('--force');
+    }
+    if (args?.target) {
+      biSyncArgs.push(`--target=${args.target}`);
     }
 
     const result = await this.engineAdapter.callEngine('bi-sync', biSyncArgs);

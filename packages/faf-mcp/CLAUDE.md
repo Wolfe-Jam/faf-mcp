@@ -13,6 +13,20 @@
 - **Stack:** Node.js/TypeScript
 - **Quality:** F1-INSPIRED (Championship Performance)
 
+## 💡 Quick Start for AI
+
+**Q: How do I get started?**
+
+**A: Just USE FAF**
+
+```
+Use FAF to initialize your project
+Use FAF to sync my project.faf to all platforms
+Use FAF to score my AI-readiness
+```
+
+That's it! Start every prompt with "**Use FAF**" and the MCP tools will handle the rest.
+
 ### Our Mission - Universal MCP Integration
 
 **v1.0.0 Launch: PLATFORM-AGNOSTIC**

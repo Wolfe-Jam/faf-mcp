@@ -6,7 +6,21 @@
   </div>
 </div>
 
-> Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Works with Claude Desktop, Cursor, Windsurf, and all MCP-compatible platforms
+> Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Persistent project context for Claude Desktop, Cursor, Windsurf, and all MCP-compatible platforms
+
+## 💡 Quick Start
+
+**Q: How do I get started?**
+
+**A: Just USE FAF**
+
+```
+Use FAF to initialize your project
+Use FAF to sync my project.faf to all platforms
+Use FAF to score my AI-readiness
+```
+
+That's it! Start every prompt with "**Use FAF**" and the MCP tools will handle the rest.
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/3pjzpKsP)
@@ -18,13 +32,16 @@
 
 ## 🏁 AI-Readiness Scorecard
 
+> **"README for the AI era"** — Google Gemini
+
 **The closer you get to 100% the better AI can assist you.**
 
 At 55% you are building your project with half a blueprint and basically flipping a coin with AI. .FAF defines, and AI becomes optimized for Context with the project.faf file.
 
 <div align="center">
   <img src="./assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
-  <p><em>project.faf lives at the project root, between package.json and README.md</em></p>
+  <p><em><strong>project.faf is to AI context what package.json is to dependencies</strong></em></p>
+  <p><em>Lives at the project root, between package.json and README.md</em></p>
 </div>
 
 ```
@@ -73,6 +90,51 @@ At 55% you are building your project with half a blueprint and basically flippin
 We're launching `faf-mcp` as the universal package. If you'd prefer a dedicated package for your platform (like `cursor-faf-mcp` or `windsurf-faf-mcp` with tailored setup instructions), **[request it here](https://github.com/Wolfe-Jam/faf-mcp/issues)**.
 
 We'll publish platform-specific packages based on demand.
+
+---
+
+## 💬 How to Use FAF - Universal Solution
+
+**ALWAYS start every prompt with "Use FAF"** - it fixes everything:
+
+### All Platforms
+```
+Use FAF to initialize my project
+Use FAF to sync my project.faf to all platforms
+Use FAF to score my AI-readiness
+Use FAF to enhance my project context
+Use FAF to create platform sync files
+```
+
+### Why "Use FAF" Works Everywhere
+
+**Claude Desktop:**
+- ✅ Calls MCP tool instead of searching web
+- ✅ No void container issues
+- ✅ Direct tool invocation
+
+**Claude.ai (Web):**
+- ✅ Stops web search addiction immediately
+- ✅ Forces MCP tool usage
+- ✅ No more guessing
+
+**Cursor / Windsurf / Cline:**
+- ✅ MCP standard compliance
+- ✅ Tool invocation (not manual file creation)
+- ✅ Consistent behavior
+
+### The Pattern
+
+**Without "Use FAF":**
+- ❌ AI searches the web
+- ❌ AI creates files manually
+- ❌ Void containers
+- ❌ Inconsistent results
+
+**With "Use FAF":**
+- ✅ MCP tool called correctly
+- ✅ Championship output
+- ✅ Every time
 
 ---
 
@@ -131,13 +193,27 @@ We'll publish platform-specific packages based on demand.
 
 ## 🏆 Why FAF?
 
-> "README for the AI era" — Gemini CLI
+### Championship Credentials
+
+**🏅 Creators of the Format** - We designed .FAF (IANA-registered `application/vnd.faf+yaml`)
+**🏅 First & Only** - Persistent Project Context MCP Server approved by Anthropic
+**🏅 Creators of Context-Mirroring** - faf_bi_sync creates native files for all platforms
+**🏅 Google Chrome-Approved** - Published Chrome Extension
+**🏅 12K+ npm Downloads** - Proven adoption across the ecosystem
+
+> "README for the AI era" — Google Gemini
+
+### The FAF Advantage
 
 **Persistent Context** - Your project's DNA lives in `project.faf`, readable by any AI or human
 
 **Universal Format** - IANA-registered standard works across Claude, Gemini, Cursor, Windsurf, any MCP platform
 
 **Zero Setup Tax** - One file (`project.faf`) eliminates AI context setup across your entire team
+
+**FREE FOREVER** - MIT License, open source, no subscription
+
+**All Boats Rise Together** - Improving projects, AI performance, code quality, speed to market for everyone
 
 **Championship Engineering** - F1-inspired performance with strict TypeScript, zero runtime errors
 
