@@ -34,15 +34,15 @@ That's it! Start every prompt with "**Use FAF**" and the MCP tools will handle t
 
 > **"README for the AI era"** — Google Gemini
 
-**The closer you get to 100% the better AI can assist you.**
-
-At 55% you are building your project with half a blueprint and basically flipping a coin with AI. .FAF defines, and AI becomes optimized for Context with the project.faf file.
-
 <div align="center">
   <img src="./assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
   <p><em><strong>project.faf is to AI context what package.json is to dependencies</strong></em></p>
   <p><em>Lives at the project root, between package.json and README.md</em></p>
 </div>
+
+**The closer you get to 100% the better AI can assist you.**
+
+At 55% you are building your project with half a blueprint and basically flipping a coin with AI. .FAF defines, and AI becomes optimized for Context with the project.faf file.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
