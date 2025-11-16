@@ -11,7 +11,7 @@
 **Universal version of [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** — Anthropic-approved MCP server, now compatible with all platforms. Built on the IANA-registered .FAF format (`application/vnd.faf+yaml`).
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/3pjzpKsP)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/56fPBUJKfk)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -226,7 +226,7 @@ Use FAF to create platform sync files
 - **[claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** - Claude Desktop-specific package
 - **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** - Browser integration
 - **[faf.one](https://faf.one)** - Official website and documentation
-- **[Discord Community](https://discord.com/invite/3pjzpKsP)** - Join the discussion
+- **[Discord Community](https://discord.com/invite/56fPBUJKfk)** - Join the discussion
 
 ---
 
