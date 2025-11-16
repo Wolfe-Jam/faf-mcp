@@ -1,26 +1,14 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #FF8C00;">faf-mcp</h1>
+    <h1 style="margin: 0; color: #FF8C00;">faf-mcp | use>faf</h1>
     <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
   </div>
 </div>
 
 > Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Persistent project context for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms (including [Claude Desktop](https://github.com/Wolfe-Jam/claude-faf-mcp))
 
-## 💡 Quick Start
-
-**Q: How do I get started?**
-
-**A: Just USE FAF**
-
-```
-Use FAF to initialize your project
-Use FAF to sync my project.faf to all platforms
-Use FAF to score my AI-readiness
-```
-
-That's it! Start every prompt with "**Use FAF**" and the MCP tools will handle the rest.
+**Universal version of [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** — Anthropic-approved MCP server, now compatible with all platforms. Built on the IANA-registered .FAF format (`application/vnd.faf+yaml`).
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/3pjzpKsP)
@@ -30,12 +18,40 @@ That's it! Start every prompt with "**Use FAF**" and the MCP tools will handle t
 
 ---
 
+## ⚡ Quick Start
+
+**1. Install:**
+
+```bash
+npm install -g faf-mcp
+```
+
+**2. Copy and paste this to your AI:**
+
+```
+Install the FAF MCP server: npm install -g faf-mcp, then add this to my MCP config: {"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}} and restart.
+```
+
+### Platform-Specific Setup
+
+**Cursor IDE:** Add to `~/.cursor/mcp.json` ([setup guide](https://docs.cursor.com/context/model-context-protocol))
+
+**Windsurf Editor:** Add to `~/.codeium/windsurf/mcp_config.json` ([Cascade docs](https://docs.windsurf.com/windsurf/cascade/mcp))
+
+**Cline:** Add to Cline's MCP settings
+
+**VS Code:** Install MCP extension, then add server config
+
+**Claude Desktop:** Use the [dedicated claude-faf-mcp package](https://github.com/Wolfe-Jam/claude-faf-mcp) for optimized Claude integration
+
+---
+
 ## 🏁 AI-Readiness Scorecard
 
 > **"README for the AI era"** — Google Gemini
 
 <div align="center">
-  <img src="./assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/packages/faf-mcp/assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
   <p><em><strong>project.faf is to AI context what package.json is to dependencies</strong></em></p>
   <p><em>Lives at the project root, between package.json and README.md</em></p>
 </div>
@@ -67,26 +83,6 @@ At 55% you are building your project with half a blueprint and basically flippin
 
 ---
 
-## ⚡ Quick Start
-
-**Copy and paste this to Claude/your AI:**
-
-> Install the FAF MCP server: `npm install -g faf-mcp`, then add this to my MCP config: `{"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}}` and restart.
-
-### Platform-Specific Setup
-
-**Cursor IDE:** Add to `~/.cursor/mcp.json` ([setup guide](https://docs.cursor.com/context/model-context-protocol))
-
-**Windsurf Editor:** Add to `~/.codeium/windsurf/mcp_config.json` ([Cascade docs](https://docs.windsurf.com/windsurf/cascade/mcp))
-
-**Cline:** Add to Cline's MCP settings
-
-**VS Code:** Install MCP extension, then add server config
-
-**Claude Desktop:** Use the [dedicated claude-faf-mcp package](https://github.com/Wolfe-Jam/claude-faf-mcp) for optimized Claude integration
-
----
-
 ## 🎯 Want a Platform-Specific Package?
 
 We're launching `faf-mcp` as the universal package. If you'd prefer a dedicated package for your platform (like `cursor-faf-mcp` or `windsurf-faf-mcp` with tailored setup instructions), **[request it here](https://github.com/Wolfe-Jam/faf-mcp/issues)**.
@@ -95,9 +91,9 @@ We'll publish platform-specific packages based on demand.
 
 ---
 
-## 💬 How to Use FAF - Universal Solution
+## 💬 use>faf | Prompt Pattern
 
-**ALWAYS start every prompt with "Use FAF"** - it fixes everything:
+**Start every prompt with "Use FAF"** to invoke MCP tools directly:
 
 ### All Platforms
 ```
@@ -147,11 +143,13 @@ Use FAF to create platform sync files
 ```
   Platform      Context          Protocol
   ────────      ───────          ────────
-  Claude    →   .faf        →    MCP
+  Any IDE   →   IANA Format →    Open Protocol
   Cursor    →   .faf        →    MCP
   Windsurf  →   .faf        →    MCP
+  Cline     →   .faf        →    MCP
   VS Code   →   .faf        →    MCP
-  Any IDE   →   IANA Format →    Open Protocol
+  Claude    →   .faf        →    MCP
+  Gemini    →   .faf        →    MCP
 ```
 
 **.FAF is the foundational, universal base layer** for any platform using the Model Context Protocol. It provides the standardized Context that makes MCP work for everyone.
