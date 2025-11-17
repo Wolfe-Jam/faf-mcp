@@ -199,7 +199,7 @@ Use FAF to create platform sync files
 **🏅 First & Only** - Persistent Project Context MCP Server approved by Anthropic
 **🏅 Creators of Context-Mirroring** - faf_bi_sync creates native files for all platforms
 **🏅 Google Chrome-Approved** - Published Chrome Extension
-**🏅 12K+ npm Downloads** - Proven adoption across the ecosystem
+**🏅 13.5K+ npm Downloads** - Proven adoption across the ecosystem
 
 > "README for the AI era" — Google Gemini
 
