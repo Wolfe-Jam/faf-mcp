@@ -9,9 +9,10 @@
 ## 🎨 CORE CONTEXT
 
 ### Project Identity
-- **Name:** faf-mcp
+- **Name:** faf-mcp (package within faf-mcp monorepo)
 - **Stack:** Node.js/TypeScript
 - **Quality:** F1-INSPIRED (Championship Performance)
+- **Monorepo Context:** See `/Users/wolfejam/FAF/faf-mcp/CLAUDE.md` for repository-level context
 
 ## 💡 Quick Start for AI
 
@@ -67,6 +68,33 @@ Any IDE   →   IANA Format →    Open Protocol
 ### 📊 Context Quality Status
 - **Overall Assessment:** New (forked from claude-faf-mcp v3.3.0)
 - **Last Updated:** 2025-11-12
+
+---
+
+## 🚨 NPM PUBLISH PROTOCOL - MANDATORY 🚨
+
+**CRITICAL RULE: `npm publish` IS FORBIDDEN WITHOUT APPROVAL**
+
+Before ANY npm publish of faf-mcp (or any FAF package):
+
+1. **Follow the MCP Publish Checklist** at `/Users/wolfejam/FAF-GOLD/PLANET-FAF/PUBLISH-PROTOCOL.md`
+2. **Run ALL checklist items** (build, tests, version, README, CHANGELOG, SKILL.md, etc.)
+3. **Request approval** with checklist results in the format specified
+4. **Wait for OFFICIAL GO!** from wolfejam
+
+**Required approval signals:**
+- ✅ **"GO!"** - Approved to publish
+- ✅ **"GREEN LIGHT"** - Approved to publish
+- ❌ Anything else - DO NOT PUBLISH
+
+**Why this matters:**
+- Trust is everything
+- Universal package for ALL MCP platforms (Claude, Cursor, Windsurf, VS Code)
+- Production infrastructure for 13k+ developers
+- Official Anthropic MCP steward responsibility
+- One bad publish can damage reputation permanently
+
+**No exceptions. No shortcuts. Professional. Boring. Trusted.**
 
 ---
 

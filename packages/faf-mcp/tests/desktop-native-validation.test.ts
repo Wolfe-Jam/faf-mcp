@@ -45,8 +45,11 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       // Test native file read
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_read', { path: testFile });
-      
-      expect(result.content[0].text).toBe(testContent);
+
+      expect(result.content[0].type).toBe('text');
+      if (result.content[0].type === 'text') {
+        expect(result.content[0].text).toBe(testContent);
+      }
     });
     
     test('faf_write - Native file writing', async () => {
@@ -72,20 +75,26 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_score', { details: true });
-      
-      const text = result.content[0].text;
-      expect(text).toContain('FAF SCORE');
-      expect(text).toMatch(/\d+%/); // Contains percentage
+
+      expect(result.content[0].type).toBe('text');
+      if (result.content[0].type === 'text') {
+        const text = result.content[0].text;
+        expect(text).toContain('FAF SCORE');
+        expect(text).toMatch(/\d+%/); // Contains percentage
+      }
     });
     
     test('faf_debug - Native environment inspection', async () => {
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_debug', {});
-      
-      const text = result.content[0].text;
-      expect(text).toContain('Working Directory');
-      expect(text).toContain('Write Permissions');
-      expect(text).toContain('FAF Engine Path');
+
+      expect(result.content[0].type).toBe('text');
+      if (result.content[0].type === 'text') {
+        const text = result.content[0].text;
+        expect(text).toContain('Working Directory');
+        expect(text).toContain('Write Permissions');
+        expect(text).toContain('FAF Engine Path');
+      }
     });
   });
 
@@ -96,12 +105,18 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       // Status should work with or without CLI (reads .faf files directly)
       const statusResult = await handler.callTool('faf_status', {});
       expect(statusResult.content).toBeDefined();
-      expect(statusResult.content[0].text).toBeDefined();
+      expect(statusResult.content[0].type).toBe('text');
+      if (statusResult.content[0].type === 'text') {
+        expect(statusResult.content[0].text).toBeDefined();
+      }
 
       // Init might work or fail depending on CLI availability
       const initResult = await handler.callTool('faf_init', {});
       expect(initResult.content).toBeDefined();
-      expect(initResult.content[0].text).toBeDefined();
+      expect(initResult.content[0].type).toBe('text');
+      if (initResult.content[0].type === 'text') {
+        expect(initResult.content[0].text).toBeDefined();
+      }
     });
     
     test('File operations continue working', async () => {
@@ -115,9 +130,12 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       });
       
       expect(fs.existsSync(testFile)).toBe(true);
-      
+
       const readResult = await handler.callTool('faf_read', { path: testFile });
-      expect(readResult.content[0].text).toBe('Works without CLI!');
+      expect(readResult.content[0].type).toBe('text');
+      if (readResult.content[0].type === 'text') {
+        expect(readResult.content[0].text).toBe('Works without CLI!');
+      }
     });
   });
 
@@ -133,12 +151,15 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_score', { details: true });
-      
-      const text = result.content[0].text as string;
-      // Check if easter egg triggers
-      if (text.includes('105%')) {
-        expect(text).toContain('Big Orange');
-        expect(text).toContain('Championship');
+
+      expect(result.content[0].type).toBe('text');
+      if (result.content[0].type === 'text') {
+        const text = result.content[0].text;
+        // Check if easter egg triggers
+        if (text.includes('105%')) {
+          expect(text).toContain('Big Orange');
+          expect(text).toContain('Championship');
+        }
       }
     });
   });
@@ -197,7 +218,10 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_read', { path: largeFile });
 
-      expect((result.content[0].text as string).length).toBe(size);
+      expect(result.content[0].type).toBe('text');
+      if (result.content[0].type === 'text') {
+        expect(result.content[0].text.length).toBe(size);
+      }
     });
   });
 });

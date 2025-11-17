@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.Wolfe-Jam/faf-mcp",
   "title": ".faf - Universal Project Context",
-  "description": "Persistent project context for all MCP platforms. Auto-detects CLI, discovers FAF projects. 50 MCP tools.",
+  "description": "Universal project context for all MCP platforms. Auto-detects CLI, 50 MCP tools.",
   "icons": [
     {
       "src": "https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/assets/icons/faf-icon-48.png",
@@ -29,12 +29,12 @@
     "url": "https://github.com/Wolfe-Jam/faf-mcp",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "1.1.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "faf-mcp",
-      "version": "1.0.0",
+      "version": "1.1.1",
       "transport": {
         "type": "stdio"
       }

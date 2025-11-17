@@ -20,7 +20,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -29,7 +28,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -38,7 +36,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -49,7 +46,6 @@ export class FafToolHandler {
             properties: {
               details: { type: 'boolean', description: 'Include detailed breakdown and improvement suggestions' }
             },
-            additionalProperties: false
           }
         },
         {
@@ -63,7 +59,6 @@ export class FafToolHandler {
               path: { type: 'string', description: 'Alias for directory parameter' },
               projectName: { type: 'string', description: 'Project name for path inference (used with Projects convention)' }
             },
-            additionalProperties: false
           }
         },
         {
@@ -72,7 +67,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -81,7 +75,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -95,7 +88,6 @@ export class FafToolHandler {
               consensus: { type: 'boolean', description: 'Build consensus from multiple AI models' },
               dryRun: { type: 'boolean', description: 'Preview enhancement without applying changes' }
             },
-            additionalProperties: false
           }
         },
         {
@@ -113,7 +105,6 @@ export class FafToolHandler {
                 description: 'Sync target: auto (detect existing), specific platform, or all'
               }
             },
-            additionalProperties: false
           }
         },
         {
@@ -127,7 +118,6 @@ export class FafToolHandler {
               backups: { type: 'boolean', description: 'Clear backup files only' },
               all: { type: 'boolean', description: 'Clear everything (default)' }
             },
-            additionalProperties: false
           }
         },
         {
@@ -136,7 +126,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -151,7 +140,6 @@ export class FafToolHandler {
               }
             },
             required: ['path'],
-            additionalProperties: false
           }
         },
         {
@@ -170,7 +158,6 @@ export class FafToolHandler {
               }
             },
             required: ['path', 'content'],
-            additionalProperties: false
           }
         },
         {
@@ -199,7 +186,6 @@ export class FafToolHandler {
               }
             },
             required: ['path'],
-            additionalProperties: false
           }
         },
         {
@@ -208,7 +194,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         },
         {
@@ -222,7 +207,6 @@ export class FafToolHandler {
                 description: 'Test fuzzy matching with typos like "raect" or "chr ext"'
               }
             },
-            additionalProperties: false
           }
         },
         {
@@ -231,7 +215,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {},
-            additionalProperties: false
           }
         }
       ] as Tool[]
