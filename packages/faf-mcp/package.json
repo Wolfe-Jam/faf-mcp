@@ -1,8 +1,8 @@
 {
   "name": "faf-mcp",
-  "version": "1.0.6",
+  "version": "1.1.1",
   "mcpName": "io.github.Wolfe-Jam/faf-mcp",
-  "description": "USE>FAF™ - IANA-registered format (application/vnd.faf+yaml) • Universal AI context • MCP server for all platforms • Start with 'Use FAF'",
+  "description": "faf-mcp | use>faf • IANA-registered format (application/vnd.faf+yaml) • Universal MCP server for Cursor, Windsurf, Cline, VS Code, and all platforms",
   "icon": "./assets/icons/faf-icon-256.png",
   "logo": "./assets/icons/faf-icon-256.png",
   "displayName": ".faf 🧡⚡️",
@@ -85,6 +85,7 @@
     "README.md",
     "CLAUDE.md",
     ".faf",
+    "project.faf",
     "LICENSE",
     "CHANGELOG.md"
   ],
