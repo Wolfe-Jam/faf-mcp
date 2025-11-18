@@ -80,7 +80,8 @@ app.get('/health', (req, res) => {
 });
 
 // Info endpoint
-app.get('/info', (req, res) => {
+app.get('/info', async (req, res) => {
+  const toolsList = await toolHandler.listTools();
   res.json({
     name: 'faf-mcp',
     version: VERSION,
@@ -91,10 +92,8 @@ app.get('/info', (req, res) => {
       resources: { subscribe: true, listChanged: true },
       tools: { listChanged: true }
     },
-    tools: [
-      'faf_status', 'faf_score', 'faf_init', 'faf_trust',
-      'faf_sync', 'faf_enhance', 'faf_bi_sync', 'faf_clear', 'faf_debug'
-    ],
+    tools: toolsList.tools.map(t => t.name),
+    toolCount: toolsList.tools.length,
     endpoints: {
       health: '/health',
       info: '/info',
