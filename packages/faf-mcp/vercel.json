@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "name": "faf-mcp",
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/sse",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/info",
+      "dest": "/api/index.ts"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
