@@ -1,22 +1,5 @@
 {
-  "buildCommand": "npm run build && cp -r public dist/",
-  "outputDirectory": "dist",
   "rewrites": [
-    {
-      "source": "/",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/info",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/sse",
-      "destination": "/api/index"
-    }
+    { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
