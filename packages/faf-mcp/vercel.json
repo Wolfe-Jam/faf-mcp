@@ -1,5 +1,8 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
-  ]
+  "functions": {
+    "api/**/*.[jt]s": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
 }
