@@ -153,11 +153,25 @@ export class ClaudeFafMcpServer {
       }
     } else if (this.config.transport === 'http-sse') {
       const app = this.createHttpApp();
-      
-      // Create SSE transport
-      const transport = new SSEServerTransport('/sse', app as any);
-      await this.server.connect(transport);
-      
+
+      // Add SSE endpoint handler - create transport per request
+      app.get('/sse', async (req, res) => {
+        if (this.config.debug) {
+          console.error('New SSE connection established');
+        }
+
+        // Create SSE transport for this specific connection
+        const transport = new SSEServerTransport('/sse', res);
+        await this.server.connect(transport);
+
+        // Handle client disconnect
+        req.on('close', () => {
+          if (this.config.debug) {
+            console.error('SSE connection closed');
+          }
+        });
+      });
+
       // Start HTTP server (ensure port and host are defined)
       const port = this.config.port ?? 3001;
       const host = this.config.host ?? '0.0.0.0';
