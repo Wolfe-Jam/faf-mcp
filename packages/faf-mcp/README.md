@@ -6,7 +6,7 @@
   </div>
 </div>
 
-> Universal MCP server for .FAF (Foundational AI-context Format) with 50 tools - Persistent project context for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms (including [Claude Desktop](https://github.com/Wolfe-Jam/claude-faf-mcp))
+> Universal MCP server for .FAF (Foundational AI-context Format) with 17 native tools + CLI fallback - Persistent project context for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms (including [Claude Desktop](https://github.com/Wolfe-Jam/claude-faf-mcp))
 
 **Universal version of [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** — Anthropic-approved MCP server, now compatible with all platforms. Built on the IANA-registered .FAF format (`application/vnd.faf+yaml`).
 
@@ -67,14 +67,14 @@ At 55% you are building your project with half a blueprint and basically flippin
 
 📊 CORE INTELLIGENCE                    🎯 CONTEXT DELIVERY
 ├─ Project DNA            [██████] 100%  ├─ MCP Protocol      [██████] 100%
-├─ Architecture Map       [██████] 100%  ├─ 50 Native Tools   [██████] 100%
+├─ Architecture Map       [██████] 100%  ├─ 17 Native Tools   [██████] 100%
 ├─ Domain Model          [██████] 100%  ├─ IANA Format       [██████] 100%
 └─ Version Tracking      [██████] 100%  └─ Universal Context [██████] 100%
 
 🚀 PERFORMANCE                          ⚡ STANDALONE OPERATION
 ├─ 16.2x CLI Speedup     [██████] 100%  ├─ Zero Dependencies [██████] 100%
 ├─ 19ms Avg Execution    [██████] 100%  ├─ Bundled Engine    [██████] 100%
-├─ 50/50 Tools Active    [██████] 100%  ├─ Direct Function   [██████] 100%
+├─ 17/17 Tools Active    [██████] 100%  ├─ Direct Function   [██████] 100%
 └─ Zero Memory Leaks     [██████] 100%  └─ 14 Bundled Cmds   [██████] 100%
 
 🏆 project.faf score: podium
@@ -158,14 +158,20 @@ Use FAF to create platform sync files
 
 ## 🛠️ Core Features
 
-### 50 MCP Tools (100% Standalone)
-- **faf_quick** - Lightning-fast project.faf creation (3ms avg)
+### 17 Native MCP Tools
+- **faf_init** - Initialize project.faf with auto-detection
+- **faf_score** - AI-readiness scoring engine
 - **faf_enhance** - Intelligent enhancement with auto-detection
 - **faf_read** - Parse and validate FAF files
 - **faf_write** - Create/update FAF with validation
-- **faf_score** - AI-readiness scoring engine
-- **faf_compress** - Intelligent size optimization
-- **14 bundled commands** - Zero CLI dependencies, 16.2x faster
+- **faf_sync** - Synchronize context across platforms
+- **faf_bi_sync** - Bi-directional CLAUDE.md sync
+
+### CLI Fallback (40+ commands)
+- **faf readme** - Smart 6 Ws extraction from README.md
+- **faf human-add** - Non-interactive human context entry
+- **faf git** - GitHub repo extraction (Git CLI, no rate limits)
+- Plus all other faf-cli commands
 
 ### IANA-Registered Standard
 - Official MIME type: `application/vnd.faf+yaml`
@@ -185,7 +191,7 @@ Use FAF to create platform sync files
 
 - **[Full Documentation](https://wolfe-jam.github.io/claude-faf-mcp/)** - Complete guide
 - **[Getting Started](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/getting-started.md)** - Installation & setup
-- **[MCP Tools Reference](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/mcp-tools.md)** - All 50 tools
+- **[MCP Tools Reference](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/mcp-tools.md)** - All 17 native tools
 - **[FAQ](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/FAQ.md)** - Common questions
 - **[CHANGELOG](./CHANGELOG.md)** - Version history
 
@@ -199,7 +205,7 @@ Use FAF to create platform sync files
 **🏅 First & Only** - Persistent Project Context MCP Server approved by Anthropic
 **🏅 Creators of Context-Mirroring** - faf_bi_sync creates native files for all platforms
 **🏅 Google Chrome-Approved** - Published Chrome Extension
-**🏅 13.5K+ npm Downloads** - Proven adoption across the ecosystem
+**🏅 15K+ npm Downloads** - Proven adoption across the FAF ecosystem
 
 > "README for the AI era" — Google Gemini
 

@@ -5,6 +5,30 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-12-01
+
+### Headline Feature
+- **`faf readme` - Smart README Extraction** (via CLI fallback)
+  - Auto-extract human context from your README.md (+25-35% score boost)
+  - Intelligently finds the 6 Ws: WHO, WHAT, WHY, WHERE, WHEN, HOW
+  - `faf readme --apply` to fill empty slots
+  - `faf readme --apply --force` to overwrite existing
+
+### Changed
+- **faf-cli Dependency** - Bumped to >=3.2.1 (from >=3.1.1)
+  - `faf readme` - Smart README extraction (see above)
+  - `faf human-add` - Non-interactive context entry (Claude Code compatible)
+  - Subsite auto-detection (static HTML sites achieve 100% scores)
+  - `faf git` uses Git CLI (no more 60/hr API rate limits)
+
+### Fixed
+- **Corrected Tool Count** - README now accurately states 17 native tools + CLI fallback
+  - 17 tools bundled natively in MCP server
+  - 40+ additional commands available via faf-cli fallback
+
+### Certification
+- **WJTTC BIG ORANGE** - 105/100 score, 46/46 tests passing
+
 ## [1.1.1] - 2025-11-16
 
 ### Changed
