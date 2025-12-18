@@ -5,6 +5,34 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-12-17
+
+### WJTTC MCP Certification Achievement
+
+**faf-mcp v1.1.4 achieves CHAMPIONSHIP GRADE certification** - Adopting the new WJTTC MCP Test Standard.
+
+### Added
+
+- **WJTTC MCP Certification** - 7-tier certification system for MCP servers
+  - Tier 1: Protocol Compliance (MCP spec 2025-11-25)
+  - Tier 2: Capability Negotiation
+  - Tier 3: Tool Integrity
+  - Tier 4: Resource Management
+  - Tier 5: Security Validation
+  - Tier 6: Performance Benchmarks (<50ms operations)
+  - Tier 7: Integration Readiness
+
+### Changed
+
+- **faf-cli Dependency** - Bumped to ^3.2.4 (WJTTC certified engine)
+
+### Test Results
+
+- 4/4 test suites passing (visibility, performance, security, desktop-native)
+- 63 tests total, 100% pass rate
+- Performance: File read 0.46ms, File write 18ms, Directory list 2.84ms
+- Memory: No leaks detected (2.53MB growth under load)
+
 ## [1.1.2] - 2025-12-01
 
 ### Headline Feature
