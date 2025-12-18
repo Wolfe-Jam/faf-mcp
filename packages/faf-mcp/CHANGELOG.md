@@ -5,6 +5,31 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-18
+
+### Trophy Achievement
+
+**faf-mcp v1.2.0 achieves 100% FAF Score** - Trophy Championship rating with complete human context.
+
+### Changed
+
+- **Human Context** - Complete rewrite of human_context section
+  - who: Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
+  - what: Universal MCP server providing .faf context tools - 17 native tools + 40+ CLI fallback commands
+  - why: Eliminate the 20-minute AI context tax - give AI instant project understanding in 30 seconds
+  - where: npm registry, MCP ecosystem, Claude Desktop, Cursor IDE, Windsurf Editor
+  - when: Production/Stable - v1.2.0 WJTTC certified
+  - how: npx faf-mcp or npm install -g faf-mcp, then add to your MCP config
+  - additional_context: IANA-registered format (application/vnd.faf+yaml), 15k+ downloads, official Anthropic MCP steward
+
+- **faf-cli Dependency** - Updated to 3.2.6
+
+### Score
+
+- FAF Score: 100/100 Trophy Championship
+- Context Quality: 21/21 slots filled (100%)
+- AI Confidence: HIGH
+
 ## [1.1.4] - 2025-12-17
 
 ### WJTTC MCP Certification Achievement
