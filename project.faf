@@ -4,7 +4,7 @@ ai_score: 85%
 ai_confidence: HIGH
 ai_value: 30_seconds_replaces_20_minutes_of_questions
 ai_tldr:
-  project: Faf Mcp - "USE>FAF™ - IANA-registered format (application/vnd.faf+yaml)
+  project: faf-mcp - "USE>FAF™ - IANA-registered format (application/vnd.faf+yaml)
     • Universal AI context • MCP server for all platforms • Start with 'Use
     FAF'"
   stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
@@ -26,7 +26,7 @@ context_quality:
   handoff_ready: true
   missing_context: []
 project:
-  name: Faf Mcp
+  name: faf-mcp
   goal: USE>FAF™ - IANA-registered format (application/vnd.faf+yaml) • Universal
     AI context • MCP server for all platforms • Start with 'Use FAF'
   main_language: TypeScript
