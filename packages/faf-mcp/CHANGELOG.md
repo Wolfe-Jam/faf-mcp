@@ -5,6 +5,17 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-12-22
+
+### Added
+- **TYPE_DEFINITIONS Scoring Parity** - Ported from claude-faf-mcp v3.3.7
+  - 94 project types + 38 aliases for accurate slot-based scoring
+  - Single source of truth for project type detection
+  - Ensures faf-mcp scoring matches faf-cli scoring exactly
+
+### Changed
+- Scoring engine now uses TYPE_DEFINITIONS for slot applicability
+
 ## [1.2.0] - 2025-12-18
 
 ### Trophy Achievement
