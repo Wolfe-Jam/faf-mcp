@@ -1,0 +1,17 @@
+# Smithery configuration for faf-mcp
+# https://smithery.ai/docs/build/project-config/smithery-yaml
+
+name: faf-mcp
+description: "Universal MCP server for .faf format. Works with Cursor, Windsurf, Cline, VS Code, and all platforms."
+icon: https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/assets/icons/faf-icon-256.png
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |-
+    (config) => ({
+      command: "npx",
+      args: ["-y", "faf-mcp@latest"]
+    })
