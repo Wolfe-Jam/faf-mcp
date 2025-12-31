@@ -51,7 +51,7 @@ Install the FAF MCP server: npm install -g faf-mcp, then add this to my MCP conf
 > **"README for the AI era"** — Google Gemini
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/packages/faf-mcp/assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
   <p><em><strong>project.faf is to AI context what package.json is to dependencies</strong></em></p>
   <p><em>Lives at the project root, between package.json and README.md</em></p>
 </div>
