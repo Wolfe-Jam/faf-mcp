@@ -1,5 +1,5 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Wolfe-Jam/faf-mcp",
   "title": ".FAF Context",
   "description": "Universal persistent project context server - IANA-registered .FAF format",
@@ -31,13 +31,13 @@
     "source": "github",
     "subfolder": ""
   },
-  "version": "1.2.1",
+  "version": "1.2.2",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "faf-mcp",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
