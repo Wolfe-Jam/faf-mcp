@@ -83,7 +83,7 @@ preferences:
   documentation: as_needed
 state:
   phase: development
-  version: 1.2.1
+  version: 1.2.2
   focus: production_deployment
   status: green_flag
   next_milestone: npm_publication
