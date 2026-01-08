@@ -1,20 +1,63 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #FF8C00;">faf-mcp | use>faf</h1>
+    <h1 style="margin: 0; color: #FF8C00;">faf-mcp</h1>
     <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
   </div>
 </div>
 
-> Universal MCP server for .FAF (Foundational AI-context Format) with 17 native tools + CLI fallback - Persistent project context for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms (including [Claude Desktop](https://github.com/Wolfe-Jam/claude-faf-mcp))
+> **.FAF optimizes AI for your codebase.** At 100% (Gold Code), AI stops guessing and starts knowing. Universal MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms.
 
-**Universal version of [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** — Anthropic-approved MCP server, now compatible with all platforms. Built on the IANA-registered .FAF format (`application/vnd.faf+yaml`).
+**Universal version of [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** — Anthropic-approved MCP server, now compatible with all platforms.
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/56fPBUJKfk)
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## The Problem: Context-Drift
+
+AI assistants forget. They misunderstand. They drift.
+
+Every new session, every new file, every new developer — AI starts guessing again. Your codebase context leaks away. Yesterday's perfect assistant becomes today's confused intern.
+
+**.FAF fixes this permanently.**
+
+---
+
+## The Solution: Gold Code
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆  FAF AI-READINESS SCORE: 100/100 — GOLD CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 100%, AI is optimized. No more guessing.
+Peak AI performance activated.
+
+├─ Project DNA locked in        ├─ Zero context-drift
+├─ Architecture understood      ├─ Eternal bi-sync active
+├─ Domain model captured        ├─ Team alignment permanent
+└─ Every session starts smart   └─ AI works WITH you, not around you
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+## 💎 Lifecycle Value
+
+Setup savings get you started. Lifecycle optimization keeps you ahead.
+
+| When | Without FAF | With FAF |
+|------|-------------|----------|
+| **Day 1** | 20 min setup per dev | 0 min — instant context |
+| **Month 1** | AI forgets between sessions | AI remembers everything |
+| **Year 1** | New devs re-explain everything | New devs inherit full context |
+| **Year 3+** | Institutional knowledge lost | Project DNA preserved forever |
+
+**Setup savings: 20 minutes. Lifecycle savings: Infinite.**
 
 ---
 
@@ -26,222 +69,121 @@
 npm install -g faf-mcp
 ```
 
-**2. Copy and paste this to your AI:**
+**2. Add to your MCP config:**
 
-```
-Install the FAF MCP server: npm install -g faf-mcp, then add this to my MCP config: {"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}} and restart.
+```json
+{"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}}
 ```
 
 ### Platform-Specific Setup
 
-**Cursor IDE:** Add to `~/.cursor/mcp.json` ([setup guide](https://docs.cursor.com/context/model-context-protocol))
-
-**Windsurf Editor:** Add to `~/.codeium/windsurf/mcp_config.json` ([Cascade docs](https://docs.windsurf.com/windsurf/cascade/mcp))
-
-**Cline:** Add to Cline's MCP settings
-
-**VS Code:** Install MCP extension, then add server config
-
-**Claude Desktop:** Use the [dedicated claude-faf-mcp package](https://github.com/Wolfe-Jam/claude-faf-mcp) for optimized Claude integration
+| Platform | Config File |
+|----------|-------------|
+| **Cursor** | `~/.cursor/mcp.json` |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` |
+| **Cline** | Cline MCP settings |
+| **VS Code** | MCP extension config |
+| **Claude Desktop** | Use [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp) |
 
 ---
 
-## 🏁 AI-Readiness Scorecard
+## 🔄 Eternal Bi-Sync
 
-> **"README for the AI era"** — Google Gemini
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
-  <p><em><strong>project.faf is to AI context what package.json is to dependencies</strong></em></p>
-  <p><em>Lives at the project root, between package.json and README.md</em></p>
-</div>
-
-**The closer you get to 100% the better AI can assist you.**
-
-At 55% you are building your project with half a blueprint and basically flipping a coin with AI. .FAF defines, and AI becomes optimized for Context with the project.faf file.
+The magic: `.faf` ↔ `CLAUDE.md` stay synchronized in milliseconds.
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏎️  FAF AI-READINESS SCORE: 100/100 — PODIUM EDITION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 CORE INTELLIGENCE                    🎯 CONTEXT DELIVERY
-├─ Project DNA            [██████] 100%  ├─ MCP Protocol      [██████] 100%
-├─ Architecture Map       [██████] 100%  ├─ 17 Native Tools   [██████] 100%
-├─ Domain Model          [██████] 100%  ├─ IANA Format       [██████] 100%
-└─ Version Tracking      [██████] 100%  └─ Universal Context [██████] 100%
-
-🚀 PERFORMANCE                          ⚡ STANDALONE OPERATION
-├─ 16.2x CLI Speedup     [██████] 100%  ├─ Zero Dependencies [██████] 100%
-├─ 19ms Avg Execution    [██████] 100%  ├─ Bundled Engine    [██████] 100%
-├─ 17/17 Tools Active    [██████] 100%  ├─ Direct Function   [██████] 100%
-└─ Zero Memory Leaks     [██████] 100%  └─ 14 Bundled Cmds   [██████] 100%
-
-🏆 project.faf score: podium
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+project.faf  ←──── 8ms ────→  CLAUDE.md
+     │                            │
+     └── Single source of truth ──┘
 ```
+
+- Update either file → both stay aligned
+- Zero manual maintenance
+- Works across teams, branches, sessions
+- **Context never goes stale**
 
 ---
 
-## 🎯 Want a Platform-Specific Package?
+## Tier System: From Blind to Optimized
 
-We're launching `faf-mcp` as the universal package. If you'd prefer a dedicated package for your platform (like `cursor-faf-mcp` or `windsurf-faf-mcp` with tailored setup instructions), **[request it here](https://github.com/Wolfe-Jam/faf-mcp/issues)**.
+| Tier | Score | Status |
+|------|-------|--------|
+| 🏆 **Trophy** | 100% | **AI Optimized** — Gold Code |
+| 🥇 **Gold** | 99%+ | Near-perfect context |
+| 🥈 **Silver** | 95%+ | Excellent |
+| 🥉 **Bronze** | 85%+ | Production ready |
+| 🟢 **Green** | 70%+ | Solid foundation |
+| 🟡 **Yellow** | 55%+ | AI flipping coins |
+| 🔴 **Red** | <55% | AI working blind |
+| 🤍 **White** | 0% | No context at all |
 
-We'll publish platform-specific packages based on demand.
+**At 55%, AI is guessing half the time.** At 100%, AI is optimized.
 
 ---
 
 ## 💬 use>faf | Prompt Pattern
 
-**Start every prompt with "Use FAF"** to invoke MCP tools directly:
+**Start every prompt with "Use FAF"** to invoke MCP tools:
 
-### All Platforms
 ```
 Use FAF to initialize my project
-Use FAF to sync my project.faf to all platforms
 Use FAF to score my AI-readiness
-Use FAF to enhance my project context
-Use FAF to create platform sync files
+Use FAF to sync my context
+Use FAF to enhance my project
 ```
 
-### Why "Use FAF" Works Everywhere
-
-**Claude Desktop:**
-- ✅ Calls MCP tool instead of searching web
-- ✅ No void container issues
-- ✅ Direct tool invocation
-
-**Claude.ai (Web):**
-- ✅ Stops web search addiction immediately
-- ✅ Forces MCP tool usage
-- ✅ No more guessing
-
-**Cursor / Windsurf / Cline:**
-- ✅ MCP standard compliance
-- ✅ Tool invocation (not manual file creation)
-- ✅ Consistent behavior
-
-### The Pattern
-
-**Without "Use FAF":**
-- ❌ AI searches the web
-- ❌ AI creates files manually
-- ❌ Void containers
-- ❌ Inconsistent results
-
-**With "Use FAF":**
-- ✅ MCP tool called correctly
-- ✅ Championship output
-- ✅ Every time
+Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 🎯 What is FAF?
+## 🛠️ 17 Native MCP Tools
 
-**The .FAF Position in the MCP Ecosystem:**
+| Tool | Purpose |
+|------|---------|
+| `faf_init` | Initialize project.faf |
+| `faf_score` | Check AI-readiness (0-100%) |
+| `faf_sync` | Sync context across platforms |
+| `faf_bi_sync` | Bi-directional .faf ↔ CLAUDE.md |
+| `faf_enhance` | Intelligent enhancement |
+| `faf_read` | Parse and validate FAF files |
+| `faf_write` | Create/update FAF with validation |
+
+Plus CLI fallback with 40+ commands.
+
+---
+
+## 🎯 The .FAF Position
 
 ```
   Platform      Context          Protocol
   ────────      ───────          ────────
-  Any IDE   →   IANA Format →    Open Protocol
-  Cursor    →   .faf        →    MCP
-  Windsurf  →   .faf        →    MCP
-  Cline     →   .faf        →    MCP
-  VS Code   →   .faf        →    MCP
-  Claude    →   .faf        →    MCP
-  Gemini    →   .faf        →    MCP
+  Cursor     →   .faf        →    MCP
+  Windsurf   →   .faf        →    MCP
+  Cline      →   .faf        →    MCP
+  VS Code    →   .faf        →    MCP
+  Claude     →   .faf        →    MCP
+  Any IDE    →   .faf        →    MCP
 ```
 
-**.FAF is the foundational, universal base layer** for any platform using the Model Context Protocol. It provides the standardized Context that makes MCP work for everyone.
-
----
-
-## 🛠️ Core Features
-
-### 17 Native MCP Tools
-- **faf_init** - Initialize project.faf with auto-detection
-- **faf_score** - AI-readiness scoring engine
-- **faf_enhance** - Intelligent enhancement with auto-detection
-- **faf_read** - Parse and validate FAF files
-- **faf_write** - Create/update FAF with validation
-- **faf_sync** - Synchronize context across platforms
-- **faf_bi_sync** - Bi-directional CLAUDE.md sync
-
-### CLI Fallback (40+ commands)
-- **faf readme** - Smart 6 Ws extraction from README.md
-- **faf human-add** - Non-interactive human context entry
-- **faf git** - GitHub repo extraction (Git CLI, no rate limits)
-- Plus all other faf-cli commands
-
-### IANA-Registered Standard
-- Official MIME type: `application/vnd.faf+yaml`
-- W3C-compliant structured format
-- Universal AI context protocol
-- Cross-platform compatibility
-
-### Championship Performance
-- **16.2x faster** than CLI versions (direct function calls vs process spawning)
-- **19ms average** execution across all bundled commands
-- **Fastest: 1ms** (formats command)
-- **Zero memory leaks** with F1-grade engineering
-
----
-
-## 📚 Documentation
-
-- **[Full Documentation](https://wolfe-jam.github.io/claude-faf-mcp/)** - Complete guide
-- **[Getting Started](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/getting-started.md)** - Installation & setup
-- **[MCP Tools Reference](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/mcp-tools.md)** - All 17 native tools
-- **[FAQ](https://github.com/Wolfe-Jam/claude-faf-mcp/blob/main/docs/FAQ.md)** - Common questions
-- **[CHANGELOG](./CHANGELOG.md)** - Version history
-
----
-
-## 🏆 Why FAF?
-
-### Championship Credentials
-
-**🏅 Creators of the Format** - We designed .FAF (IANA-registered `application/vnd.faf+yaml`)
-**🏅 First & Only** - Persistent Project Context MCP Server approved by Anthropic
-**🏅 Creators of Context-Mirroring** - faf_bi_sync creates native files for all platforms
-**🏅 Google Chrome-Approved** - Published Chrome Extension
-**🏅 15K+ npm Downloads** - Proven adoption across the FAF ecosystem
-
-> "README for the AI era" — Google Gemini
-
-### The FAF Advantage
-
-**Persistent Context** - Your project's DNA lives in `project.faf`, readable by any AI or human
-
-**Universal Format** - IANA-registered standard works across Claude, Gemini, Cursor, Windsurf, any MCP platform
-
-**Zero Setup Tax** - One file (`project.faf`) eliminates AI context setup across your entire team
-
-**FREE FOREVER** - MIT License, open source, no subscription
-
-**All Boats Rise Together** - Improving projects, AI performance, code quality, speed to market for everyone
-
-**Championship Engineering** - F1-inspired performance with strict TypeScript, zero runtime errors
+**.FAF is the foundational layer.** Universal context format. IANA-registered. Works everywhere.
 
 ---
 
 ## 📦 Ecosystem
 
-- **[FAF Format Spec](https://github.com/Wolfe-Jam/faf)** - Official IANA specification
-- **[FAF CLI](https://github.com/Wolfe-Jam/faf-cli)** - Command-line tooling
-- **[claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** - Claude Desktop-specific package
-- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** - Browser integration
-- **[faf.one](https://faf.one)** - Official website and documentation
-- **[Discord Community](https://discord.com/invite/56fPBUJKfk)** - Join the discussion
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (52 tools)
+- **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI (18k+ downloads)
+- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
+- **[faf.one](https://faf.one)** — Official website
 
 ---
 
 ## 📄 License
 
-MIT License - Free and open source
+MIT License — Free and open source
 
 ---
 
-**Built with F1-inspired engineering principles** 🏎️⚡
+**Zero drift. Eternal sync. AI optimized.** 🏆
 
 *"It's so logical if it didn't exist, AI would have built it itself" — Claude*
