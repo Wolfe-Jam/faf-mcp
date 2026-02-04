@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing - MCPaaS</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 0;
+      border-bottom: 1px solid #222;
+      margin-bottom: 2rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #FF6B35;
+    }
+
+    nav {
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav a {
+      color: #888;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: #00D4D4;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+      border: 2px solid #00D4D4;
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .balance-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #00D4D4, #00A8A8);
+    }
+
+    .balance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .balance-label {
+      font-size: 1.1rem;
+      color: #888;
+    }
+
+    .balance-amount {
+      font-size: 4rem;
+      font-weight: 900;
+      color: #00D4D4;
+      margin-bottom: 0.5rem;
+    }
+
+    .balance-amount .small {
+      font-size: 1.5rem;
+      color: #666;
+      font-weight: 400;
+    }
+
+    .balance-usd {
+      color: #888;
+      font-size: 1.2rem;
+    }
+
+    .alert {
+      background: rgba(255, 107, 53, 0.1);
+      border: 1px solid #FF6B35;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .alert-icon {
+      font-size: 1.5rem;
+    }
+
+    .topup-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .topup-btn {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .topup-btn:hover {
+      border-color: #00D4D4;
+      transform: translateY(-2px);
+    }
+
+    .topup-btn.selected {
+      border-color: #00D4D4;
+      background: rgba(0, 212, 212, 0.1);
+    }
+
+    .topup-amount {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00D4D4;
+      margin-bottom: 0.5rem;
+    }
+
+    .topup-tokens {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .custom-amount {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .custom-amount input {
+      width: 100%;
+      padding: 0.75rem;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #f5f5f5;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+
+    .auto-reload {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .auto-reload label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+    }
+
+    .auto-reload input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, #00D4D4 0%, #00A8A8 100%);
+      color: #0a0a0a;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .checkout-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .checkout-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .section {
+      background: #1a1a1a;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .usage-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-box {
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00D4D4;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #222;
+    }
+
+    .history-table th {
+      color: #888;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .history-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+      .topup-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .usage-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">⚡ MCPaaS</div>
+      <nav>
+        <a href="/ghost">Ghost 👻</a>
+        <a href="/billing">Billing</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </header>
+
+    <!-- Balance Card -->
+    <div class="balance-card">
+      <div class="balance-header">
+        <div class="balance-label">Current Balance</div>
+        <button onclick="window.location.reload()" style="background: #0a0a0a; border: 1px solid #333; color: #888; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
+          Refresh
+        </button>
+      </div>
+      <div class="balance-amount">
+        <span id="token-balance">8,234</span>
+        <span class="small">tokens</span>
+      </div>
+      <div class="balance-usd">≈ $<span id="usd-balance">0.82</span> remaining</div>
+    </div>
+
+    <!-- Low Balance Alert -->
+    <div class="alert" id="low-balance-alert" style="display: none;">
+      <div class="alert-icon">⚠️</div>
+      <div>
+        <strong>Low Balance Warning</strong>
+        <p>You have less than 1,000 tokens remaining. Top up now to avoid interruption.</p>
+      </div>
+    </div>
+
+    <!-- Usage Stats -->
+    <div class="section">
+      <h2>This Month's Usage</h2>
+      <div class="usage-stats">
+        <div class="stat-box">
+          <div class="stat-value" id="free-tier-used">10,000</div>
+          <div class="stat-label">Free tier (used)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="total-reads">45,123</div>
+          <div class="stat-label">Soul reads</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="total-writes">1,411</div>
+          <div class="stat-label">Soul writes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top-Up Section -->
+    <div class="section">
+      <h2>Add Credits</h2>
+
+      <div class="topup-options">
+        <div class="topup-btn" onclick="selectAmount(10)">
+          <div class="topup-amount">$10</div>
+          <div class="topup-tokens">100k tokens</div>
+        </div>
+        <div class="topup-btn" onclick="selectAmount(25)">
+          <div class="topup-amount">$25</div>
+          <div class="topup-tokens">250k tokens</div>
+        </div>
+        <div class="topup-btn" onclick="selectAmount(50)">
+          <div class="topup-amount">$50</div>
+          <div class="topup-tokens">500k tokens</div>
+        </div>
+        <div class="topup-btn" onclick="selectAmount(100)">
+          <div class="topup-amount">$100</div>
+          <div class="topup-tokens">1M tokens</div>
+        </div>
+      </div>
+
+      <div class="custom-amount">
+        <input
+          type="number"
+          id="custom-amount"
+          placeholder="Custom amount ($10 minimum)"
+          min="10"
+          oninput="selectCustomAmount()"
+        >
+      </div>
+
+      <div class="auto-reload">
+        <label>
+          <input type="checkbox" id="auto-reload">
+          <span>Auto-reload when balance drops below 5,000 tokens</span>
+        </label>
+      </div>
+
+      <button class="checkout-btn" id="checkout-btn" onclick="checkout()">
+        Add $<span id="selected-amount">10</span> via Stripe
+      </button>
+    </div>
+
+    <!-- Top-Up History -->
+    <div class="section">
+      <h2>Top-Up History</h2>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Tokens</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr>
+            <td>Feb 3, 2026</td>
+            <td>$50.00</td>
+            <td>+500,000</td>
+            <td style="color: #4ade80;">✓ Complete</td>
+          </tr>
+          <tr>
+            <td>Jan 28, 2026</td>
+            <td>$100.00</td>
+            <td>+1,000,000</td>
+            <td style="color: #4ade80;">✓ Complete</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let selectedAmount = 10;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateBalance();
+      checkLowBalance();
+      selectAmount(10);
+    });
+
+    function updateBalance() {
+      // TODO: Fetch real balance from API
+      const balance = 8234;
+      const usd = (balance / 10000).toFixed(2);
+
+      document.getElementById('token-balance').textContent = balance.toLocaleString();
+      document.getElementById('usd-balance').textContent = usd;
+    }
+
+    function checkLowBalance() {
+      const balance = parseInt(document.getElementById('token-balance').textContent.replace(/,/g, ''));
+      const alert = document.getElementById('low-balance-alert');
+
+      if (balance < 1000) {
+        alert.style.display = 'flex';
+      } else {
+        alert.style.display = 'none';
+      }
+    }
+
+    function selectAmount(amount) {
+      selectedAmount = amount;
+
+      // Clear selection
+      document.querySelectorAll('.topup-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+
+      // Select clicked
+      event.target.closest('.topup-btn').classList.add('selected');
+
+      // Clear custom
+      document.getElementById('custom-amount').value = '';
+
+      // Update button
+      document.getElementById('selected-amount').textContent = amount;
+    }
+
+    function selectCustomAmount() {
+      const input = document.getElementById('custom-amount');
+      const amount = parseInt(input.value);
+
+      if (amount >= 10) {
+        selectedAmount = amount;
+
+        // Clear preset selection
+        document.querySelectorAll('.topup-btn').forEach(btn => {
+          btn.classList.remove('selected');
+        });
+
+        // Update button
+        document.getElementById('selected-amount').textContent = amount;
+      }
+    }
+
+    async function checkout() {
+      if (selectedAmount < 10) {
+        alert('Minimum top-up is $10');
+        return;
+      }
+
+      const btn = document.getElementById('checkout-btn');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      try {
+        // TODO: Replace with real Stripe integration
+        const response = await fetch('/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: selectedAmount,
+            autoReload: document.getElementById('auto-reload').checked
+          })
+        });
+
+        const { sessionId } = await response.json();
+
+        // Redirect to Stripe Checkout
+        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY');
+        await stripe.redirectToCheckout({ sessionId });
+
+      } catch (error) {
+        console.error('Checkout error:', error);
+        alert('Error creating checkout session. Please try again.');
+        btn.disabled = false;
+        btn.textContent = `Add $${selectedAmount} via Stripe`;
+      }
+    }
+  </script>
+</body>
+</html>

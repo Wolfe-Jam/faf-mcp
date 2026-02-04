@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCPaaS Pricing - Pay As You Go</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      padding: 4rem 0 2rem 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #FF6B35;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #FF6B35 0%, #00D4D4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      color: #888;
+      margin-bottom: 2rem;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+
+    .pricing-card {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+      border: 2px solid #333;
+      border-radius: 16px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #FF6B35, #00D4D4);
+    }
+
+    .pricing-card.featured {
+      border-color: #00D4D4;
+      box-shadow: 0 0 40px rgba(0, 212, 212, 0.3);
+    }
+
+    .badge {
+      display: inline-block;
+      background: #00D4D4;
+      color: #0a0a0a;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .plan-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .plan-price {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #00D4D4;
+      margin-bottom: 0.5rem;
+    }
+
+    .plan-price .small {
+      font-size: 1.2rem;
+      color: #666;
+      font-weight: 400;
+    }
+
+    .plan-desc {
+      color: #888;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .features {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .features li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .features li:last-child {
+      border-bottom: none;
+    }
+
+    .features .icon {
+      color: #00D4D4;
+      font-size: 1.2rem;
+    }
+
+    .cta-button {
+      display: block;
+      width: 100%;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #00D4D4 0%, #00A8A8 100%);
+      color: #0a0a0a;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .cta-button.secondary {
+      background: transparent;
+      border: 2px solid #333;
+      color: #f5f5f5;
+    }
+
+    .token-costs {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 4rem 0;
+    }
+
+    .token-costs h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .costs-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .costs-table th,
+    .costs-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #222;
+    }
+
+    .costs-table th {
+      color: #00D4D4;
+      font-weight: 600;
+    }
+
+    .costs-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .calculator {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+      border: 2px solid #FF6B35;
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin: 4rem 0;
+    }
+
+    .calculator h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .calc-input {
+      margin-bottom: 1.5rem;
+    }
+
+    .calc-input label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #888;
+    }
+
+    .calc-input input {
+      width: 100%;
+      padding: 0.75rem;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #f5f5f5;
+      font-size: 1rem;
+    }
+
+    .calc-result {
+      background: #0a0a0a;
+      border: 2px solid #00D4D4;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .calc-result .big {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #00D4D4;
+      margin-bottom: 0.5rem;
+    }
+
+    .calc-result .label {
+      color: #888;
+      font-size: 1.1rem;
+    }
+
+    .faq {
+      margin: 4rem 0;
+    }
+
+    .faq h2 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .faq-item {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .faq-item h3 {
+      color: #00D4D4;
+      margin-bottom: 0.75rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 4rem 0;
+      color: #666;
+      border-top: 1px solid #222;
+    }
+
+    @media (max-width: 768px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">⚡ MCPaaS</div>
+      <h1>Pay As You Go</h1>
+      <p class="subtitle">Eternal Memory for AI - Simple, Fair, Scalable</p>
+    </header>
+
+    <div class="pricing-grid">
+      <!-- Free Tier -->
+      <div class="pricing-card">
+        <div class="plan-name">Free Forever</div>
+        <div class="plan-price">
+          $0
+          <span class="small">/month</span>
+        </div>
+        <p class="plan-desc">Perfect for testing and side projects</p>
+        <ul class="features">
+          <li><span class="icon">✓</span> 10,000 tokens/month</li>
+          <li><span class="icon">✓</span> Unlimited souls</li>
+          <li><span class="icon">✓</span> Ghost reveal access 👻</li>
+          <li><span class="icon">✓</span> Global edge (300+ locations)</li>
+          <li><span class="icon">✓</span> Community support</li>
+        </ul>
+        <a href="/signup" class="cta-button secondary">Start Free</a>
+      </div>
+
+      <!-- PAYG Tier -->
+      <div class="pricing-card featured">
+        <span class="badge">Most Popular</span>
+        <div class="plan-name">Pay As You Go</div>
+        <div class="plan-price">
+          $0.10
+          <span class="small">/1k tokens</span>
+        </div>
+        <p class="plan-desc">Top up when you need it</p>
+        <ul class="features">
+          <li><span class="icon">✓</span> Everything in Free</li>
+          <li><span class="icon">✓</span> $10 minimum top-up</li>
+          <li><span class="icon">✓</span> Credits never expire</li>
+          <li><span class="icon">✓</span> Optional auto-reload</li>
+          <li><span class="icon">✓</span> Priority support</li>
+        </ul>
+        <a href="/billing" class="cta-button">Add Credits</a>
+      </div>
+    </div>
+
+    <!-- Token Costs -->
+    <div class="token-costs">
+      <h2>What Are Tokens?</h2>
+      <table class="costs-table">
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th>Token Cost</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Read Soul</strong></td>
+            <td>1 token</td>
+            <td>AI loads your context</td>
+          </tr>
+          <tr>
+            <td><strong>Write Soul</strong></td>
+            <td>10 tokens</td>
+            <td>Save new memory</td>
+          </tr>
+          <tr>
+            <td><strong>Create Soul</strong></td>
+            <td>100 tokens</td>
+            <td>New project setup</td>
+          </tr>
+          <tr>
+            <td><strong>Ghost Reveal</strong></td>
+            <td>0 tokens</td>
+            <td>Always free 👻</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Calculator -->
+    <div class="calculator">
+      <h2>Token Usage Calculator</h2>
+      <div class="calc-input">
+        <label>Soul reads per day:</label>
+        <input type="number" id="reads" value="100" oninput="calculate()">
+      </div>
+      <div class="calc-input">
+        <label>Soul writes per day:</label>
+        <input type="number" id="writes" value="10" oninput="calculate()">
+      </div>
+      <div class="calc-result">
+        <div class="big" id="result-tokens">3,300</div>
+        <div class="label">tokens/month</div>
+        <div class="big" id="result-cost" style="margin-top: 1rem;">FREE</div>
+        <div class="label">under 10k limit</div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq">
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <h3>How does the free tier work?</h3>
+        <p>Every account gets 10,000 free tokens per month. This resets on the 1st of each month. No credit card required.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>What happens when I run out of tokens?</h3>
+        <p>You'll see a low balance warning at 1,000 tokens. When you hit zero, you can top up instantly via Stripe (minimum $10).</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Do tokens expire?</h3>
+        <p>No! Purchased tokens never expire. Top up once, use them whenever.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Can I enable auto-reload?</h3>
+        <p>Yes! Set a threshold (e.g., 5,000 tokens) and auto-reload amount (e.g., $25). We'll charge your card automatically when you hit the threshold.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>What payment methods do you accept?</h3>
+        <p>All major credit cards via Stripe. Secure, PCI-compliant, instant.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Is this really just like xAI's API pricing?</h3>
+        <p>Exactly! We learned from the best. Simple PAYG model, no surprises.</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Built with .faf ☑️ Eternal Memory Infrastructure 👻</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="/" style="color: #00D4D4; text-decoration: none;">Home</a> •
+        <a href="/ghost" style="color: #00D4D4; text-decoration: none;">Ghost 👻</a> •
+        <a href="/docs" style="color: #00D4D4; text-decoration: none;">Docs</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function calculate() {
+      const reads = parseInt(document.getElementById('reads').value) || 0;
+      const writes = parseInt(document.getElementById('writes').value) || 0;
+
+      const tokensPerMonth = (reads * 30) + (writes * 10 * 30);
+      const cost = tokensPerMonth > 10000
+        ? ((tokensPerMonth - 10000) / 1000 * 0.10).toFixed(2)
+        : 0;
+
+      document.getElementById('result-tokens').textContent =
+        tokensPerMonth.toLocaleString();
+
+      document.getElementById('result-cost').textContent =
+        cost === 0 ? 'FREE' : `$${cost}`;
+    }
+
+    // Initialize
+    calculate();
+  </script>
+</body>
+</html>

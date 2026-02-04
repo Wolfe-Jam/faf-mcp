@@ -6,9 +6,18 @@ import { FafToolHandler } from '../src/handlers/tools.js';
 import { FafEngineAdapter } from '../src/handlers/engine-adapter.js';
 import express from 'express';
 import cors from 'cors';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 // Import version directly from package.json for Vercel
 import packageJson from '../package.json' assert { type: 'json' };
 const VERSION = packageJson.version;
+
+// Stripe and billing imports
+import { createCheckoutSession, handleStripeWebhook, getBalance } from './stripe-checkout.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Full MCP server for Vercel deployment
 const app = express();
@@ -97,7 +106,10 @@ app.get('/info', async (req, res) => {
     endpoints: {
       health: '/health',
       info: '/info',
-      sse: '/sse'
+      sse: '/sse',
+      pricing: '/pricing',
+      billing: '/billing',
+      ghost: '/ghost'
     }
   });
 });
@@ -305,6 +317,51 @@ app.get('/sse', async (req, res) => {
   req.on('close', () => {
     // Connection closed
   });
+});
+
+// Pricing page
+app.get('/pricing', (req, res) => {
+  try {
+    const html = readFileSync(join(__dirname, 'pricing.html'), 'utf-8');
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving pricing page:', error);
+    res.status(500).send('Error loading pricing page');
+  }
+});
+
+// Billing dashboard
+app.get('/billing', (req, res) => {
+  try {
+    const html = readFileSync(join(__dirname, 'billing.html'), 'utf-8');
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving billing page:', error);
+    res.status(500).send('Error loading billing page');
+  }
+});
+
+// Stripe Checkout Session Creation
+app.post('/api/create-checkout', createCheckoutSession);
+
+// Stripe Webhook Handler (raw body required)
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
+
+// Get user token balance
+app.get('/api/balance', getBalance);
+
+// Ghost guardian page
+app.get('/ghost', (req, res) => {
+  try {
+    const html = readFileSync(join(__dirname, 'ghost.html'), 'utf-8');
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving ghost page:', error);
+    res.status(500).send('Error loading ghost page');
+  }
 });
 
 export default app;
