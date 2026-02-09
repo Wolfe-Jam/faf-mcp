@@ -89,6 +89,33 @@ npm install -g faf-mcp
 
 ---
 
+## ☁️ Cloud Sync (NEW in v1.3.0)
+
+Share your FAF context globally via [mcpaas.live](https://mcpaas.live):
+
+| Tool | Purpose |
+|------|---------|
+| `faf_cloud_publish` | Upload to cloud, get shareable URL |
+| `faf_cloud_fetch` | Pull context from cloud |
+| `faf_cloud_list` | List available souls |
+| `faf_cloud_search` | Search across souls |
+| `faf_cloud_share` | Generate share links |
+
+**Example Workflow:**
+```bash
+# Upload your project.faf
+faf_cloud_publish { soul_name: "my-project" }
+→ https://mcpaas.live/souls/my-project
+
+# Anyone can fetch it
+faf_cloud_fetch { soul_name: "my-project" }
+→ Context merged into local project.faf
+```
+
+**Zero-install sharing** - Recipients need no MCP setup. Served from 300+ Cloudflare edges with <1ms cold starts via 2.7KB Zig-WASM engine.
+
+---
+
 ## 🔄 Eternal Bi-Sync
 
 The magic: `.faf` ↔ `CLAUDE.md` stay synchronized in milliseconds.
@@ -138,7 +165,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 🛠️ 17 Native MCP Tools
+## 🛠️ 22 Native MCP Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -149,8 +176,18 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_enhance` | Intelligent enhancement |
 | `faf_read` | Parse and validate FAF files |
 | `faf_write` | Create/update FAF with validation |
+| **☁️ Cloud Tools** | **(NEW in v1.3.0)** |
+| `faf_cloud_publish` | Upload to mcpaas.live |
+| `faf_cloud_fetch` | Pull from cloud |
+| `faf_cloud_list` | List souls |
+| `faf_cloud_search` | Search souls |
+| `faf_cloud_share` | Generate share links |
 
-Plus CLI fallback with 40+ commands.
+**Plus CLI fallback with 40+ commands** (via faf-cli v4.3.0):
+- `faf readme` - Extract 6 Ws from README (+25-35% boost)
+- `faf human-add` - Non-interactive YAML merge (6Ws Builder)
+- `faf git` - GitHub repo analysis without cloning
+- And 40+ more commands...
 
 ---
 

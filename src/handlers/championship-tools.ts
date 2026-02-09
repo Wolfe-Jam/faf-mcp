@@ -756,6 +756,68 @@ Working on REAL filesystem: ${targetDir}
             type: 'object',
             properties: {}
           }
+        },
+
+        // ☁️ Cloud Tools (MCPaaS Integration) - NEW in v1.3.0
+        {
+          name: 'faf_cloud_publish',
+          description: '☁️ Upload project.faf to mcpaas.live - Get shareable URL. Share your FAF context globally via edge-deployed service (300+ locations, <1ms cold starts)',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              soul_name: { type: 'string', description: 'Unique name for your context (e.g., "my-project")' },
+              directory: { type: 'string', description: 'Project directory (defaults to current)' },
+              tags: { type: 'array', items: { type: 'string' }, description: 'Optional tags for searchability' },
+              public: { type: 'boolean', description: 'Make publicly accessible (default: token-protected)' }
+            },
+            required: ['soul_name']
+          }
+        },
+        {
+          name: 'faf_cloud_fetch',
+          description: '📥 Pull context from mcpaas.live into local project.faf - Zero-install sharing. Anyone can fetch your published context.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              soul_name: { type: 'string', description: 'Name of the soul to fetch (e.g., "faf", "grok", "ghost")' },
+              directory: { type: 'string', description: 'Project directory (defaults to current)' },
+              merge: { type: 'boolean', description: 'Merge with existing .faf (default: false = replace)' }
+            },
+            required: ['soul_name']
+          }
+        },
+        {
+          name: 'faf_cloud_list',
+          description: '📋 List available souls on mcpaas.live - Discover published contexts. Filter by tags.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags (e.g., ["faf", "demo"])' }
+            }
+          }
+        },
+        {
+          name: 'faf_cloud_search',
+          description: '🔍 Search across cloud souls - Full-text search or tag-based filtering across all published contexts on mcpaas.live',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              query: { type: 'string', description: 'Search query for full-text search' },
+              tag: { type: 'string', description: 'Tag to filter by (alternative to query)' }
+            }
+          }
+        },
+        {
+          name: 'faf_cloud_share',
+          description: '🔗 Generate shareable link for cloud soul - Get URL for instant zero-install access. Served from 300+ Cloudflare edges.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              soul_name: { type: 'string', description: 'Name of the soul to share' },
+              expires_in: { type: 'number', description: 'Optional: hours until expiration (requires OAuth)' }
+            },
+            required: ['soul_name']
+          }
         }
       ] as Tool[];
 
@@ -901,6 +963,18 @@ Working on REAL filesystem: ${targetDir}
           return await this.handleSkills(_args);
         case 'faf_install_skill':
           return await this.handleInstallSkill(_args);
+
+        // ☁️ Cloud Tools (MCPaaS Integration)
+        case 'faf_cloud_publish':
+          return await this.handleCloudPublish(_args);
+        case 'faf_cloud_fetch':
+          return await this.handleCloudFetch(_args);
+        case 'faf_cloud_list':
+          return await this.handleCloudList(_args);
+        case 'faf_cloud_search':
+          return await this.handleCloudSearch(_args);
+        case 'faf_cloud_share':
+          return await this.handleCloudShare(_args);
 
         default:
           throw new Error(`Unknown tool: ${name}`);
@@ -2810,5 +2884,36 @@ Performance: <50ms per operation
     if (await this.fileExists(path.join(targetDir, 'package.json'))) score += 14;
 
     return score;
+  }
+
+  // ☁️ Cloud Handler Methods (MCPaaS Integration)
+  private async handleCloudPublish(args: any): Promise<CallToolResult> {
+    const { FafCloudHandler } = await import('./cloud-handler.js');
+    const handler = new FafCloudHandler();
+    return await handler.publish(args);
+  }
+
+  private async handleCloudFetch(args: any): Promise<CallToolResult> {
+    const { FafCloudHandler } = await import('./cloud-handler.js');
+    const handler = new FafCloudHandler();
+    return await handler.fetch(args);
+  }
+
+  private async handleCloudList(args: any): Promise<CallToolResult> {
+    const { FafCloudHandler } = await import('./cloud-handler.js');
+    const handler = new FafCloudHandler();
+    return await handler.list(args);
+  }
+
+  private async handleCloudSearch(args: any): Promise<CallToolResult> {
+    const { FafCloudHandler } = await import('./cloud-handler.js');
+    const handler = new FafCloudHandler();
+    return await handler.search(args);
+  }
+
+  private async handleCloudShare(args: any): Promise<CallToolResult> {
+    const { FafCloudHandler } = await import('./cloud-handler.js');
+    const handler = new FafCloudHandler();
+    return await handler.share(args);
   }
 }

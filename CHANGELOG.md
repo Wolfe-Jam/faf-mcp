@@ -5,6 +5,50 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-09
+
+### 🌐 MCPaaS Integration - Universal Context Sharing
+
+**The Answer (v1.3.0 = 13 → 42/13 = 3.23... → The Magic Number)**
+
+### Added
+
+- **☁️ MCPaaS Cloud Integration** - Global context sharing via mcpaas.live
+  - `faf_cloud_publish` - Upload project.faf to cloud, get shareable URL
+  - `faf_cloud_fetch` - Pull context from cloud into local project.faf
+  - `faf_cloud_list` - List available souls on mcpaas.live
+  - `faf_cloud_search` - Full-text search + tag-based filtering
+  - `faf_cloud_share` - Generate shareable links for instant access
+
+- **Zero-Install Sharing** - Recipients need no MCP setup
+  - Share via URL: `https://mcpaas.live/souls/your-project`
+  - Fetch anywhere: `faf_cloud_fetch { soul_name: "your-project" }`
+  - Edge-deployed: 300+ Cloudflare locations
+  - <1ms cold starts via 2.7KB Zig-WASM engine
+
+- **New Handler Module** - `src/handlers/cloud-handler.ts`
+  - HTTP client for mcpaas.live/mcp endpoint
+  - MCP protocol over HTTP (JSON-RPC 2.0)
+  - OAuth 2.0 authentication ready (Auth0)
+  - Error handling and rate limit awareness
+
+### Changed
+
+- **Tool Count** - 17 → 22 native MCP tools
+- **faf-cli Dependency** - ^4.0.0 → ^4.3.0
+  - Inherits `faf readme` - Automatic README extraction (+25-35% score boost)
+  - Inherits `faf human-add` - 6Ws Builder integration (non-interactive YAML merge)
+  - Inherits all v4.1.0-4.3.0 improvements via CLI fallback
+- **README** - Added Cloud Sync section with examples
+- **Architecture** - Enhanced for hybrid local + cloud workflows
+
+### Technical
+
+- Uses built-in fetch API (Node.js 18+)
+- Non-interactive cloud operations
+- Graceful fallbacks for network issues
+- Compatible with all MCP platforms
+
 ## [1.2.1] - 2025-12-22
 
 ### Added
