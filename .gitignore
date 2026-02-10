@@ -30,3 +30,13 @@ LAUNCH-DISTRIBUTION.md
 .faf-dna
 .vercel
 .env*.local
+# Strategy docs (keep local only - NOT for public repo)
+**/MARKETPLACE-SUBMISSIONS.md
+**/SUBMISSION-STEPS.md
+
+# Strategy/planning docs (keep local only)
+COMMUNITY-POST.md
+*-STRATEGY.md
+*-POSITIONING.md
+LAUNCH-*.md
+MARKETPLACE-*.md
