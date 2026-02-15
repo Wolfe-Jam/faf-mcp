@@ -1,6 +1,6 @@
 {
   "name": "faf-mcp",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "mcpName": "io.github.Wolfe-Jam/faf-mcp",
   "description": "faf-mcp | use>faf • IANA-registered format (application/vnd.faf+yaml) • Universal MCP server for Cursor, Windsurf, Cline, VS Code, and all platforms",
   "icon": "./assets/icons/faf-icon-256.png",
