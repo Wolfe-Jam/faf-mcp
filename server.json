@@ -30,12 +30,12 @@
     "url": "https://github.com/Wolfe-Jam/faf-mcp",
     "source": "github"
   },
-  "version": "1.3.0",
+  "version": "1.3.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "faf-mcp",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
