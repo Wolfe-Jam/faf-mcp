@@ -100,7 +100,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.20.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "faf-cli": "^4.4.0",
     "yaml": "^2.4.1"
   },
