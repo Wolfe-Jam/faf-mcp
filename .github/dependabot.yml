@@ -3,22 +3,25 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "automated"
-    commit-message:
-      prefix: "deps"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    labels:
-      - "dependencies"
-      - "ci"
-    commit-message:
-      prefix: "ci"
+      interval: "weekly"  # Weekly, not daily spam
+    open-pull-requests-limit: 3  # Max 3 PRs at once
+    ignore:
+      # Ignore major version bumps for linting tools (breaking changes)
+      - dependency-name: "@typescript-eslint/*"
+        update-types: ["version-update:semver-major"]
+      
+      # Ignore eslint major versions (breaking changes)
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      
+      # Ignore major Node.js type jumps (too aggressive)
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      
+      # Ignore Jest major versions (breaking changes)
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      
+      # Allow patch and minor updates for everything else
