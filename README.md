@@ -16,6 +16,7 @@
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp)
 
 ---
 
@@ -64,21 +65,37 @@ Setup savings get you started. Lifecycle optimization keeps you ahead.
 
 ---
 
-## ⚡ Quick Start
+## Three Ways to Deploy
 
-**1. Install:**
+| Door | Method | Best For |
+|------|--------|----------|
+| **Hosted** | [mcpaas.live](https://mcpaas.live) | Zero-install, point any MCP client to the URL |
+| **Self-Deploy** | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp) | Your own instance, full control |
+| **Local** | `npx faf-mcp` | IDE integration via stdio transport |
+
+### Hosted (mcpaas.live)
+
+Point your MCP client to `https://mcpaas.live/sse` — no install, no config, no maintenance. Served from 300+ Cloudflare edges with sub-ms cold starts via 2.7KB Zig-WASM engine.
+
+### Self-Deploy (Vercel)
+
+Click the Deploy button above to get your own MCP server on Vercel in one click. Once deployed, your server exposes:
+- `/health` — Health check
+- `/info` — Server metadata + tool list
+- `/sse` — MCP Server-Sent Events transport
+- `/ghost` — Ghost guardian demo
+
+### Local (npm)
 
 ```bash
-npm install -g faf-mcp
+npx faf-mcp
 ```
 
-**2. Add to your MCP config:**
+Or install globally and add to your MCP config:
 
 ```json
 {"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}}
 ```
-
-### Platform-Specific Setup
 
 | Platform | Config File |
 |----------|-------------|

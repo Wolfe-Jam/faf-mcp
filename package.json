@@ -101,6 +101,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
     "faf-cli": "^4.4.0",
     "yaml": "^2.4.1"
   },
