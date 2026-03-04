@@ -114,173 +114,317 @@ app.get('/', (_req, res) => {
 <head>
   <meta charset="UTF-8">
   <title>MCPaaS | MCP as a Service</title>
-  <meta name="description" content="MCPaaS - Model Context Protocol as a Service. Zero-install MCP servers via URL.">
+  <meta name="description" content="MCPaaS - Model Context Protocol as a Service. The future of MCP is Instant.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
       color: #fff;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 70% 30%, rgba(139, 26, 43, 0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .accent-line {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
+      z-index: 100;
     }
     .container {
-      text-align: center;
-      padding: 2rem;
-      max-width: 800px;
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 80px 2rem 0;
     }
-    .logo {
-      font-size: 80px;
-      margin-bottom: 1rem;
+
+    /* Hero */
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      min-height: 70vh;
     }
-    h1 {
-      font-size: 3.5rem;
-      margin: 0;
-      background: linear-gradient(135deg, #00bf63 0%, #00D4D4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .hero-left { flex: 1; }
+    .hero-right {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .tagline {
-      font-size: 1.5rem;
-      color: #888;
-      margin: 0.5rem 0 2rem;
-    }
-    .badge {
-      display: inline-block;
-      background: #FF6B35;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
+    .so-2025 {
+      font-size: 14px;
       font-weight: 700;
-      margin-bottom: 2rem;
+      color: #666;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
+    .so-2025 span {
+      color: #E23B3B;
+      text-decoration: line-through;
+    }
+    .title {
+      font-size: 5rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 16px;
+      letter-spacing: -3px;
+    }
+    .title .accent { color: #8B1A2B; }
+    .subtitle {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #ccc;
+      margin-bottom: 12px;
+    }
+    .subtitle .gold { color: #FFD700; }
+    .tagline {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .lightning {
+      font-size: 120px;
+      line-height: 1;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.4));
+    }
+    .hero-badge {
+      background: #8B1A2B;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .iana-label {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #E23B3B;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 32px;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* CTAs */
+    .ctas {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .ctas a {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: transform 0.2s;
+    }
+    .ctas a:hover { transform: translateY(-2px); }
+    .btn-primary { background: #8B1A2B; color: #fff; }
+    .btn-primary:hover { background: #a52035; }
+    .btn-secondary { background: #E23B3B; color: #fff; }
+    .btn-tertiary { background: transparent; border: 2px solid #444; color: #ccc; }
+    .btn-tertiary:hover { border-color: #888; color: #fff; }
+
+    /* Features */
     .features {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
-      margin: 2rem 0;
+      margin: 80px 0 60px;
     }
     .feature {
-      background: rgba(255,255,255,0.05);
-      padding: 1.5rem;
+      background: rgba(139, 26, 43, 0.06);
+      padding: 2rem;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(139, 26, 43, 0.2);
     }
     .feature h3 {
-      color: #00bf63;
+      color: #E23B3B;
       margin: 0 0 0.5rem;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      font-weight: 700;
     }
     .feature p {
       color: #888;
       margin: 0;
       font-size: 0.9rem;
+      line-height: 1.5;
     }
+
+    /* Three Doors */
     .three-doors {
-      background: rgba(0, 191, 99, 0.1);
-      border: 2px solid #00bf63;
+      background: rgba(139, 26, 43, 0.06);
+      border: 1px solid rgba(139, 26, 43, 0.3);
       border-radius: 12px;
-      padding: 1.5rem;
-      margin: 2rem 0;
+      padding: 2rem;
+      margin: 0 0 60px;
     }
     .three-doors h3 {
-      color: #00bf63;
-      margin: 0 0 1rem;
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 800;
     }
     .door {
       display: flex;
       justify-content: space-between;
-      padding: 0.75rem;
+      align-items: center;
+      padding: 1rem 1.25rem;
       margin: 0.5rem 0;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 6px;
-      font-family: 'Courier New', monospace;
-    }
-    .door-name { color: #00D4D4; }
-    .door-value { color: #00bf63; }
-    .platforms {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin: 2rem 0;
-      flex-wrap: wrap;
-    }
-    .platform {
-      color: #666;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(139, 26, 43, 0.15);
+      font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
       font-size: 0.9rem;
     }
-    .platform.active { color: #00bf63; font-weight: 600; }
-    .cta {
-      margin-top: 2rem;
-    }
-    .cta a {
-      display: inline-block;
-      padding: 1rem 2rem;
-      margin: 0.5rem;
-      border-radius: 8px;
+    .door-name { color: #ccc; font-weight: 600; }
+    .door-value { color: #E23B3B; font-weight: 600; }
+    .door-value a {
+      color: #E23B3B;
       text-decoration: none;
+    }
+    .door-value a:hover { color: #FFD700; }
+
+    /* Bottom bar */
+    .bottom-bar {
+      border-top: 2px solid transparent;
+      border-image: linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%) 1;
+      padding: 20px 0;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bottom-left {
+      font-size: 13px;
+      color: #999;
       font-weight: 600;
-      transition: transform 0.2s;
     }
-    .cta a:hover { transform: translateY(-2px); }
-    .btn-primary { background: #00bf63; color: white; }
-    .btn-secondary { background: #FF6B35; color: white; }
-    .btn-tertiary { background: transparent; border: 2px solid #00D4D4; color: #00D4D4; }
-    .version {
-      color: #666;
-      font-size: 0.85rem;
-      margin-top: 2rem;
+    .bottom-platforms {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #ccc;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
+    .bottom-platforms .dot { color: #E23B3B; }
+    .bottom-version {
+      text-align: center;
+      padding: 20px 0 40px;
+      color: #444;
+      font-size: 0.8rem;
+    }
+
     @media (max-width: 768px) {
+      .hero { flex-direction: column; text-align: center; min-height: auto; padding-top: 40px; }
+      .hero-right { width: 100%; }
+      .title { font-size: 3.5rem; }
+      .stats { justify-content: center; }
+      .ctas { justify-content: center; }
       .features { grid-template-columns: 1fr; }
-      h1 { font-size: 2.5rem; }
+      .bottom-bar { flex-direction: column; gap: 12px; text-align: center; }
     }
   </style>
 </head>
 <body>
+  <div class="accent-line"></div>
+
   <div class="container">
-    <div class="badge">IANA REGISTERED</div>
-    <div class="logo">&#9889;</div>
-    <h1>MCPaaS</h1>
-    <p class="tagline">Model Context Protocol as a Service</p>
+    <div class="hero">
+      <div class="hero-left">
+        <div class="so-2025">MCP Servers are <span>so 2025</span></div>
+        <div class="title">MCP<span class="accent">aa</span>S</div>
+        <div class="subtitle">The future of MCP is Instant <span class="gold">&#9889;</span></div>
+        <p class="tagline">Model Context Protocol as a Service</p>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value">17</div>
+            <div class="stat-label">MCP Tools</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Config Required</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">33k+</div>
+            <div class="stat-label">Downloads</div>
+          </div>
+        </div>
+
+        <div class="ctas">
+          <a href="https://mcpaas.live" class="btn-primary">mcpaas.live</a>
+          <a href="https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp" class="btn-secondary">Deploy to Vercel</a>
+          <a href="https://faf.one" class="btn-tertiary">Learn More</a>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="lightning">&#9889;</div>
+        <div class="hero-badge">ZERO CONFIG DEPLOY</div>
+        <div class="iana-label">IANA REGISTERED<br><span style="color:#888;font-size:10px;letter-spacing:1.5px;">SINCE OCT 2025</span></div>
+      </div>
+    </div>
 
     <div class="features">
       <div class="feature">
         <h3>Zero Install</h3>
-        <p>No npm. No pip. Just point to a URL.</p>
+        <p>No npm. No pip. Just point your MCP client to a URL and go.</p>
       </div>
       <div class="feature">
         <h3>Universal</h3>
-        <p>Works with Claude, Grok, Gemini, any MCP client.</p>
+        <p>Works with Claude, Grok, Gemini, Cursor, Windsurf, any MCP client.</p>
       </div>
       <div class="feature">
         <h3>Always Live</h3>
-        <p>Edge-deployed. Globally distributed. Always running.</p>
+        <p>Edge-deployed on 300+ locations. Sub-ms cold starts via 2.7KB Zig-WASM.</p>
       </div>
-    </div>
-
-    <div class="platforms">
-      <span class="platform active">Claude</span>
-      <span class="platform active">Grok</span>
-      <span class="platform active">Gemini</span>
-      <span class="platform active">Cursor</span>
-      <span class="platform active">Any MCP</span>
     </div>
 
     <div class="three-doors">
       <h3>Three Ways to Deploy</h3>
       <div class="door">
         <span class="door-name">Hosted</span>
-        <span class="door-value">mcpaas.live</span>
+        <span class="door-value"><a href="https://mcpaas.live">mcpaas.live</a></span>
       </div>
       <div class="door">
         <span class="door-name">Self-Deploy</span>
-        <span class="door-value">Deploy to Vercel</span>
+        <span class="door-value"><a href="https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp">Deploy to Vercel</a></span>
       </div>
       <div class="door">
         <span class="door-name">Local</span>
@@ -288,16 +432,17 @@ app.get('/', (_req, res) => {
       </div>
     </div>
 
-    <div class="cta">
-      <a href="https://mcpaas.live" class="btn-primary">mcpaas.live</a>
-      <a href="https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp" class="btn-secondary">Deploy to Vercel</a>
-      <a href="https://faf.one" class="btn-tertiary">Learn More</a>
+    <div class="bottom-bar">
+      <div class="bottom-left">v${VERSION} · IANA Registered · application/vnd.faf+yaml</div>
+      <div class="bottom-platforms">
+        <span>Claude</span><span class="dot">&bull;</span>
+        <span>Grok</span><span class="dot">&bull;</span>
+        <span>Gemini</span><span class="dot">&bull;</span>
+        <span>Cursor</span><span class="dot">&bull;</span>
+        <span>Any MCP</span>
+      </div>
     </div>
-
-    <div class="version">
-      v${VERSION} · Vercel Edge · IANA Registered (application/vnd.faf+yaml)<br>
-      <span style="color: #00bf63;">One URL. Any AI. Zero install.</span>
-    </div>
+    <div class="bottom-version">One URL. Any AI. Zero install.</div>
   </div>
 </body>
 </html>`);
