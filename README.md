@@ -6,9 +6,7 @@
   </div>
 </div>
 
-> **.FAF optimizes AI for your codebase.** At 100% (Gold Code), AI stops guessing and starts knowing. Universal MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms.
-
-**Universal version of [claude-faf-mcp](https://github.com/Wolfe-Jam/claude-faf-mcp)** — Anthropic-approved MCP server, now compatible with all platforms.
+> **Define once. Sync everywhere.** Universal MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms. At 100% (Gold Code), AI stops guessing and starts knowing.
 
 [![CI](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml)
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
@@ -107,7 +105,40 @@ Or install globally and add to your MCP config:
 
 ---
 
-## ☁️ Cloud Sync (NEW in v1.3.0)
+## 🔄 AI Format Interop
+
+Define once in `.faf`, sync to every AI platform:
+
+```
+                      project.faf
+                           │
+          ┌────────┬───────┴───────┬────────────┐
+          ▼        ▼               ▼            ▼
+      CLAUDE.md  AGENTS.md  .cursorrules  GEMINI.md
+      (Claude)   (Codex)      (Cursor)    (Gemini)
+```
+
+| Tool | Platform | Action |
+|------|----------|--------|
+| `faf_agents` | OpenAI Codex | Import/export/sync AGENTS.md |
+| `faf_cursor` | Cursor IDE | Import/export/sync .cursorrules |
+| `faf_gemini` | Google Gemini | Import/export/sync GEMINI.md |
+| `faf_conductor` | Conductor | Import/export directory structure |
+| `faf_git` | GitHub | Generate .faf from any repo URL |
+
+```bash
+# Sync to all formats at once
+faf bi-sync --all
+
+# Generate .faf from any GitHub repo
+faf_git { url: "https://github.com/facebook/react" }
+```
+
+**61 tools** (25 core + 36 advanced) · **309 tests** (9 suites) · **7 bundled parsers**
+
+---
+
+## ☁️ Cloud Sync
 
 Share your FAF context globally via [mcpaas.live](https://mcpaas.live):
 
@@ -145,6 +176,7 @@ project.faf  ←──── 8ms ────→  CLAUDE.md
 ```
 
 - Update either file → both stay aligned
+- `--all` flag syncs to CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md
 - Zero manual maintenance
 - Works across teams, branches, sessions
 - **Context never goes stale**
@@ -183,7 +215,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 🛠️ 22 Native MCP Tools
+## 🛠️ 25 Core MCP Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -194,14 +226,20 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_enhance` | Intelligent enhancement |
 | `faf_read` | Parse and validate FAF files |
 | `faf_write` | Create/update FAF with validation |
-| **☁️ Cloud Tools** | **(NEW in v1.3.0)** |
+| **🔄 Interop Tools** | |
+| `faf_agents` | Import/export/sync AGENTS.md |
+| `faf_cursor` | Import/export/sync .cursorrules |
+| `faf_gemini` | Import/export/sync GEMINI.md |
+| `faf_conductor` | Import/export directory structure |
+| `faf_git` | Generate .faf from GitHub repo URL |
+| **☁️ Cloud Tools** | |
 | `faf_cloud_publish` | Upload to mcpaas.live |
 | `faf_cloud_fetch` | Pull from cloud |
 | `faf_cloud_list` | List souls |
 | `faf_cloud_search` | Search souls |
 | `faf_cloud_share` | Generate share links |
 
-**Plus CLI fallback with 40+ commands** (via faf-cli v4.3.0):
+**Plus 36 advanced tools and CLI fallback** (via faf-cli v5.0.1):
 - `faf readme` - Extract 6 Ws from README (+25-35% boost)
 - `faf human-add` - Non-interactive YAML merge (6Ws Builder)
 - `faf git` - GitHub repo analysis without cloning
@@ -228,7 +266,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ## 📦 Ecosystem
 
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (52 tools)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (33 tools)
 - **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI (18k+ downloads)
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
 - **[faf.one](https://faf.one)** — Official website

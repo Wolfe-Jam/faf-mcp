@@ -5,6 +5,38 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-07 — The Interop MCP for Context
+
+**Define once. Sync everywhere.**
+
+### Added
+
+- **AI Format Interop** — 5 new MCP tools for cross-platform AI context
+  - `faf_agents`: Import/export/sync AGENTS.md (OpenAI Codex / Linux Foundation)
+  - `faf_cursor`: Import/export/sync .cursorrules (Cursor IDE)
+  - `faf_gemini`: Import/export/sync GEMINI.md (Google Gemini CLI)
+  - `faf_conductor`: Import/export Conductor directory structure
+  - `faf_git`: Extract .faf context from any public GitHub repo URL
+- **Bi-sync `--all` flag** — Sync project.faf to all formats at once (CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md)
+- **7 bundled parsers** — All parser logic runs standalone, zero CLI dependency
+  - agents-parser, cursorrules-parser, gemini-parser, conductor-parser
+  - github-extractor, faf-git-generator, slot-counter
+- **WJTTC v2.0.0 Championship Suite** — 73 Brake/Engine/Aero tests
+- **New test suites** — interop-v450, cli-mcp-parity, type-definitions-edge-cases
+
+### Changed
+
+- **Tool count**: 56 → 61 (25 core + 36 advanced)
+- **Tests**: 84 → 309 (9 suites)
+- **MCP SDK**: ^1.26.0 → ^1.27.1
+- Tier system fix: 100 = Trophy max (105 removed)
+- Path resolver: tilde expansion + project discovery
+- Version resolver: multi-path package.json fallback
+
+### Why Major Version
+
+New interop tools change the MCP contract surface. Define once in .faf, sync to every AI platform.
+
 ## [1.3.1] - 2026-02-15
 
 ### Fixed
