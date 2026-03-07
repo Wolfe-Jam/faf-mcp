@@ -12,6 +12,11 @@ import { FafEngineAdapter } from '../src/handlers/engine-adapter';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Type helper for MCP content extraction (SDK 1.26+ uses union types)
+type TextContent = { type: 'text'; text: string };
+const getTextContent = (content: unknown[]): string =>
+  (content[0] as TextContent).text;
+
 describe('🏁 Desktop-Native MCP Championship Tests', () => {
   let testDir: string;
 
@@ -45,11 +50,8 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       // Test native file read
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_read', { path: testFile });
-
-      expect(result.content[0].type).toBe('text');
-      if (result.content[0].type === 'text') {
-        expect(result.content[0].text).toBe(testContent);
-      }
+      
+      expect(getTextContent(result.content)).toBe(testContent);
     });
     
     test('faf_write - Native file writing', async () => {
@@ -75,26 +77,20 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_score', { details: true });
-
-      expect(result.content[0].type).toBe('text');
-      if (result.content[0].type === 'text') {
-        const text = result.content[0].text;
-        expect(text).toContain('FAF SCORE');
-        expect(text).toMatch(/\d+%/); // Contains percentage
-      }
+      
+      const text = getTextContent(result.content);
+      expect(text).toContain('FAF SCORE');
+      expect(text).toMatch(/\d+%/); // Contains percentage
     });
     
     test('faf_debug - Native environment inspection', async () => {
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_debug', {});
-
-      expect(result.content[0].type).toBe('text');
-      if (result.content[0].type === 'text') {
-        const text = result.content[0].text;
-        expect(text).toContain('Working Directory');
-        expect(text).toContain('Write Permissions');
-        expect(text).toContain('FAF Engine Path');
-      }
+      
+      const text = getTextContent(result.content);
+      expect(text).toContain('Working Directory');
+      expect(text).toContain('Write Permissions');
+      expect(text).toContain('FAF Engine Path');
     });
   });
 
@@ -105,18 +101,12 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       // Status should work with or without CLI (reads .faf files directly)
       const statusResult = await handler.callTool('faf_status', {});
       expect(statusResult.content).toBeDefined();
-      expect(statusResult.content[0].type).toBe('text');
-      if (statusResult.content[0].type === 'text') {
-        expect(statusResult.content[0].text).toBeDefined();
-      }
+      expect(getTextContent(statusResult.content)).toBeDefined();
 
       // Init might work or fail depending on CLI availability
       const initResult = await handler.callTool('faf_init', {});
       expect(initResult.content).toBeDefined();
-      expect(initResult.content[0].type).toBe('text');
-      if (initResult.content[0].type === 'text') {
-        expect(initResult.content[0].text).toBeDefined();
-      }
+      expect(getTextContent(initResult.content)).toBeDefined();
     });
     
     test('File operations continue working', async () => {
@@ -130,36 +120,30 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       });
       
       expect(fs.existsSync(testFile)).toBe(true);
-
+      
       const readResult = await handler.callTool('faf_read', { path: testFile });
-      expect(readResult.content[0].type).toBe('text');
-      if (readResult.content[0].type === 'text') {
-        expect(readResult.content[0].text).toBe('Works without CLI!');
-      }
+      expect(getTextContent(readResult.content)).toBe('Works without CLI!');
     });
   });
 
-  describe('🏆 Trophy Achievement Detection', () => {
+  describe('🏆 Easter Egg Detection', () => {
     test('100% Trophy achievement', async () => {
       // Create championship-quality files
       const fafContent = `## Project Context\n${'='.repeat(100)}\nRich content here`;
       const claudeContent = `## AI Instructions\n${'='.repeat(100)}\nExcellent guidance`;
-
+      
       fs.writeFileSync(path.join(testDir, '.faf'), fafContent);
       fs.writeFileSync(path.join(testDir, 'CLAUDE.md'), claudeContent);
       fs.writeFileSync(path.join(testDir, 'README.md'), '# Champion');
-
+      
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_score', { details: true });
-
-      expect(result.content[0].type).toBe('text');
-      if (result.content[0].type === 'text') {
-        const text = result.content[0].text;
-        // Check if Trophy achievement triggers
-        if (text.includes('100%')) {
-          expect(text).toContain('Trophy');
-          expect(text).toContain('Championship');
-        }
+      
+      const text = getTextContent(result.content) as string;
+      // Check if Trophy achievement triggers
+      if (text.includes('100%')) {
+        expect(text).toContain('Trophy');
+        expect(text).toContain('Championship');
       }
     });
   });
@@ -218,10 +202,7 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
       const handler = new FafToolHandler(new FafEngineAdapter('native'));
       const result = await handler.callTool('faf_read', { path: largeFile });
 
-      expect(result.content[0].type).toBe('text');
-      if (result.content[0].type === 'text') {
-        expect(result.content[0].text.length).toBe(size);
-      }
+      expect(getTextContent(result.content).length).toBe(size);
     });
   });
 });

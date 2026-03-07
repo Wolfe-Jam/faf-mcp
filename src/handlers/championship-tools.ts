@@ -208,7 +208,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_auto',
-          description: '🏆 ONE COMMAND CHAMPIONSHIP - IMPORTANT: Users work on LOCAL projects. Ask for LOCAL filesystem path (e.g., /Users/username/projects/myapp). DO NOT use containers. Auto-scan, populate, score, sync using real FAF file tools.',
+          description: '🏆 ONE COMMAND SETUP - IMPORTANT: Users work on LOCAL projects. Ask for LOCAL filesystem path (e.g., /Users/username/projects/myapp). DO NOT use containers. Auto-scan, populate, score, sync using real FAF file tools.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -229,7 +229,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_init',
-          description: 'Initialize FAF with intelligent project detection - Championship grade',
+          description: 'Initialize FAF with intelligent project detection',
           inputSchema: {
             type: 'object',
             properties: {
@@ -252,7 +252,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_score',
-          description: 'Championship scorecard with actionable insights. CRITICAL: Content between [DISPLAY:REQUIRED] tags MUST be displayed directly to user as formatted markdown. Do NOT summarize. Includes Quick Actions for immediate next steps.',
+          description: 'AI-Readiness scorecard with actionable insights. CRITICAL: Content between [DISPLAY:REQUIRED] tags MUST be displayed directly to user as formatted markdown. Do NOT summarize. Includes Quick Actions for immediate next steps.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -263,7 +263,7 @@ Working on REAL filesystem: ${targetDir}
                 description: 'Output format: markdown (default), html, json, ascii',
                 enum: ['markdown', 'html', 'json', 'ascii']
               },
-              full: { type: 'boolean', description: 'Show full Podium Edition scorecard with detailed metrics' }
+              full: { type: 'boolean', description: 'Show full scorecard with detailed metrics' }
             }
           }
         },
@@ -280,7 +280,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_bi_sync',
-          description: '40ms bi-directional sync - Championship speed!',
+          description: '40ms bi-directional sync',
           inputSchema: {
             type: 'object',
             properties: {
@@ -322,7 +322,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_trust_validated',
-          description: 'Trust validated mode - championship seal',
+          description: 'Trust validated mode - production seal',
           inputSchema: { type: 'object', properties: {} }
         },
 
@@ -416,6 +416,54 @@ Working on REAL filesystem: ${targetDir}
           }
         },
 
+        // Human Context (6Ws Builder Integration)
+        {
+          name: 'faf_human_add',
+          description: '🧡 Add human_context to project.faf - Perfect for 6Ws Builder workflow (faf.one/6ws). Merge YAML from web form or set individual fields. Boosts AI-readiness score.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              yaml: {
+                type: 'string',
+                description: 'Complete human_context YAML from faf.one/6ws (copy-paste the entire human_context section)'
+              },
+              field: {
+                type: 'string',
+                description: 'Single field to set (who/what/where/why/when/how)'
+              },
+              value: {
+                type: 'string',
+                description: 'Value for the field'
+              },
+              directory: {
+                type: 'string',
+                description: 'LOCAL filesystem path to project directory (e.g., /Users/username/projects/myapp)'
+              }
+            }
+          }
+        },
+        {
+          name: 'faf_readme',
+          description: '📄 Extract context from README.md - Instant AI-readiness boost! Automatically finds WHO/WHAT/WHERE/WHY/WHEN/HOW from existing README. Optionally merge into project.faf. Typical +25-35% score boost.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              merge: {
+                type: 'boolean',
+                description: 'Auto-merge extracted context into project.faf (default: false, just extract)'
+              },
+              overwrite: {
+                type: 'boolean',
+                description: 'Overwrite existing fields in project.faf (default: false, only fill empty fields)'
+              },
+              directory: {
+                type: 'string',
+                description: 'LOCAL filesystem path to project directory (e.g., /Users/username/projects/myapp)'
+              }
+            }
+          }
+        },
+
         // Discovery & Navigation
         {
           name: 'faf_index',
@@ -473,7 +521,7 @@ Working on REAL filesystem: ${targetDir}
         // Developer Tools
         {
           name: 'faf_status',
-          description: 'Comprehensive project status with Championship Medal System',
+          description: 'Comprehensive project status with Mk3 Tier System',
           inputSchema: {
             type: 'object',
             properties: {
@@ -593,7 +641,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_innit',
-          description: '🇬🇧 British version of init - same championship, more bruv!',
+          description: '🇬🇧 British version of init - same quality, more bruv!',
           inputSchema: {
             type: 'object',
             properties: {
@@ -756,68 +804,6 @@ Working on REAL filesystem: ${targetDir}
             type: 'object',
             properties: {}
           }
-        },
-
-        // ☁️ Cloud Tools (MCPaaS Integration) - NEW in v1.3.0
-        {
-          name: 'faf_cloud_publish',
-          description: '☁️ Upload project.faf to mcpaas.live - Get shareable URL. Share your FAF context globally via edge-deployed service (300+ locations, <1ms cold starts)',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              soul_name: { type: 'string', description: 'Unique name for your context (e.g., "my-project")' },
-              directory: { type: 'string', description: 'Project directory (defaults to current)' },
-              tags: { type: 'array', items: { type: 'string' }, description: 'Optional tags for searchability' },
-              public: { type: 'boolean', description: 'Make publicly accessible (default: token-protected)' }
-            },
-            required: ['soul_name']
-          }
-        },
-        {
-          name: 'faf_cloud_fetch',
-          description: '📥 Pull context from mcpaas.live into local project.faf - Zero-install sharing. Anyone can fetch your published context.',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              soul_name: { type: 'string', description: 'Name of the soul to fetch (e.g., "faf", "grok", "ghost")' },
-              directory: { type: 'string', description: 'Project directory (defaults to current)' },
-              merge: { type: 'boolean', description: 'Merge with existing .faf (default: false = replace)' }
-            },
-            required: ['soul_name']
-          }
-        },
-        {
-          name: 'faf_cloud_list',
-          description: '📋 List available souls on mcpaas.live - Discover published contexts. Filter by tags.',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags (e.g., ["faf", "demo"])' }
-            }
-          }
-        },
-        {
-          name: 'faf_cloud_search',
-          description: '🔍 Search across cloud souls - Full-text search or tag-based filtering across all published contexts on mcpaas.live',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              query: { type: 'string', description: 'Search query for full-text search' },
-              tag: { type: 'string', description: 'Tag to filter by (alternative to query)' }
-            }
-          }
-        },
-        {
-          name: 'faf_cloud_share',
-          description: '🔗 Generate shareable link for cloud soul - Get URL for instant zero-install access. Served from 300+ Cloudflare edges.',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              soul_name: { type: 'string', description: 'Name of the soul to share' },
-              expires_in: { type: 'number', description: 'Optional: hours until expiration (requires OAuth)' }
-            },
-            required: ['soul_name']
-          }
         }
       ] as Tool[];
 
@@ -888,6 +874,12 @@ Working on REAL filesystem: ${targetDir}
           return await this.handleAnalyze(_args);
         case 'faf_verify':
           return await this.handleVerify(_args);
+
+        // Human Context (6Ws Builder integration)
+        case 'faf_human_add':
+          return await this.handleHumanAdd(_args);
+        case 'faf_readme':
+          return await this.handleReadme(_args);
 
         // Discovery
         case 'faf_index':
@@ -964,18 +956,6 @@ Working on REAL filesystem: ${targetDir}
         case 'faf_install_skill':
           return await this.handleInstallSkill(_args);
 
-        // ☁️ Cloud Tools (MCPaaS Integration)
-        case 'faf_cloud_publish':
-          return await this.handleCloudPublish(_args);
-        case 'faf_cloud_fetch':
-          return await this.handleCloudFetch(_args);
-        case 'faf_cloud_list':
-          return await this.handleCloudList(_args);
-        case 'faf_cloud_search':
-          return await this.handleCloudSearch(_args);
-        case 'faf_cloud_share':
-          return await this.handleCloudShare(_args);
-
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -1026,11 +1006,11 @@ Working on REAL filesystem: ${targetDir}
         const skillPath = path.join(homeDir, '.claude', 'skills', 'faf-expert', 'SKILL.md');
         const skillInstalled = await this.fileExists(skillPath);
 
-        const championshipSection = skillInstalled
-          ? `🏆 **Championship Mode Ready!**\n` +
+        const skillSection = skillInstalled
+          ? `🏆 **Expert Mode Ready!**\n` +
             `• faf-expert skill is installed ✅\n` +
             `• Invoke it anytime for 99/100 AI-readiness!\n\n`
-          : `🏆 **Want Championship Mode?**\n` +
+          : `🏆 **Want Expert Mode?**\n` +
             `• Install faf-expert skill: Say "Run faf_install_skill"\n` +
             `• Get 99/100 AI-readiness with world-class guidance!\n\n`;
 
@@ -1043,7 +1023,7 @@ Working on REAL filesystem: ${targetDir}
           `• **DROP** any file from your project (I'll find the root!)\n` +
           `• **PASTE** your project path: \`faf_auto /path/to/project\`\n` +
           `• **CREATE** instantly: Say "Run faf_quick"\n\n` +
-          championshipSection +
+          skillSection +
           `💡 **Examples:**\n` +
           `\`faf_auto ~/Documents/my-app\`\n` +
           `\`faf_auto /Users/yourname/cool-project\`\n\n` +
@@ -1150,7 +1130,7 @@ Claude Desktop needs a target directory:
     let status = '';
     let emoji = '';
     if (score >= 99) {
-      status = 'Championship!';
+      status = 'Trophy!';
       emoji = '🏆';
     } else if (score >= 90) {
       status = 'Excellent!';
@@ -1271,26 +1251,13 @@ AI-Readiness: ${score}% ${emoji}
       // Build CLEAN markdown - no wrappers!
       const progressBar = '█'.repeat(Math.floor(score * 24 / 100)) + '░'.repeat(24 - Math.floor(score * 24 / 100));
 
-      let statusEmoji = '';
-      let statusText = '';
-      if (score >= 99) {
-        statusEmoji = '🟢';
-        statusText = 'CHAMPIONSHIP!';
-      } else if (score >= 84) {
-        statusEmoji = '⭐';
-        statusText = 'PODIUM READY!';
-      } else if (score >= 69) {
-        statusEmoji = '🟡';
-        statusText = 'QUALIFYING!';
-      } else {
-        statusEmoji = '🔴';
-        statusText = 'PIT LANE';
-      }
+      // Mk3 Canonical Tier System
+      const { medal: statusEmoji, status: statusText } = this.getScoreMedal(score);
 
       // Build clean output - just markdown, no wrappers!
-      const output = `# 🏎️ FAF Championship Score Card
+      const output = `# FAF Score Card
 
-## **Project Score: ${score}/100** ${score >= 99 ? '🏆' : ''}
+## **Project Score: ${score}/100** ${statusEmoji}
 
 ${progressBar} ${score}%
 
@@ -1309,10 +1276,10 @@ ${progressBar} ${score}%
 
 ---
 
-## 🏁 Race Telemetry
+## Context Status
 
 ### **Strengths** 💚
-${hasFaf && hasClaude ? '- Bi-directional sync: 40ms championship speed\n' : ''}${hasClaude ? '- AI-Ready Documentation: Full CLAUDE.md integration\n' : ''}${hasFaf ? '- Core Systems: FAF foundation in place\n' : ''}${hasReadme ? '- Documentation: README.md providing clarity\n' : ''}${hasPackage ? '- Dependencies: package.json tracking enabled' : ''}
+${hasFaf && hasClaude ? '- Bi-directional sync active\n' : ''}${hasClaude ? '- AI-Ready Documentation: Full CLAUDE.md integration\n' : ''}${hasFaf ? '- Core Systems: FAF foundation in place\n' : ''}${hasReadme ? '- Documentation: README.md providing clarity\n' : ''}${hasPackage ? '- Dependencies: package.json tracking enabled' : ''}
 
 ---
 
@@ -1326,7 +1293,7 @@ faf_score --save      # Save this scorecard
 
 ---
 
-> "Championship teams measure everything. So does FAF."
+> "Context is everything. FAF delivers it."
 
 ---
 
@@ -1412,7 +1379,7 @@ faf_score --save      # Save this scorecard
         project: path.basename(targetDir),
         score: score,
         percentage: score,
-        status: score >= 90 ? 'Championship' : score >= 70 ? 'Podium Ready' : score >= 50 ? 'Qualifying' : score >= 30 ? 'In the Garage' : 'Needs Pit Stop',
+        status: this.getScoreMedal(score).status,
         components: {
           faf: { exists: hasFaf, points: hasFaf ? 40 : 0 },
           claude: { exists: hasClaude, points: hasClaude ? 30 : 0 },
@@ -1438,7 +1405,7 @@ faf_score --save      # Save this scorecard
       result += `[.faf: ${hasFaf ? '✓' : 'x'}] [CLAUDE.md: ${hasClaude ? '✓' : 'x'}] [README: ${hasReadme ? '✓' : 'x'}] [package.json: ${hasPackage ? '✓' : 'x'}]`;
     } else if (showFull) {
       // Podium Edition: Full Championship Scorecard with detailed metrics
-      const projectName = path.basename(targetDir);
+      const _projectName = path.basename(targetDir);
 
       // Calculate section scores based on files present
       const coreIntelligence = Math.round((
@@ -1455,39 +1422,26 @@ faf_score --save      # Save this scorecard
         (hasFaf && hasClaude ? 25 : hasFaf ? 15 : hasClaude ? 10 : 0)  // Universal Context
       ));
 
-      const performance = 100;  // Static for MCP server itself
-      const standalone = 100;   // Static for MCP server itself
+      const _performance = 100;  // Static for MCP server itself
+      const _standalone = 100;   // Static for MCP server itself
 
       // Determine status tier
-      let statusTier = '';
-      let statusEmoji = '';
-      if (score >= 99) {
-        statusTier = 'PODIUM EDITION';
-        statusEmoji = '🏆';
-      } else if (score >= 85) {
-        statusTier = 'RACE READY';
-        statusEmoji = '⭐';
-      } else if (score >= 70) {
-        statusTier = 'QUALIFYING';
-        statusEmoji = '🟪';
-      } else {
-        statusTier = 'IN DEVELOPMENT';
-        statusEmoji = '🔧';
-      }
+      // Mk3 Canonical Tier System
+      const { medal: tierEmoji, status: statusTier } = this.getScoreMedal(score);
 
       result = ``;
-      result += `# 🏎️ FAF AI-Readiness Score: ${score}/100 — ${statusTier}\n\n`;
+      result += `# FAF AI-Readiness Score: ${score}/100 ${tierEmoji}\n\n`;
       result += `**The closer you get to 100% the better AI can assist you.**\n\n`;
       result += `At 55% you are building your project with half a blueprint and basically flipping a coin with AI. .FAF defines, and AI becomes optimized for Context with the project.faf file.\n\n`;
       result += `\`\`\`\n`;
       result += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-      result += `🏎️  FAF AI-READINESS SCORE: ${score}/100 — ${statusTier}\n`;
+      result += `${tierEmoji}  FAF AI-READINESS SCORE: ${score}/100 — ${statusTier}\n`;
       result += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
       // Core Intelligence section
       result += `📊 CORE INTELLIGENCE                    🎯 CONTEXT DELIVERY\n`;
       const bar100 = '[██████] 100%';
-      const barCore = `[${('█'.repeat(Math.round(coreIntelligence / 100 * 6)) + '░'.repeat(6 - Math.round(coreIntelligence / 100 * 6)))}] ${coreIntelligence}%`;
+      const _barCore = `[${('█'.repeat(Math.round(coreIntelligence / 100 * 6)) + '░'.repeat(6 - Math.round(coreIntelligence / 100 * 6)))}] ${coreIntelligence}%`;
       const barContext = `[${('█'.repeat(Math.round(contextDelivery / 100 * 6)) + '░'.repeat(6 - Math.round(contextDelivery / 100 * 6)))}] ${contextDelivery}%`;
 
       result += `├─ Project DNA            ${hasFaf ? bar100 : '[░░░░░░]   0%'}  ├─ MCP Protocol      ${bar100}\n`;
@@ -1502,7 +1456,7 @@ faf_score --save      # Save this scorecard
       result += `├─ 50/50 Tools Active    ${bar100}  ├─ Direct Function   ${bar100}\n`;
       result += `└─ Zero Memory Leaks     ${bar100}  └─ 14 Bundled Cmds   ${bar100}\n\n`;
 
-      result += `🏆 project.faf score: ${score >= 99 ? 'podium' : score >= 85 ? 'race-ready' : score >= 70 ? 'qualifying' : 'development'}\n`;
+      result += `${tierEmoji} project.faf score: ${statusTier}\n`;
       result += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
       result += `\`\`\`\n\n`;
 
@@ -1515,11 +1469,11 @@ faf_score --save      # Save this scorecard
         result += `📝 **Generate CLAUDE.md**: Run \`faf_sync\` to create AI documentation (+30 points)\n\n`;
       }
       if (hasFaf && hasClaude) {
-        result += `🎯 **You're at Championship level!** Run \`faf_bi_sync\` to keep files synchronized.\n\n`;
+        result += `🎯 **You're at 100%!** Run \`faf_bi_sync\` to keep files synchronized.\n\n`;
       }
 
       result += `---\n\n`;
-      result += `*Generated by FAF Podium Edition v${VERSION}*\n\n`;
+      result += `*Generated by FAF v${VERSION}*\n\n`;
       result += `*"It's so logical if it didn't exist, AI would have built it itself" — Claude*`;
 
     } else {
@@ -1532,35 +1486,17 @@ faf_score --save      # Save this scorecard
       // Determine status and emoji
       let statusEmoji = '';
       let statusText = '';
-      let statusColor = '';
 
-      if (score >= 90) {
-        statusEmoji = '🏆';
-        statusText = 'CHAMPIONSHIP!';
-        statusColor = '🟢';
-      } else if (score >= 70) {
-        statusEmoji = '⭐';
-        statusText = 'PODIUM READY!';
-        statusColor = '🟢';
-      } else if (score >= 50) {
-        statusEmoji = '🟪';
-        statusText = 'QUALIFYING!';
-        statusColor = '🟡';
-      } else if (score >= 30) {
-        statusEmoji = '🔧';
-        statusText = 'IN THE GARAGE!';
-        statusColor = '🟡';
-      } else {
-        statusEmoji = '🛟';
-        statusText = 'NEEDS PIT STOP!';
-        statusColor = '🔴';
-      }
+      // Mk3 Canonical Tier System
+      const { medal, status } = this.getScoreMedal(score);
+      statusEmoji = medal;
+      statusText = status;
 
-      // Build the championship scorecard
-      result = `# 🏎️ FAF Championship Score Card\n\n`;
+      // Build the scorecard
+      result = `# FAF Score Card\n\n`;
       result += `## **Project Score: ${score}/100** ${statusEmoji}\n\n`;
       result += `${progressBar} ${score}%\n\n`;
-      result += `### ${statusColor} **Status: ${statusText}**\n\n`;
+      result += `### ${statusEmoji} **Status: ${statusText}**\n\n`;
       result += `---\n\n`;
 
       // Performance Breakdown Table
@@ -1573,12 +1509,12 @@ faf_score --save      # Save this scorecard
       result += `| **package.json** | ${hasPackage ? '✅ **FOUND**' : '⚠️ **MISSING**'} | ${hasPackage ? '14' : '0'}pts | ${hasPackage ? 'Dependencies tracked' : '*Add for full score*'} |\n`;
       result += `\n---\n\n`;
 
-      // Race Telemetry Section
-      result += `## 🏁 Race Telemetry\n\n`;
+      // Context Status Section
+      result += `## Context Status\n\n`;
 
       // Strengths
       const strengths = [];
-      if (hasFaf && hasClaude) strengths.push('Bi-directional sync: 40ms championship speed');
+      if (hasFaf && hasClaude) strengths.push('Bi-directional sync active');
       if (hasClaude) strengths.push('AI-Ready Documentation: Full CLAUDE.md integration');
       if (hasFaf) strengths.push('Core Systems: FAF foundation in place');
       if (hasReadme) strengths.push('Documentation: README.md providing clarity');
@@ -1598,7 +1534,7 @@ faf_score --save      # Save this scorecard
       if (!hasPackage) improvements.push('Add package.json for +14 points → ${score + 14}% score');
 
       if (improvements.length > 0) {
-        result += `### **Pit Stop Required** 🔧\n`;
+        result += `### **Improvements Needed** 🔧\n`;
         improvements.forEach(i => result += `- ${i}\n`);
         result += `\n`;
       }
@@ -1614,13 +1550,13 @@ faf_score --save      # Save this scorecard
       result += `faf_score --save      # Save this scorecard\n`;
       result += `\`\`\`\n\n`;
 
-      // Championship Quote
+      // FAF Quote
       const quotes = [
-        '"In F1, the difference between championship and last place is milliseconds. In FAF, it\'s context."',
-        '"Every project deserves a pit crew. FAF is yours."',
-        '"Stop FAFfing about - get to 100% and race!"',
-        '"Championship teams measure everything. So does FAF."',
-        '"The best time to FAF was yesterday. The second best time is now."'
+        '"Context is everything. FAF delivers it."',
+        '"Stop FAFfing about - get to 100%!"',
+        '"The best time to FAF was yesterday. The second best time is now."',
+        '"AI without context is just guessing."',
+        '"One file. Complete understanding."'
       ];
       const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
       result += `---\n\n`;
@@ -1628,7 +1564,7 @@ faf_score --save      # Save this scorecard
 
       // Footer
       result += `---\n\n`;
-      result += `*Generated by FAF Podium Edition v${VERSION}* ⚡\n`;
+      result += `*Generated by FAF v${VERSION}* ⚡\n`;
       result += `*${new Date().toISOString()}*`;
 
       // NOTE: AI-Readiness footer is added by formatResult() - don't duplicate!
@@ -1838,6 +1774,168 @@ faf_score --save      # Save this scorecard
     }
   }
 
+  /**
+   * 🧡 Handle human_context add/merge
+   * For 6Ws Builder workflow: user fills faf.one/6ws, pastes YAML here
+   */
+  private async handleHumanAdd(args: { yaml?: string; field?: string; value?: string; directory?: string }): Promise<CallToolResult> {
+    const startTime = Date.now();
+
+    try {
+      const dir = args.directory || this.currentProjectDir;
+
+      // Validate input
+      if (!args.yaml && (!args.field || !args.value)) {
+        return await this.formatResult(
+          '🧡 Human Context',
+          `**Usage:**\n\n` +
+          `**From 6Ws Builder (faf.one/6ws):**\n` +
+          `1. Visit https://faf.one/6ws\n` +
+          `2. Fill out the 6 questions\n` +
+          `3. Copy the human_context YAML\n` +
+          `4. Use: \`faf_human_add { yaml: "paste here" }\`\n\n` +
+          `**Single field:**\n` +
+          `\`faf_human_add { field: "who", value: "developers" }\`\n\n` +
+          `**Valid fields:** who, what, where, why, when, how`,
+          Date.now() - startTime,
+          dir
+        );
+      }
+
+      // Prepare engine args
+      const engineArgs: string[] = [dir];
+      if (args.yaml) {
+        engineArgs.push(`--yaml=${args.yaml}`);
+      }
+      if (args.field) {
+        engineArgs.push(`--field=${args.field}`);
+      }
+      if (args.value) {
+        engineArgs.push(`--value=${args.value}`);
+      }
+
+      // Call bundled human command
+      this.fafEngine.setWorkingDirectory(dir);
+      const result = await this.fafEngine.callEngine('human-add', engineArgs);
+      const duration = Date.now() - startTime;
+
+      if (result.success && result.data) {
+        const fieldsUpdated = result.data.fieldsUpdated || [];
+        const fieldsList = fieldsUpdated.join(', ');
+
+        return await this.formatResult(
+          '🧡 Human Context Added',
+          `${result.data.message}\n\n` +
+          `**Updated fields:** ${fieldsList}\n\n` +
+          `**Next steps:**\n` +
+          `1. Run \`faf_score\` to see your new AI-readiness score\n` +
+          `2. Your context is now available to all AI assistants\n\n` +
+          `💡 **Tip:** Complete all 6 Ws (who, what, where, why, when, how) for maximum score boost!`,
+          duration,
+          dir
+        );
+      } else {
+        return await this.formatResult(
+          '🧡 Human Context',
+          result.error || 'Failed to add human context',
+          duration,
+          dir
+        );
+      }
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      return await this.formatResult(
+        '🧡 Human Context',
+        `Error: ${error.message}`,
+        duration
+      );
+    }
+  }
+
+  /**
+   * 📄 Handle README context extraction
+   * Extract 6 Ws from existing README.md and optionally merge into project.faf
+   */
+  private async handleReadme(args: { merge?: boolean; overwrite?: boolean; directory?: string }): Promise<CallToolResult> {
+    const startTime = Date.now();
+
+    try {
+      const dir = args.directory || this.currentProjectDir;
+
+      // Determine which command to call
+      const command = args.merge ? 'readme-merge' : 'readme-extract';
+      const engineArgs: string[] = [dir];
+
+      if (args.overwrite) {
+        engineArgs.push('--overwrite');
+      }
+
+      // Call bundled readme command
+      this.fafEngine.setWorkingDirectory(dir);
+      const result = await this.fafEngine.callEngine(command, engineArgs);
+      const duration = Date.now() - startTime;
+
+      if (result.success && result.data) {
+        const extracted = result.data.extracted;
+        const fieldsExtracted = extracted ? Object.keys(extracted).filter(k => k !== 'confidence' && extracted[k]).length : 0;
+        const confidence = extracted?.confidence?.overall || 0;
+        const confidencePercent = Math.round(confidence * 100);
+
+        // Build extracted fields display
+        let extractedDisplay = '';
+        if (extracted) {
+          const fields = ['who', 'what', 'where', 'why', 'when', 'how'];
+          for (const field of fields) {
+            if (extracted[field]) {
+              extractedDisplay += `\n**${field.toUpperCase()}:** ${extracted[field]}`;
+            }
+          }
+        }
+
+        let message = `${result.data.message}\n\n` +
+          `**README:** ${result.data.readmePath}\n` +
+          `**Confidence:** ${confidencePercent}%\n` +
+          `**Fields found:** ${fieldsExtracted}/6\n` +
+          extractedDisplay;
+
+        if (args.merge) {
+          const fieldsUpdated = result.data.fieldsUpdated || [];
+          message += `\n\n**Merged fields:** ${fieldsUpdated.join(', ')}\n\n` +
+            `**Next steps:**\n` +
+            `1. Run \`faf_score\` to see your new AI-readiness score\n` +
+            `2. Fill any missing fields with \`faf_human_add\` or visit faf.one/6ws\n` +
+            `3. Your context is now available to all AI assistants`;
+        } else {
+          message += `\n\n**Next steps:**\n` +
+            `1. Run \`faf_readme { merge: true }\` to merge into project.faf\n` +
+            `2. Or manually copy the extracted context\n` +
+            `3. Fill any missing fields at faf.one/6ws`;
+        }
+
+        return await this.formatResult(
+          '📄 README Context',
+          message,
+          duration,
+          dir
+        );
+      } else {
+        return await this.formatResult(
+          '📄 README Context',
+          result.error || 'Failed to extract context from README',
+          duration,
+          dir
+        );
+      }
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      return await this.formatResult(
+        '📄 README Context',
+        `Error: ${error.message}`,
+        duration
+      );
+    }
+  }
+
   private async handleShare(args: ToolTypes.FafShareArgs): Promise<CallToolResult> {
     const message = args.sanitize ? '🔒 Sanitized and ready to share!' : '🔗 Share link: faf.one/share/abc123';
     return await this.formatResult('🔗 FAF Share', message);
@@ -2013,14 +2111,16 @@ faf_score --save      # Save this scorecard
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
           `faf_score\n\n` +
 
-          `Scoring:\n` +
-          `• 0-84%: Keep building\n` +
-          `• 85-98%: Race ready\n` +
-          `• 99%: Maximum technical\n` +
-          `• 🏆 100%: TROPHY - Championship Complete!\n` +
-          `• 🍊 Big Orange: BADGE (awarded separately)\n\n` +
+          `Scoring (Mk3 Tier System):\n` +
+          `• 🔴 <55%: AI working blind\n` +
+          `• 🟡 55%+: Needs improvement\n` +
+          `• 🟢 70%+: Solid foundation\n` +
+          `• 🥉 85%+: Bronze - Production ready\n` +
+          `• 🥈 95%+: Silver - Excellent\n` +
+          `• 🥇 99%+: Gold - Exceptional\n` +
+          `• 🏆 100%: Trophy - Perfect!\n\n` +
 
-          `That's it! You're ready to race! 🏎️⚡`;
+          `That's it! You're ready to go! ⚡`;
         break;
 
       case 'commands':
@@ -2059,8 +2159,8 @@ faf_score --save      # Save this scorecard
       case 'performance':
       case 'speed':
       case 'fast':
-        answer = `⚡ CHAMPIONSHIP PERFORMANCE\n\n` +
-          `Our Speed Achievements:\n` +
+        answer = `⚡ FAF PERFORMANCE\n\n` +
+          `Speed Benchmarks:\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
           `• faf_check    → 0ms (SUB-MILLISECOND!)\n` +
           `• faf_list     → 1ms\n` +
@@ -2071,10 +2171,10 @@ faf_score --save      # Save this scorecard
 
           `Speed Classifications:\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `🏎️ <10ms    = Championship\n` +
-          `🚗 10-50ms  = Race ready\n` +
-          `🚙 50-100ms = Street legal\n` +
-          `🐌 >100ms   = Large operations\n\n` +
+          `⚡ <10ms    = Instant\n` +
+          `🚀 10-50ms  = Fast\n` +
+          `✅ 50-100ms = Normal\n` +
+          `⏳ >100ms   = Large operations\n\n` +
 
           `The Secret:\n` +
           `• Native TypeScript (no shell)\n` +
@@ -2259,11 +2359,12 @@ Simple, fast, championship-grade.`;
   private getScoreMedal(score: number): { medal: string; status: string } {
     if (score >= 100) return { medal: '🏆', status: 'Trophy - Championship' };
     if (score >= 99) return { medal: '🥇', status: 'Gold' };
-    if (score >= 95) return { medal: '🥈', status: 'Target 2 - Silver' };
-    if (score >= 85) return { medal: '🥉', status: 'Target 1 - Bronze' };
-    if (score >= 70) return { medal: '🟢', status: 'GO! - Ready for Target 1' };
-    if (score >= 55) return { medal: '🟡', status: 'Caution - Getting ready' };
-    return { medal: '🔴', status: 'Stop - Needs work' };
+    if (score >= 95) return { medal: '🥈', status: 'Silver' };
+    if (score >= 85) return { medal: '🥉', status: 'Bronze' };
+    if (score >= 70) return { medal: '🟢', status: 'Green - Solid foundation' };
+    if (score >= 55) return { medal: '🟡', status: 'Yellow - Needs improvement' };
+    if (score > 0) return { medal: '🔴', status: 'Red - AI working blind' };
+    return { medal: '🤍', status: 'White - Empty' };
   }
 
   /**
@@ -2287,38 +2388,45 @@ Simple, fast, championship-grade.`;
       };
     } else if (score >= 95) {
       return {
-        current: 'Target 2 - Silver',
+        current: 'Silver',
         next: 'Gold',
         nextTarget: 99,
         nextMedal: '🥇'
       };
     } else if (score >= 85) {
       return {
-        current: 'Target 1 - Bronze',
-        next: 'Target 2 - Silver',
+        current: 'Bronze',
+        next: 'Silver',
         nextTarget: 95,
         nextMedal: '🥈'
       };
     } else if (score >= 70) {
       return {
-        current: 'GO! - Ready for Target 1',
-        next: 'Target 1 - Bronze',
+        current: 'Green - Solid foundation',
+        next: 'Bronze',
         nextTarget: 85,
         nextMedal: '🥉'
       };
     } else if (score >= 55) {
       return {
-        current: 'Caution - Getting ready',
-        next: 'GO! - Ready for Target 1',
+        current: 'Yellow - Needs improvement',
+        next: 'Green - Solid foundation',
         nextTarget: 70,
         nextMedal: '🟢'
       };
-    } else {
+    } else if (score > 0) {
       return {
-        current: 'Stop - Needs work',
-        next: 'Caution - Getting ready',
+        current: 'Red - AI working blind',
+        next: 'Yellow - Needs improvement',
         nextTarget: 55,
         nextMedal: '🟡'
+      };
+    } else {
+      return {
+        current: 'White - Empty',
+        next: 'Red - AI working blind',
+        nextTarget: 1,
+        nextMedal: '🔴'
       };
     }
   }
@@ -2415,7 +2523,6 @@ ${FILESYSTEM_CONTEXT_INSTRUCTION}
 
 Version ${VERSION}
 🌐 IANA Registered Format
-🏎️ Podium Edition
 
 50+ Tools Available
 21 Core • 30+ Advanced
@@ -2458,7 +2565,6 @@ ${FILESYSTEM_CONTEXT_INSTRUCTION}
 🎯 PASS TO USER AS-IS (DO NOT SUMMARIZE)
 
 MCP Server: v${VERSION}
-🏎️ Podium Edition
 🌐 IANA Registered: application/vnd.faf+yaml
 
 50+ Tools Available
@@ -2885,36 +2991,5 @@ Performance: <50ms per operation
     if (await this.fileExists(path.join(targetDir, 'package.json'))) score += 14;
 
     return score;
-  }
-
-  // ☁️ Cloud Handler Methods (MCPaaS Integration)
-  private async handleCloudPublish(args: any): Promise<CallToolResult> {
-    const { FafCloudHandler } = await import('./cloud-handler.js');
-    const handler = new FafCloudHandler();
-    return await handler.publish(args);
-  }
-
-  private async handleCloudFetch(args: any): Promise<CallToolResult> {
-    const { FafCloudHandler } = await import('./cloud-handler.js');
-    const handler = new FafCloudHandler();
-    return await handler.fetch(args);
-  }
-
-  private async handleCloudList(args: any): Promise<CallToolResult> {
-    const { FafCloudHandler } = await import('./cloud-handler.js');
-    const handler = new FafCloudHandler();
-    return await handler.list(args);
-  }
-
-  private async handleCloudSearch(args: any): Promise<CallToolResult> {
-    const { FafCloudHandler } = await import('./cloud-handler.js');
-    const handler = new FafCloudHandler();
-    return await handler.search(args);
-  }
-
-  private async handleCloudShare(args: any): Promise<CallToolResult> {
-    const { FafCloudHandler } = await import('./cloud-handler.js');
-    const handler = new FafCloudHandler();
-    return await handler.share(args);
   }
 }

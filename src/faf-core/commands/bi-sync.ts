@@ -1,19 +1,26 @@
 /**
  * 🔗 Bi-Sync Engine - Mk3 Bundled Edition
  * Revolutionary project.faf ↔ CLAUDE.md Synchronization
+ * v4.5.0: Added agents/cursor/gemini/all flags for multi-format sync
  */
 
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import { findFafFile, fileExists } from '../utils/file-utils';
+import { agentsExportCommand } from './agents.js';
+import { cursorExportCommand } from './cursor.js';
+import { geminiExportCommand } from './gemini.js';
 
 export interface BiSyncOptions {
   auto?: boolean;
   watch?: boolean;
   force?: boolean;
   json?: boolean;
-  target?: 'auto' | '.clinerules' | '.cursorrules' | '.windsurfrules' | 'CLAUDE.md' | 'all';
+  agents?: boolean;
+  cursor?: boolean;
+  gemini?: boolean;
+  all?: boolean;
 }
 
 export interface BiSyncResult {
@@ -26,109 +33,63 @@ export interface BiSyncResult {
 }
 
 /**
- * 🎯 Platform Detection & Target Resolution
+ * 🔄 Convert project.faf YAML content to CLAUDE.md Markdown format
  */
-interface PlatformTarget {
-  filename: string;
-  displayName: string;
-}
-
-const PLATFORM_TARGETS: Record<string, PlatformTarget> = {
-  '.clinerules': { filename: '.clinerules', displayName: 'Cline' },
-  '.cursorrules': { filename: '.cursorrules', displayName: 'Cursor' },
-  '.windsurfrules': { filename: '.windsurfrules', displayName: 'Windsurf' },
-  'CLAUDE.md': { filename: 'CLAUDE.md', displayName: 'Claude Desktop' }
-};
-
-async function detectPlatformTargets(projectDir: string): Promise<string[]> {
-  const existingTargets: string[] = [];
-
-  for (const targetKey of Object.keys(PLATFORM_TARGETS)) {
-    const targetPath = path.join(projectDir, PLATFORM_TARGETS[targetKey].filename);
-    if (await fileExists(targetPath)) {
-      existingTargets.push(targetKey);
-    }
-  }
-
-  return existingTargets;
-}
-
-function resolveTargets(targetOption: string | undefined, existingTargets: string[]): string[] {
-  if (targetOption === 'all') {
-    return Object.keys(PLATFORM_TARGETS);
-  }
-
-  if (targetOption && targetOption !== 'auto' && PLATFORM_TARGETS[targetOption]) {
-    return [targetOption];
-  }
-
-  // Auto-detect: use existing files or default to CLAUDE.md
-  return existingTargets.length > 0 ? existingTargets : ['CLAUDE.md'];
-}
-
-/**
- * 🔄 Convert project.faf YAML content to platform-specific format
- */
-export function fafToPlatformFormat(fafContent: string, targetPlatform: string): string {
+export function fafToClaudeMd(fafContent: string): string {
   try {
     const fafData = parseYAML(fafContent);
-    const platformInfo = PLATFORM_TARGETS[targetPlatform] || PLATFORM_TARGETS['CLAUDE.md'];
-    const headerName = platformInfo.filename.toUpperCase().replace(/\./g, '');
 
-    let content = `# 🏎️ ${headerName} - ${fafData.project?.name || 'Project'} Persistent Context\n\n`;
-    content += `**Platform:** ${platformInfo.displayName}\n`;
-    content += `**Synced from:** project.faf (IANA format: application/vnd.faf+yaml)\n\n`;
+    let claudeMd = `# 🏎️ CLAUDE.md - ${fafData.project?.name || 'Project'} Persistent Context & Intelligence\n\n`;
 
     // Project State
     if (fafData.project) {
-      content += `## PROJECT STATE: ${fafData.context_quality?.overall_assessment || 'ACTIVE'} 🚀\n`;
+      claudeMd += `## PROJECT STATE: ${fafData.context_quality?.overall_assessment || 'ACTIVE'} 🚀\n`;
       if (fafData.project.goal) {
-        content += `**Current Position:** ${fafData.project.goal}\n`;
+        claudeMd += `**Current Position:** ${fafData.project.goal}\n`;
       }
-      content += `**Tyre Compound:** ULTRASOFT C5 (Maximum Performance)\n\n`;
-      content += `---\n\n`;
+      claudeMd += `**Tyre Compound:** ULTRASOFT C5 (Maximum Performance)\n\n`;
+      claudeMd += `---\n\n`;
     }
 
     // Core Context
-    content += `## 🎨 CORE CONTEXT\n\n`;
+    claudeMd += `## 🎨 CORE CONTEXT\n\n`;
 
     if (fafData.project) {
-      content += `### Project Identity\n`;
-      content += `- **Name:** ${fafData.project.name || 'Unknown'}\n`;
+      claudeMd += `### Project Identity\n`;
+      claudeMd += `- **Name:** ${fafData.project.name || 'Unknown'}\n`;
       if (fafData.instant_context?.tech_stack) {
-        content += `- **Stack:** ${fafData.instant_context.tech_stack}\n`;
+        claudeMd += `- **Stack:** ${fafData.instant_context.tech_stack}\n`;
       }
-      content += `- **Quality:** F1-INSPIRED (Championship Performance)\n\n`;
+      claudeMd += `- **Quality:** F1-INSPIRED (Championship Performance)\n\n`;
     }
 
     // Technical Context
     if (fafData.instant_context) {
-      content += `### Technical Architecture\n`;
+      claudeMd += `### Technical Architecture\n`;
       if (fafData.instant_context.what_building) {
-        content += `- **What Building:** ${fafData.instant_context.what_building}\n`;
+        claudeMd += `- **What Building:** ${fafData.instant_context.what_building}\n`;
       }
       if (fafData.instant_context.main_language) {
-        content += `- **Main Language:** ${fafData.instant_context.main_language}\n`;
+        claudeMd += `- **Main Language:** ${fafData.instant_context.main_language}\n`;
       }
-      content += `\n`;
+      claudeMd += `\n`;
     }
 
     // Context Quality
     if (fafData.context_quality) {
-      content += `### 📊 Context Quality Status\n`;
-      content += `- **Overall Assessment:** ${fafData.context_quality.overall_assessment || 'Good'}\n`;
-      content += `- **Last Updated:** ${new Date().toISOString().split('T')[0]}\n\n`;
+      claudeMd += `### 📊 Context Quality Status\n`;
+      claudeMd += `- **Overall Assessment:** ${fafData.context_quality.overall_assessment || 'Good'}\n`;
+      claudeMd += `- **Last Updated:** ${new Date().toISOString().split('T')[0]}\n\n`;
     }
 
     // Championship Footer
-    content += `---\n\n`;
-    content += `**STATUS: BI-SYNC ACTIVE 🔗 - Synchronized with project.faf (.FAF Foundation)**\n\n`;
-    content += `*Last Sync: ${new Date().toISOString()}*\n`;
-    content += `*Sync Engine: .FAF Foundation*\n`;
-    content += `*Target Platform: ${platformInfo.displayName}*\n`;
-    content += `*🏎️⚡️_championship_sync*\n`;
+    claudeMd += `---\n\n`;
+    claudeMd += `**STATUS: BI-SYNC ACTIVE 🔗 - Synchronized with .faf context!**\n\n`;
+    claudeMd += `*Last Sync: ${new Date().toISOString()}*\n`;
+    claudeMd += `*Sync Engine: F1-Inspired Software Engineering*\n`;
+    claudeMd += `*🏎️⚡️_championship_sync*\n`;
 
-    return content;
+    return claudeMd;
 
   } catch (error) {
     throw new Error(`Failed to convert .faf to CLAUDE.md: ${error instanceof Error ? error.message : String(error)}`);
@@ -136,9 +97,9 @@ export function fafToPlatformFormat(fafContent: string, targetPlatform: string):
 }
 
 /**
- * 🔗 Main Bi-Sync function - Platform-Aware
+ * 🔗 Main Bi-Sync function
  */
-export async function syncBiDirectional(projectPath?: string, options: BiSyncOptions = {}): Promise<BiSyncResult> {
+export async function syncBiDirectional(projectPath?: string, _options: BiSyncOptions = {}): Promise<BiSyncResult> {
   const startTime = Date.now();
   const result: BiSyncResult = {
     success: false,
@@ -160,50 +121,80 @@ export async function syncBiDirectional(projectPath?: string, options: BiSyncOpt
     }
 
     const projectDir = path.dirname(fafPath);
+    const claudeMdPath = path.join(projectDir, 'CLAUDE.md');
 
-    // Detect existing platform files
-    const existingTargets = await detectPlatformTargets(projectDir);
-
-    // Resolve which targets to sync
-    const targetsToSync = resolveTargets(options.target, existingTargets);
+    // Check what exists
+    const claudeMdExists = await fileExists(claudeMdPath);
 
     // Read .faf content
     const fafContent = await fs.readFile(fafPath, 'utf-8');
     const fafData = parseYAML(fafContent);
     const currentScore = fafData.faf_score || '0%';
 
-    // Sync to all resolved targets
-    for (const target of targetsToSync) {
-      const platformInfo = PLATFORM_TARGETS[target];
-      let targetPath = path.join(projectDir, platformInfo.filename);
+    if (!claudeMdExists) {
+      // Create CLAUDE.md from project.faf
+      const claudeMdContent = fafToClaudeMd(fafContent);
+      await fs.writeFile(claudeMdPath, claudeMdContent, 'utf-8');
 
-      // Special handling for CLAUDE.md - detect case-insensitive
-      if (target === 'CLAUDE.md') {
-        const lowercasePath = path.join(projectDir, 'claude.md');
-        if (await fileExists(lowercasePath)) {
-          targetPath = lowercasePath; // Update existing lowercase file
-        }
-      }
+      result.success = true;
+      result.direction = 'faf-to-claude';
+      result.filesChanged.push('CLAUDE.md');
+      result.message = `CLAUDE.md created! Bi-sync now active! FAF Score: ${currentScore}`;
 
-      // Generate platform-specific content
-      const platformContent = fafToPlatformFormat(fafContent, target);
-      await fs.writeFile(targetPath, platformContent, 'utf-8');
-
-      result.filesChanged.push(path.basename(targetPath));
-    }
-
-    result.success = true;
-    result.direction = 'faf-to-claude'; // Keep for backward compat
-    result.duration = Date.now() - startTime;
-
-    if (targetsToSync.length === 1) {
-      const platformName = PLATFORM_TARGETS[targetsToSync[0]].displayName;
-      result.message = `Synced to ${platformName}! FAF Score: ${currentScore}`;
     } else {
-      const platforms = targetsToSync.map(t => PLATFORM_TARGETS[t].displayName).join(', ');
-      result.message = `Synced to ${targetsToSync.length} platforms (${platforms})! FAF Score: ${currentScore}`;
+      // Both files exist - update CLAUDE.md from project.faf
+      const claudeMdContent = fafToClaudeMd(fafContent);
+      await fs.writeFile(claudeMdPath, claudeMdContent, 'utf-8');
+
+      result.success = true;
+      result.direction = 'faf-to-claude';
+      result.filesChanged.push('CLAUDE.md');
+      result.message = `Files synchronized! Perfect harmony achieved! FAF Score: ${currentScore}`;
     }
 
+    // v4.5.0: Chain additional format exports if requested
+    const doAgents = _options.agents || _options.all;
+    const doCursor = _options.cursor || _options.all;
+    const doGemini = _options.gemini || _options.all;
+
+    if (doAgents) {
+      try {
+        const agentsResult = await agentsExportCommand(projectDir, { force: true });
+        if (agentsResult.success) {
+          result.filesChanged.push('AGENTS.md');
+        }
+      } catch {
+        // Non-fatal — CLAUDE.md sync already succeeded
+      }
+    }
+
+    if (doCursor) {
+      try {
+        const cursorResult = await cursorExportCommand(projectDir, { force: true });
+        if (cursorResult.success) {
+          result.filesChanged.push('.cursorrules');
+        }
+      } catch {
+        // Non-fatal
+      }
+    }
+
+    if (doGemini) {
+      try {
+        const geminiResult = await geminiExportCommand(projectDir, { force: true });
+        if (geminiResult.success) {
+          result.filesChanged.push('GEMINI.md');
+        }
+      } catch {
+        // Non-fatal
+      }
+    }
+
+    if (result.filesChanged.length > 1) {
+      result.message += ` | Also synced: ${result.filesChanged.filter(f => f !== 'CLAUDE.md').join(', ')}`;
+    }
+
+    result.duration = Date.now() - startTime;
     return result;
 
   } catch (error) {
