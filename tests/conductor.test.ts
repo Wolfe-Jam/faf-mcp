@@ -81,7 +81,7 @@ interface FafFromConductor {
  */
 function parseMarkdownSections(content: string): Record<string, string> {
   const sections: Record<string, string> = {};
-  const lines = content.split('\n');
+  const lines = content.replace(/\r\n/g, '\n').split('\n');
   let currentSection = '_intro';
   let currentContent: string[] = [];
 
@@ -118,7 +118,7 @@ function parseMarkdownSections(content: string): Record<string, string> {
  * Extract bullet points from markdown content
  */
 function extractBulletPoints(content: string): string[] {
-  const lines = content.split('\n');
+  const lines = content.replace(/\r\n/g, '\n').split('\n');
   const bullets: string[] = [];
 
   for (const line of lines) {

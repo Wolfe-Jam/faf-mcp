@@ -65,7 +65,7 @@ export interface GeminiExportResult {
  * Parse GEMINI.md file content
  */
 export function parseGeminiMd(content: string): GeminiMdFile {
-  const lines = content.split('\n');
+  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   let projectName = 'Unknown Project';
   const sections: GeminiMdSection[] = [];
   let currentSection: GeminiMdSection | null = null;
