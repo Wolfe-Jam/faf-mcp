@@ -5,6 +5,15 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-03-07
+
+### Fixed
+
+- **README updated** — Rewritten for Cursor/Windsurf/Cline devs: v2.0.0 announcement in hero, "Define once. Sync everywhere." with interop diagram and quick start up front
+- **Windows CRLF** — Normalize `\r\n` in conductor-parser, gemini-parser, and conductor tests (same fix as agents/cursorrules from faf-cli v4.5.0)
+- **CI pipeline** — Fix 3 failures: npm audit fix (hono, express-rate-limit), audit-level downgraded to critical with continue-on-error, MCP Registry duplicate version tolerance
+- **Vercel badge** — Replaced oversized deploy button with shields.io badge
+
 ## [2.0.0] - 2026-03-07 — The Interop MCP for Context
 
 **Define once. Sync everywhere.**

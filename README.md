@@ -2,11 +2,13 @@
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
     <h1 style="margin: 0; color: #FF8C00;">faf-mcp</h1>
-    <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
+    <p style="margin: 4px 0 0 0;"><strong>v2.0.0 — The Interop MCP for Context</strong></p>
   </div>
 </div>
 
-> **Define once. Sync everywhere.** Universal MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible platforms. At 100% (Gold Code), AI stops guessing and starts knowing.
+The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 36,000+ downloads across Claude and now Gemini, we bring you faf-mcp v2.0.0 to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
+
+**The only IANA-Registered Format for AI Context** · `application/vnd.faf+yaml`
 
 [![CI](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml)
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
@@ -14,82 +16,32 @@
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp)
+[![Deploy](https://img.shields.io/badge/Deploy-Vercel-black)](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp)
 
 ---
 
-## The Problem: Context-Drift
+## Define once. Sync everywhere.
 
-AI assistants forget. They misunderstand. They drift.
+You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team just switched to Gemini. Every AI tool wants its own context file — and they all say the same thing in different formats.
 
-Every new session, every new file, every new developer — AI starts guessing again. Your codebase context leaks away. Yesterday's perfect assistant becomes today's confused intern.
-
-**.FAF fixes this permanently.**
-
----
-
-## The Solution: Gold Code
+**faf-mcp is the dedicated MCP server for Cursor, Windsurf, Cline, VS Code, and every non-Claude platform.** One `.faf` file in your repo, synced to every format your team needs.
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏆  FAF AI-READINESS SCORE: 100/100 — GOLD CODE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-At 100%, AI is optimized. No more guessing.
-Peak AI performance activated.
-
-├─ Project DNA locked in        ├─ Zero context-drift
-├─ Architecture understood      ├─ Eternal bi-sync active
-├─ Domain model captured        ├─ Team alignment permanent
-└─ Every session starts smart   └─ AI works WITH you, not around you
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                      project.faf
+                           │
+          ┌────────┬───────┴───────┬────────────┐
+          ▼        ▼               ▼            ▼
+      CLAUDE.md  AGENTS.md  .cursorrules  GEMINI.md
+      (Claude)   (Codex)      (Cursor)    (Gemini)
 ```
 
----
-
-## 💎 Lifecycle Value
-
-Setup savings get you started. Lifecycle optimization keeps you ahead.
-
-| When | Without FAF | With FAF |
-|------|-------------|----------|
-| **Day 1** | 20 min setup per dev | 0 min — instant context |
-| **Month 1** | AI forgets between sessions | AI remembers everything |
-| **Year 1** | New devs re-explain everything | New devs inherit full context |
-| **Year 3+** | Institutional knowledge lost | Project DNA preserved forever |
-
-**Setup savings: 20 minutes. Lifecycle savings: Infinite.**
-
----
-
-## Three Ways to Deploy
-
-| Door | Method | Best For |
-|------|--------|----------|
-| **Hosted** | [mcpaas.live](https://mcpaas.live) | Zero-install, point any MCP client to the URL |
-| **Self-Deploy** | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp) | Your own instance, full control |
-| **Local** | `npx faf-mcp` | IDE integration via stdio transport |
-
-### Hosted (mcpaas.live)
-
-Point your MCP client to `https://mcpaas.live/sse` — no install, no config, no maintenance. Served from 300+ Cloudflare edges with sub-ms cold starts via 2.7KB Zig-WASM engine.
-
-### Self-Deploy (Vercel)
-
-Click the Deploy button above to get your own MCP server on Vercel in one click. Once deployed, your server exposes:
-- `/health` — Health check
-- `/info` — Server metadata + tool list
-- `/sse` — MCP Server-Sent Events transport
-- `/ghost` — Ghost guardian demo
-
-### Local (npm)
+### Quick Start
 
 ```bash
 npx faf-mcp
 ```
 
-Or install globally and add to your MCP config:
+Add to your MCP config:
 
 ```json
 {"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}}
@@ -105,18 +57,34 @@ Or install globally and add to your MCP config:
 
 ---
 
-## 🔄 AI Format Interop
+## Three Ways to Deploy
 
-Define once in `.faf`, sync to every AI platform:
+| Door | Method | Best For |
+|------|--------|----------|
+| **Hosted** | [mcpaas.live](https://mcpaas.live) | Zero-install, point any MCP client to the URL |
+| **Self-Deploy** | [Deploy to Vercel](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp) | Your own instance, full control |
+| **Local** | `npx faf-mcp` | IDE integration via stdio transport |
 
+### Hosted (mcpaas.live)
+
+Point your MCP client to `https://mcpaas.live/sse` — no install, no config, no maintenance. Served from 300+ Cloudflare edges with sub-ms cold starts via 2.7KB Zig-WASM engine.
+
+### Self-Deploy (Vercel)
+
+Deploy your own MCP server on Vercel in one click. Once deployed, your server exposes:
+- `/health` — Health check
+- `/info` — Server metadata + tool list
+- `/sse` — MCP Server-Sent Events transport
+
+### Local (npm)
+
+```bash
+npx faf-mcp
 ```
-                      project.faf
-                           │
-          ┌────────┬───────┴───────┬────────────┐
-          ▼        ▼               ▼            ▼
-      CLAUDE.md  AGENTS.md  .cursorrules  GEMINI.md
-      (Claude)   (Codex)      (Cursor)    (Gemini)
-```
+
+---
+
+## 🔄 Interop Tools
 
 | Tool | Platform | Action |
 |------|----------|--------|
@@ -167,19 +135,19 @@ faf_cloud_fetch { soul_name: "my-project" }
 
 ## 🔄 Eternal Bi-Sync
 
-The magic: `.faf` ↔ `CLAUDE.md` stay synchronized in milliseconds.
+Your `.faf` file and your platform context files stay synchronized in milliseconds.
 
 ```
-project.faf  ←──── 8ms ────→  CLAUDE.md
-     │                            │
-     └── Single source of truth ──┘
+project.faf  ←── 8ms ──→  .cursorrules / AGENTS.md / CLAUDE.md / GEMINI.md
+                    Single source of truth
 ```
 
-- Update either file → both stay aligned
-- `--all` flag syncs to CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md
+- Update either side → both stay aligned
+- `--all` flag syncs to all four formats at once
 - Zero manual maintenance
 - Works across teams, branches, sessions
-- **Context never goes stale**
+
+AI assistants forget. They drift. Every new session, AI starts guessing again. Bi-sync means **context never goes stale**.
 
 ---
 
@@ -247,27 +215,10 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 🎯 The .FAF Position
-
-```
-  Platform      Context          Protocol
-  ────────      ───────          ────────
-  Cursor     →   .faf        →    MCP
-  Windsurf   →   .faf        →    MCP
-  Cline      →   .faf        →    MCP
-  VS Code    →   .faf        →    MCP
-  Claude     →   .faf        →    MCP
-  Any IDE    →   .faf        →    MCP
-```
-
-**.FAF is the foundational layer.** Universal context format. IANA-registered. Works everywhere.
-
----
-
 ## 📦 Ecosystem
 
 - **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (33 tools)
-- **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI (18k+ downloads)
+- **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
 - **[faf.one](https://faf.one)** — Official website
 

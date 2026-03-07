@@ -724,11 +724,11 @@ describe('AERO: HTTP-SSE Transport (faf-mcp exclusive)', () => {
     expect(pkg.dependencies).toHaveProperty('cors');
   });
 
-  it('package.json version is 2.0.0', () => {
+  it('package.json version is 2.x', () => {
     const pkg = JSON.parse(fs.readFileSync(
       path.join(__dirname, '..', 'package.json'), 'utf-8'
     ));
-    expect(pkg.version).toBe('2.0.0');
+    expect(pkg.version).toMatch(/^2\./);
   });
 });
 
