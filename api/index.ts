@@ -355,6 +355,8 @@ app.get('/', (_req, res) => {
       text-transform: uppercase;
     }
     .bottom-platforms .dot { color: #E23B3B; }
+    .bottom-platforms .copy-cmd { cursor: pointer; position: relative; }
+    .bottom-platforms .copy-cmd:hover { color: #00D4D4; }
     .bottom-version {
       text-align: center;
       padding: 20px 0 40px;
@@ -447,15 +449,26 @@ app.get('/', (_req, res) => {
     <div class="bottom-bar">
       <div class="bottom-left">v${VERSION} · IANA Registered · application/vnd.faf+yaml</div>
       <div class="bottom-platforms">
-        <span>Claude</span><span class="dot">&bull;</span>
-        <span>Grok</span><span class="dot">&bull;</span>
-        <span>Gemini</span><span class="dot">&bull;</span>
-        <span>Cursor</span><span class="dot">&bull;</span>
-        <span>Any MCP</span>
+        <span class="copy-cmd" data-cmd="npx claude-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Claude</span><span class="dot">&bull;</span>
+        <span class="copy-cmd" data-cmd="npx grok-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Grok</span><span class="dot">&bull;</span>
+        <span class="copy-cmd" data-cmd="pip install gemini-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Gemini</span><span class="dot">&bull;</span>
+        <span class="copy-cmd" data-cmd="npx faf-mcp" title="Copy the install command — paste in any terminal or your AI">Cursor</span><span class="dot">&bull;</span>
+        <span class="copy-cmd" data-cmd="npx faf-mcp" title="Copy the install command — paste in any terminal or your AI">Any MCP</span>
       </div>
     </div>
     <div class="bottom-version">One URL. Any AI. Zero install.</div>
   </div>
+  <script>
+    document.querySelectorAll('.copy-cmd').forEach(el => {
+      el.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(el.dataset.cmd);
+        const orig = el.textContent;
+        el.textContent = 'Copied!';
+        el.style.color = '#00D4D4';
+        setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1500);
+      });
+    });
+  </script>
   <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>`);
