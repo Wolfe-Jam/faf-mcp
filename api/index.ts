@@ -65,6 +65,18 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
   );
 });
 
+// Smithery server-card.json — allows Smithery to discover capabilities without scanning
+app.get('/.well-known/mcp/server-card.json', async (_req, res) => {
+  const toolsList = await toolHandler.listTools();
+  res.json({
+    serverInfo: { name: 'faf-mcp', version: VERSION },
+    authentication: { required: false },
+    tools: toolsList.tools,
+    resources: [],
+    prompts: []
+  });
+});
+
 // Health endpoint
 app.get('/health', (_req, res) => {
   res.json({
@@ -374,7 +386,7 @@ app.get('/', (_req, res) => {
 
         <div class="stats">
           <div class="stat">
-            <div class="stat-value">17</div>
+            <div class="stat-value">21</div>
             <div class="stat-label">MCP Tools</div>
           </div>
           <div class="stat">
@@ -444,6 +456,7 @@ app.get('/', (_req, res) => {
     </div>
     <div class="bottom-version">One URL. Any AI. Zero install.</div>
   </div>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>`);
 });
@@ -641,6 +654,7 @@ guardian: "Ziggy"</div>
       }
     });
   </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>`);
 });
