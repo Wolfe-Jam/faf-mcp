@@ -131,13 +131,13 @@ app.get('/', (_req, res) => {
   <link rel="icon" href="https://faf.one/orange-smiley.svg" type="image/svg+xml">
   <meta property="og:title" content="MCPaaS — MCP as a Service">
   <meta property="og:description" content="The future of MCP is Instant. 21 tools, SSE transport, any MCP client. Zero config, zero env vars.">
-  <meta property="og:image" content="https://faf.one/orange-smiley.svg">
+  <meta property="og:image" content="https://faf.one/og-image-1200x630.png">
   <meta property="og:url" content="https://faf-mcp.vercel.app">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="MCPaaS — MCP as a Service">
   <meta name="twitter:description" content="The future of MCP is Instant. 21 tools, SSE transport, any MCP client.">
-  <meta name="twitter:image" content="https://faf.one/orange-smiley.svg">
+  <meta name="twitter:image" content="https://faf.one/og-image-1200x630.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
