@@ -128,6 +128,16 @@ app.get('/', (_req, res) => {
   <title>MCPaaS | MCP as a Service</title>
   <meta name="description" content="MCPaaS - Model Context Protocol as a Service. The future of MCP is Instant.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="https://faf.one/orange-smiley.svg" type="image/svg+xml">
+  <meta property="og:title" content="MCPaaS — MCP as a Service">
+  <meta property="og:description" content="The future of MCP is Instant. 21 tools, SSE transport, any MCP client. Zero config, zero env vars.">
+  <meta property="og:image" content="https://faf.one/orange-smiley.svg">
+  <meta property="og:url" content="https://faf-mcp.vercel.app">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="MCPaaS — MCP as a Service">
+  <meta name="twitter:description" content="The future of MCP is Instant. 21 tools, SSE transport, any MCP client.">
+  <meta name="twitter:image" content="https://faf.one/orange-smiley.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
