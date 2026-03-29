@@ -233,3 +233,8 @@ MIT License — Free and open source
 **Zero drift. Eternal sync. AI optimized.** 🏆
 
 *"It's so logical if it didn't exist, AI would have built it itself" — Claude*
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/wolfe-jam-faf-mcp).
+
