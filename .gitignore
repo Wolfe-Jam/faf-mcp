@@ -40,3 +40,6 @@ COMMUNITY-POST.md
 *-POSITIONING.md
 LAUNCH-*.md
 MARKETPLACE-*.md
+
+# MCP Registry auth tokens — NEVER commit these (secrets)
+.mcpregistry_*
