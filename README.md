@@ -84,7 +84,7 @@ npx faf-mcp
 
 ---
 
-## 🔄 Interop Tools
+## Interop Tools
 
 | Tool | Platform | Action |
 |------|----------|--------|
@@ -106,7 +106,7 @@ faf_git { url: "https://github.com/facebook/react" }
 
 ---
 
-## ☁️ Cloud Sync
+## Cloud Sync
 
 Share your FAF context globally via [mcpaas.live](https://mcpaas.live):
 
@@ -133,7 +133,7 @@ faf_cloud_fetch { soul_name: "my-project" }
 
 ---
 
-## 🔄 Eternal Bi-Sync
+## Eternal Bi-Sync
 
 Your `.faf` file and your platform context files stay synchronized in milliseconds.
 
@@ -155,20 +155,20 @@ AI assistants forget. They drift. Every new session, AI starts guessing again. B
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **Trophy** | 100% | **AI Optimized** — Gold Code |
-| 🥇 **Gold** | 99%+ | Near-perfect context |
-| 🥈 **Silver** | 95%+ | Excellent |
-| 🥉 **Bronze** | 85%+ | Production ready |
-| 🟢 **Green** | 70%+ | Solid foundation |
-| 🟡 **Yellow** | 55%+ | AI flipping coins |
-| 🔴 **Red** | <55% | AI working blind |
-| 🤍 **White** | 0% | No context at all |
+| 🏆 **TROPHY** | 100% | **AI Optimized** — Gold Code |
+| ★ **GOLD** | 99%+ | Near-perfect context |
+| ◆ **SILVER** | 95%+ | Excellent |
+| ◇ **BRONZE** | 85%+ | Production ready |
+| ● **GREEN** | 70%+ | Solid foundation |
+| ● **YELLOW** | 55%+ | AI flipping coins |
+| ○ **RED** | <55% | AI working blind |
+| ♡ **WHITE** | 0% | No context at all |
 
 **At 55%, AI is guessing half the time.** At 100%, AI is optimized.
 
 ---
 
-## 💬 use>faf | Prompt Pattern
+## use>faf | Prompt Pattern
 
 **Start every prompt with "Use FAF"** to invoke MCP tools:
 
@@ -183,7 +183,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 🛠️ 25 Core MCP Tools
+## 25 Core MCP Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -194,13 +194,13 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_enhance` | Intelligent enhancement |
 | `faf_read` | Parse and validate FAF files |
 | `faf_write` | Create/update FAF with validation |
-| **🔄 Interop Tools** | |
+| **Interop Tools** | |
 | `faf_agents` | Import/export/sync AGENTS.md |
 | `faf_cursor` | Import/export/sync .cursorrules |
 | `faf_gemini` | Import/export/sync GEMINI.md |
 | `faf_conductor` | Import/export directory structure |
 | `faf_git` | Generate .faf from GitHub repo URL |
-| **☁️ Cloud Tools** | |
+| **Cloud Tools** | |
 | `faf_cloud_publish` | Upload to mcpaas.live |
 | `faf_cloud_fetch` | Pull from cloud |
 | `faf_cloud_list` | List souls |
@@ -215,7 +215,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 📦 Ecosystem
+## Ecosystem
 
 - **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (33 tools)
 - **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI
@@ -224,7 +224,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 📄 License
+## License
 
 MIT License — Free and open source
 
