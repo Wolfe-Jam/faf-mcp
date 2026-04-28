@@ -2,7 +2,7 @@
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
     <h1 style="margin: 0; color: #FF8C00;">faf-mcp</h1>
-    <p style="margin: 4px 0 0 0;"><strong>v2.0.0 — The Interop MCP for Context</strong></p>
+    <p style="margin: 4px 0 0 0;"><strong>Persistent Project Context for Cursor, IDEs and VS Code. Define once. Sync everywhere.</strong></p>
   </div>
 </div>
 
@@ -102,7 +102,7 @@ faf bi-sync --all
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**61 tools** (25 core + 36 advanced) · **309 tests** (9 suites) · **7 bundled parsers**
+**25 MCP tools** (with CLI fallback) · **309 tests** (9 suites) · **7 bundled parsers**
 
 ---
 
