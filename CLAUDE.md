@@ -1,3 +1,6 @@
+<!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
+<!-- faf: claim=project.faf | score=100 | family=FAF | siblings=README.md,CHANGELOG.md,server.json -->
+
 # 🏎️ CLAUDE.md - faf-mcp Persistent Context & Intelligence
 
 ## PROJECT STATE: GOOD

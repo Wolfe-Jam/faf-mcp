@@ -1,3 +1,6 @@
+<!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
+<!-- faf: doc=changelog | latest=v2.0.1 | canonical=project.faf | family=FAF -->
+
 # Changelog
 
 All notable changes to faf-mcp will be documented in this file.

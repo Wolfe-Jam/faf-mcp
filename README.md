@@ -1,3 +1,6 @@
+<!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
+<!-- faf: doc=readme | canonical=project.faf | score=100 | family=FAF -->
+
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
