@@ -22,6 +22,32 @@ app.use(cors({
 
 app.use(express.json());
 
+// Stats middleware — fire-and-forget Redis counters in shared faf-vercel-apps DB.
+// Pattern mirrors claude-faf-mcp / grok-faf-mcp. Prefix `cursor:` per architecture
+// doctrine — faf-mcp serves Cursor / IDEs / VS Code (cursor: leads as marketable handle).
+app.use((req, _res, next) => {
+  const PREFIX = 'cursor';
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) {
+    const today = new Date().toISOString().slice(0, 10);
+    const ua = req.headers['user-agent'] || 'unknown';
+    fetch(`${url}/pipeline`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        ['INCR', `${PREFIX}:stats:page_views`],
+        ['INCR', `${PREFIX}:stats:page_views:${today}`],
+        ['HINCRBY', `${PREFIX}:stats:sse_connections:detail`, ua, 1],
+      ]),
+    }).catch(() => {}); // silent — observability never breaks the request path
+  }
+  next();
+});
+
 // Initialize MCP server
 const mcpServer = new Server(
   {
