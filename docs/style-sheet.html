@@ -18,40 +18,23 @@
        The path IS the metadata. No registry. No drift.
        =================================================================== */
 
-    :root {
-      /* — Palette — */
-      --bg:            #0a0a0a;  /* page base */
-      --ink:           #ffffff;  /* primary text */
-      --crimson:       #8B1A2B;  /* primary brand · accent · primary button */
-      --crimson-hot:   #a52035;  /* primary button hover */
-      --red:           #E23B3B;  /* bright accent · headings · strike */
-      --gold:          #FFD700;  /* lightning · gradient mid · highlight */
-      --cyan:          #00D4D4;  /* interaction confirm only (cyan sweetspot) */
-      --grey-1:        #cccccc;  /* secondary text */
-      --grey-2:        #999999;  /* tertiary text */
-      --grey-3:        #888888;  /* muted body */
-      --grey-4:        #666666;  /* faint */
-      --grey-5:        #555555;  /* labels */
-      --grey-6:        #444444;  /* hairline / disabled */
-
-      /* — Effects — */
-      --glow:          radial-gradient(ellipse at 70% 30%, rgba(139,26,43,0.12) 0%, transparent 60%);
-      --accent-grad:   linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
-      --card-bg:       rgba(139,26,43,0.06);
-      --card-border:   rgba(139,26,43,0.20);
-
-      /* — Type — */
-      --font:          'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --mono:          'SF Mono', 'Monaco', 'Courier New', monospace;
-      --w-regular:     400;
-      --w-semi:        600;
-      --w-bold:        700;
-      --w-x:           800;
-      --w-black:       900;
-
-      /* — Radius — */
-      --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-pill: 24px;
-    }
+/* === faf-mcp:stylesheet canonical — source of truth: docs/style-sheet.html === */
+/* === edit ONLY here; surfaces derive · drift-checked in CI                  === */
+:root {
+  --bg:#0a0a0a; --ink:#ffffff;
+  --crimson:#8B1A2B; --crimson-hot:#a52035;
+  --red:#E23B3B; --gold:#FFD700; --cyan:#00D4D4;
+  --grey-1:#cccccc; --grey-2:#999999; --grey-3:#888888;
+  --grey-4:#666666; --grey-5:#555555; --grey-6:#444444;
+  --glow:radial-gradient(ellipse at 70% 30%, rgba(139,26,43,0.12) 0%, transparent 60%);
+  --accent-grad:linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
+  --card-bg:rgba(139,26,43,0.06); --card-border:rgba(139,26,43,0.20);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'SF Mono','Monaco','Courier New',monospace;
+  --w-regular:400; --w-semi:600; --w-bold:700; --w-x:800; --w-black:900;
+  --r-sm:6px; --r-md:8px; --r-lg:12px; --r-pill:24px;
+}
+/* === /faf-mcp:stylesheet canonical === */
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -222,7 +205,7 @@
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
           <div class="lightning">&#9889;</div>
           <div class="hero-badge">ZERO CONFIG DEPLOY</div>
-          <div class="iana-label" style="text-align:center">IANA REGISTERED<br><span style="color:#888;font-size:10px;letter-spacing:1.5px">SINCE OCT 2025</span></div>
+          <div class="iana-label" style="text-align:center">IANA REGISTERED<br><span style="color:var(--grey-3);font-size:10px;letter-spacing:1.5px">SINCE OCT 2025</span></div>
         </div>
       </div>
 

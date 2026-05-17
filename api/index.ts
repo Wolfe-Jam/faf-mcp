@@ -167,11 +167,28 @@ app.get('/', (_req, res) => {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+/* === faf-mcp:stylesheet canonical — source of truth: docs/style-sheet.html === */
+/* === edit ONLY here; surfaces derive · drift-checked in CI                  === */
+:root {
+  --bg:#0a0a0a; --ink:#ffffff;
+  --crimson:#8B1A2B; --crimson-hot:#a52035;
+  --red:#E23B3B; --gold:#FFD700; --cyan:#00D4D4;
+  --grey-1:#cccccc; --grey-2:#999999; --grey-3:#888888;
+  --grey-4:#666666; --grey-5:#555555; --grey-6:#444444;
+  --glow:radial-gradient(ellipse at 70% 30%, rgba(139,26,43,0.12) 0%, transparent 60%);
+  --accent-grad:linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
+  --card-bg:rgba(139,26,43,0.06); --card-border:rgba(139,26,43,0.20);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'SF Mono','Monaco','Courier New',monospace;
+  --w-regular:400; --w-semi:600; --w-bold:700; --w-x:800; --w-black:900;
+  --r-sm:6px; --r-md:8px; --r-lg:12px; --r-pill:24px;
+}
+/* === /faf-mcp:stylesheet canonical === */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0a0a0a;
-      color: #fff;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
       min-height: 100vh;
       position: relative;
     }
@@ -179,14 +196,14 @@ app.get('/', (_req, res) => {
       content: '';
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(ellipse at 70% 30%, rgba(139, 26, 43, 0.12) 0%, transparent 60%);
+      background: var(--glow);
       pointer-events: none;
     }
     .accent-line {
       position: fixed;
       top: 0; left: 0; right: 0;
       height: 3px;
-      background: linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
+      background: var(--accent-grad);
       z-index: 100;
     }
     .container {
@@ -213,13 +230,13 @@ app.get('/', (_req, res) => {
     .so-2025 {
       font-size: 14px;
       font-weight: 700;
-      color: #666;
+      color: var(--grey-4);
       letter-spacing: 3px;
       text-transform: uppercase;
       margin-bottom: 16px;
     }
     .so-2025 span {
-      color: #E23B3B;
+      color: var(--red);
       text-decoration: line-through;
     }
     .title {
@@ -229,17 +246,17 @@ app.get('/', (_req, res) => {
       margin-bottom: 16px;
       letter-spacing: -3px;
     }
-    .title .accent { color: #8B1A2B; }
+    .title .accent { color: var(--crimson); }
     .subtitle {
       font-size: 1.4rem;
       font-weight: 600;
-      color: #ccc;
+      color: var(--grey-1);
       margin-bottom: 12px;
     }
-    .subtitle .gold { color: #FFD700; }
+    .subtitle .gold { color: var(--gold); }
     .tagline {
       font-size: 1rem;
-      color: #666;
+      color: var(--grey-4);
       margin-bottom: 32px;
     }
     .lightning {
@@ -249,8 +266,8 @@ app.get('/', (_req, res) => {
       filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.4));
     }
     .hero-badge {
-      background: #8B1A2B;
-      color: #fff;
+      background: var(--crimson);
+      color: var(--ink);
       padding: 10px 24px;
       border-radius: 24px;
       font-size: 12px;
@@ -261,7 +278,7 @@ app.get('/', (_req, res) => {
     .iana-label {
       margin-top: 12px;
       font-size: 11px;
-      color: #E23B3B;
+      color: var(--red);
       font-weight: 700;
       letter-spacing: 1px;
     }
@@ -279,7 +296,7 @@ app.get('/', (_req, res) => {
     .stat-label {
       font-size: 11px;
       font-weight: 600;
-      color: #555;
+      color: var(--grey-5);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -300,11 +317,11 @@ app.get('/', (_req, res) => {
       transition: transform 0.2s;
     }
     .ctas a:hover { transform: translateY(-2px); }
-    .btn-primary { background: #8B1A2B; color: #fff; }
-    .btn-primary:hover { background: #a52035; }
-    .btn-secondary { background: #E23B3B; color: #fff; }
-    .btn-tertiary { background: transparent; border: 2px solid #444; color: #ccc; }
-    .btn-tertiary:hover { border-color: #888; color: #fff; }
+    .btn-primary { background: var(--crimson); color: var(--ink); }
+    .btn-primary:hover { background: var(--crimson-hot); }
+    .btn-secondary { background: var(--red); color: var(--ink); }
+    .btn-tertiary { background: transparent; border: 2px solid var(--grey-6); color: var(--grey-1); }
+    .btn-tertiary:hover { border-color: var(--grey-3); color: var(--ink); }
 
     /* Features */
     .features {
@@ -314,19 +331,19 @@ app.get('/', (_req, res) => {
       margin: 80px 0 60px;
     }
     .feature {
-      background: rgba(139, 26, 43, 0.06);
+      background: var(--card-bg);
       padding: 2rem;
       border-radius: 12px;
-      border: 1px solid rgba(139, 26, 43, 0.2);
+      border: 1px solid var(--card-border);
     }
     .feature h3 {
-      color: #E23B3B;
+      color: var(--red);
       margin: 0 0 0.5rem;
       font-size: 1rem;
       font-weight: 700;
     }
     .feature p {
-      color: #888;
+      color: var(--grey-3);
       margin: 0;
       font-size: 0.9rem;
       line-height: 1.5;
@@ -334,14 +351,14 @@ app.get('/', (_req, res) => {
 
     /* Three Doors */
     .three-doors {
-      background: rgba(139, 26, 43, 0.06);
+      background: var(--card-bg);
       border: 1px solid rgba(139, 26, 43, 0.3);
       border-radius: 12px;
       padding: 2rem;
       margin: 0 0 60px;
     }
     .three-doors h3 {
-      color: #fff;
+      color: var(--ink);
       font-size: 1.2rem;
       margin-bottom: 1.5rem;
       font-weight: 800;
@@ -355,21 +372,21 @@ app.get('/', (_req, res) => {
       background: rgba(0, 0, 0, 0.4);
       border-radius: 8px;
       border: 1px solid rgba(139, 26, 43, 0.15);
-      font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+      font-family: var(--mono);
       font-size: 0.9rem;
     }
-    .door-name { color: #ccc; font-weight: 600; }
-    .door-value { color: #E23B3B; font-weight: 600; }
+    .door-name { color: var(--grey-1); font-weight: 600; }
+    .door-value { color: var(--red); font-weight: 600; }
     .door-value a {
-      color: #E23B3B;
+      color: var(--red);
       text-decoration: none;
     }
-    .door-value a:hover { color: #FFD700; }
+    .door-value a:hover { color: var(--gold); }
 
     /* Bottom bar */
     .bottom-bar {
       border-top: 2px solid transparent;
-      border-image: linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%) 1;
+      border-image: var(--accent-grad) 1;
       padding: 20px 0;
       margin-top: 40px;
       display: flex;
@@ -378,25 +395,25 @@ app.get('/', (_req, res) => {
     }
     .bottom-left {
       font-size: 13px;
-      color: #999;
+      color: var(--grey-2);
       font-weight: 600;
     }
     .bottom-platforms {
       display: flex;
       gap: 20px;
       font-size: 12px;
-      color: #ccc;
+      color: var(--grey-1);
       font-weight: 600;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
-    .bottom-platforms .dot { color: #E23B3B; }
+    .bottom-platforms .dot { color: var(--red); }
     .bottom-platforms .copy-cmd { cursor: pointer; position: relative; }
-    .bottom-platforms .copy-cmd:hover { color: #00D4D4; }
+    .bottom-platforms .copy-cmd:hover { color: var(--cyan); }
     .bottom-version {
       text-align: center;
       padding: 20px 0 40px;
-      color: #444;
+      color: var(--grey-6);
       font-size: 0.8rem;
     }
 
@@ -447,7 +464,7 @@ app.get('/', (_req, res) => {
       <div class="hero-right">
         <div class="lightning">&#9889;</div>
         <div class="hero-badge">ZERO CONFIG DEPLOY</div>
-        <div class="iana-label">IANA REGISTERED<br><span style="color:#888;font-size:10px;letter-spacing:1.5px;">SINCE OCT 2025</span></div>
+        <div class="iana-label">IANA REGISTERED<br><span style="color:var(--grey-3);font-size:10px;letter-spacing:1.5px;">SINCE OCT 2025</span></div>
       </div>
     </div>
 
@@ -500,7 +517,7 @@ app.get('/', (_req, res) => {
         await navigator.clipboard.writeText(el.dataset.cmd);
         const orig = el.textContent;
         el.textContent = 'Copied!';
-        el.style.color = '#00D4D4';
+        el.style.color = 'var(--cyan)';
         setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1500);
       });
     });

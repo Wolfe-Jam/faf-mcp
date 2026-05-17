@@ -101,6 +101,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: 🎨 Style-sheet drift gate
+        run: npm run check:stylesheet  # HARD gate — surfaces must derive from docs/style-sheet.html
+
       - name: Lint
         run: npm run lint
         continue-on-error: true  # Don't block on linting errors
