@@ -4,7 +4,7 @@
  * Generates clean, accurate .faf files from GitHub repos without cloning.
  * Output is compact and PR-ready — every line adds value.
  *
- * Ported from faf-cli for claude-faf-mcp v4.5.0
+ * Ported from faf-cli for faf-mcp v4.5.0
  */
 
 import type { GitHubMetadata } from './github-extractor.js';
@@ -426,7 +426,7 @@ export async function generateEnhancedFaf(
   }
 
   fafData.generated_by = {
-    tool: 'claude-faf-mcp',
+    tool: 'faf-mcp',
     version: '4.5.0',
     command: `faf git ${metadata.owner}/${metadata.repo}`,
   };

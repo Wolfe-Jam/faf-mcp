@@ -4,9 +4,9 @@ import * as path from 'path';
 import * as os from 'os';
 
 /**
- * CLI Path Detection for Claude Desktop Sandbox
+ * CLI Path Detection for your MCP host Sandbox
  *
- * Claude Desktop MCP runs in a sandboxed environment with limited PATH.
+ * your MCP host MCP runs in a sandboxed environment with limited PATH.
  * This utility detects the faf CLI using absolute paths.
  */
 

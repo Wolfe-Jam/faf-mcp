@@ -3,7 +3,7 @@
  *
  * Implements the advertised formula: (Filled + Ignored) / 21 * 100
  *
- * Ported from faf-cli for claude-faf-mcp v4.5.0
+ * Ported from faf-cli for faf-mcp v4.5.0
  */
 
 export interface SlotCount {

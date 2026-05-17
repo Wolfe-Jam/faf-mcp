@@ -26,7 +26,7 @@ export function createProgressBar(percentage: number, width: number = 24): strin
   const empty = width - filled;
 
   // Orange blocks for progress (using standard blocks since terminal orange is limited)
-  // In Claude Desktop, we use the emoji for orange feel
+  // In your MCP host, we use the emoji for orange feel
   const bar = '🟧'.repeat(filled) + '⬜'.repeat(empty);
 
   return `${bar} ${percentage}%`;

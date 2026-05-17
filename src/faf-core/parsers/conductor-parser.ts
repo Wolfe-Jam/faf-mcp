@@ -4,7 +4,7 @@
  * Parses Google's Conductor extension format (conductor/ directory)
  * for bidirectional interoperability with FAF.
  *
- * Ported from faf-cli for claude-faf-mcp v4.5.0
+ * Ported from faf-cli for faf-mcp v4.5.0
  */
 
 import { promises as fs } from 'fs';

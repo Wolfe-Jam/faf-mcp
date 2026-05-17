@@ -9,7 +9,7 @@
  * - H2: Section headers (Project Overview, Tech Stack, etc.)
  * - Bullets: Specific guidelines
  *
- * Ported from faf-cli for claude-faf-mcp v4.5.0
+ * Ported from faf-cli for faf-mcp v4.5.0
  */
 
 import { promises as fs } from 'fs';
@@ -336,7 +336,7 @@ export async function agentsExport(
 
   // Footer
   lines.push('---');
-  lines.push(`*Generated from project.faf by claude-faf-mcp — ${new Date().toISOString().split('T')[0]}*`);
+  lines.push(`*Generated from project.faf by faf-mcp — ${new Date().toISOString().split('T')[0]}*`);
   lines.push('');
 
   // Write file

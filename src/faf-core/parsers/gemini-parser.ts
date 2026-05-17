@@ -9,7 +9,7 @@
  * - H2: Section headers (General Instructions, Coding Style, etc.)
  * - Bullets: Specific guidelines
  *
- * Ported from faf-cli for claude-faf-mcp v4.5.0
+ * Ported from faf-cli for faf-mcp v4.5.0
  */
 
 import { promises as fs } from 'fs';

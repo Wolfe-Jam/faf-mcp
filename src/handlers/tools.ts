@@ -224,7 +224,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_debug',
-          description: 'Debug Claude FAF MCP environment - show working directory, permissions, and FAF CLI status',
+          description: 'Debug faf-mcp environment - show working directory, permissions, and FAF CLI status',
           annotations: {
             title: 'Debug Info',
             readOnlyHint: true,
@@ -350,7 +350,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_guide',
-          description: 'FAF MCP usage guide for Claude Desktop - Projects convention, path resolution, and UX patterns',
+          description: 'FAF MCP usage guide for your MCP host - Projects convention, path resolution, and UX patterns',
           annotations: {
             title: 'Usage Guide',
             readOnlyHint: true,
@@ -978,7 +978,7 @@ output: Championship Performance
 
 # Quick Context
 working_directory: ${targetDir}
-initialized_by: claude-faf-mcp${projectData._friday_feature ? `\nfriday_feature: ${projectData._friday_feature}` : ''}
+initialized_by: faf-mcp${projectData._friday_feature ? `\nfriday_feature: ${projectData._friday_feature}` : ''}
 vitamin_context: true
 faffless: true
 
@@ -1206,12 +1206,12 @@ package_manager: ${projectData.package_manager}` : ''}
   private async handleFafAbout(_args: any): Promise<CallToolResult> {  // ✅ FIXED: Prefixed unused args
     // Stop FAFfing about and get the facts!
     const packageInfo = {
-      name: 'claude-faf-mcp',
+      name: 'faf-mcp',
       version: VERSION,
       description: 'We ARE the C in MCP. I⚡🍊 - The formula that changes everything.',
       author: 'FAF Team (team@faf.one)',
       website: 'https://faf.one',
-      npm: 'https://www.npmjs.com/package/claude-faf-mcp'
+      npm: 'https://www.npmjs.com/package/faf-mcp'
     };
 
     const aboutText = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1321,7 +1321,7 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
       const fafResult = await findFafFile(cwd);
       const hasFaf = fafResult !== null;
 
-      const debugOutput = `🔍 Claude FAF MCP Server Debug Information:
+      const debugOutput = `🔍 faf-mcp Debug Information:
 
 📂 Working Directory: ${debugInfo.workingDirectory}
 ✏️ Write Permissions: ${debugInfo.canWrite ? '✅ Yes' : '❌ No'}
@@ -1440,7 +1440,7 @@ ${debugInfo.permissions.fafError ? `   FAF Error: ${debugInfo.permissions.fafErr
   }
 
   private async handleFafGuide(_args: any): Promise<CallToolResult> {
-    const guide = `# FAF MCP - Claude Desktop Guide
+    const guide = `# FAF MCP - your MCP host Guide
 
 ## Path Convention (CRITICAL)
 **Default**: \`~/Projects/[project-name]/project.faf\`
@@ -2331,7 +2331,7 @@ version: ${VERSION}
 
 # Quick Context
 working_directory: ${cwd}
-initialized_by: claude-faf-mcp-auto
+initialized_by: faf-mcp-auto
 vitamin_context: true
 faffless: true
 `;
@@ -2901,7 +2901,7 @@ Use force: true to overwrite, or use faf_enhance to modify.`
         type: projectType,
         generated: new Date().toISOString(),
         version: VERSION,
-        initialized_by: 'claude-faf-mcp-quick'
+        initialized_by: 'faf-mcp-quick'
       };
 
       if (framework && framework !== 'none') {
@@ -2994,7 +2994,7 @@ Use force: true to overwrite, or use faf_enhance to modify.`
       // Check 1: MCP Version
       results.push({
         status: 'ok',
-        message: `claude-faf-mcp version: ${VERSION}`
+        message: `faf-mcp version: ${VERSION}`
       });
 
       // Check 2: .faf file exists

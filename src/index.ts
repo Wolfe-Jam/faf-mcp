@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { ClaudeFafMcpServer } from './server.js';
+import { FafMcpServer } from './server.js';
 
-// MCP servers run via stdio transport when launched by Claude Desktop
+// MCP servers run via stdio transport when launched by your MCP host
 async function main() {
-  const server = new ClaudeFafMcpServer({
+  const server = new FafMcpServer({
     transport: 'stdio',
     fafEnginePath: 'faf'
   });

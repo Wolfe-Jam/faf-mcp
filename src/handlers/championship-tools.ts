@@ -24,11 +24,11 @@ import { autoDetectPath } from '../utils/auto-path-detection.js';
 // 🏆 FAF Score uses the 3-3-1 system: 3 lines, 3 words, 1 emoji!
 // 💥 Format-Finder (FF) integration for GAME-CHANGING stack detection!
 
-// Claude Desktop filesystem context instruction
+// your MCP host filesystem context instruction
 const FILESYSTEM_CONTEXT_INSTRUCTION = `
 CRITICAL CONTEXT FOR CLAUDE DESKTOP:
 - This MCP server executes on the USER'S REAL FILESYSTEM
-- NOT in Claude Desktop's container (/home/claude)
+- NOT in your MCP host's container (/home/claude)
 - All paths are REAL system paths (/Users/username/ on macOS, /home/username/ on Linux, C:\\ on Windows)
 - When discussing file locations, use the user's actual filesystem paths, not container paths
 `;
@@ -510,7 +510,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_guide',
-          description: 'FAF MCP usage guide for Claude Desktop - Projects convention, path resolution, and UX patterns',
+          description: 'FAF MCP usage guide for your MCP host - Projects convention, path resolution, and UX patterns',
           inputSchema: {
             type: 'object',
             properties: {},
@@ -1054,11 +1054,11 @@ Working on REAL filesystem: ${targetDir}
     try {
       const dir = args.directory || process.cwd();
 
-      // 🚨 Claude Desktop Protection: Detect root filesystem
+      // 🚨 your MCP host Protection: Detect root filesystem
       if (dir === '/' || dir === '') {
         const helpMessage = `🚨 Directory Required!
 
-Claude Desktop needs a target directory:
+your MCP host needs a target directory:
 
 **Usage**:
   faf_init directory=/Users/wolfejam/my-project
@@ -1066,7 +1066,7 @@ Claude Desktop needs a target directory:
 **Example**:
   faf_init directory=/Users/wolfejam/GALLERY-SVELTE
 
-📁 Can't determine working directory automatically in Claude Desktop.
+📁 Can't determine working directory automatically in your MCP host.
 ⚠️  Root filesystem (/) is read-only - specify your project path!`;
 
         return await this.formatResult('🚀 FAF Init', helpMessage);
@@ -2190,7 +2190,7 @@ faf_score --save      # Save this scorecard
         answer = `🔧 TROUBLESHOOTING\n\n` +
           `"EROFS: read-only file system"\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `You're in Claude Desktop sandbox!\n` +
+          `You're in your MCP host sandbox!\n` +
           `Solution: Use real path\n` +
           `Example: faf_auto ~/Documents/project\n\n` +
 
@@ -2258,11 +2258,11 @@ faf_score --save      # Save this scorecard
   }
 
   private async handleGuide(_args: any): Promise<CallToolResult> {
-    const guide = `# FAF MCP - Claude Desktop Guide
+    const guide = `# FAF MCP - your MCP host Guide
 
 ## Core Principle: Local Path First
 
-Claude Desktop has full filesystem access with local paths. All 52 MCP tools work perfectly when you provide local project paths.
+your MCP host has full filesystem access with local paths. All 52 MCP tools work perfectly when you provide local project paths.
 
 **The Pattern:**
 1. Ask: "What's your project path?"
@@ -2768,7 +2768,7 @@ Performance: <50ms per operation
 
     try {
       // Find the skill file in the npm package
-      // It should be at: node_modules/claude-faf-mcp/skill/SKILL.md
+      // It should be at: node_modules/faf-mcp/skill/SKILL.md
       const homeDir = process.env.HOME || process.env.USERPROFILE || '/';
       const claudeSkillsDir = path.join(homeDir, '.claude', 'skills', 'faf-expert');
       const targetSkillPath = path.join(claudeSkillsDir, 'SKILL.md');
@@ -2784,7 +2784,7 @@ Performance: <50ms per operation
 
       // Location 2: In node_modules (global or local)
       if (!sourceSkillPath) {
-        const globalNodeModules = path.join(homeDir, '.npm', 'lib', 'node_modules', 'claude-faf-mcp', 'skill', 'SKILL.md');
+        const globalNodeModules = path.join(homeDir, '.npm', 'lib', 'node_modules', 'faf-mcp', 'skill', 'SKILL.md');
         if (await this.fileExists(globalNodeModules)) {
           sourceSkillPath = globalNodeModules;
         }
@@ -2792,7 +2792,7 @@ Performance: <50ms per operation
 
       // Location 3: In current working directory node_modules
       if (!sourceSkillPath) {
-        const localNodeModules = path.join(process.cwd(), 'node_modules', 'claude-faf-mcp', 'skill', 'SKILL.md');
+        const localNodeModules = path.join(process.cwd(), 'node_modules', 'faf-mcp', 'skill', 'SKILL.md');
         if (await this.fileExists(localNodeModules)) {
           sourceSkillPath = localNodeModules;
         }
@@ -2801,7 +2801,7 @@ Performance: <50ms per operation
       // Location 4: Search using require.resolve
       if (!sourceSkillPath) {
         try {
-          const mcpPackageRoot = path.dirname(require.resolve('claude-faf-mcp/package.json'));
+          const mcpPackageRoot = path.dirname(require.resolve('faf-mcp/package.json'));
           const resolvedPath = path.join(mcpPackageRoot, 'skill', 'SKILL.md');
           if (await this.fileExists(resolvedPath)) {
             sourceSkillPath = resolvedPath;
@@ -2815,7 +2815,7 @@ Performance: <50ms per operation
         const duration = Date.now() - startTime;
         return await this.formatResult(
           '🏆 Install faf-expert Skill',
-          `❌ Could not locate skill file in npm package.\n\nSearched:\n- ${devRepoPath}\n- Global node_modules\n- Local node_modules\n\nPlease ensure claude-faf-mcp is installed.`,
+          `❌ Could not locate skill file in npm package.\n\nSearched:\n- ${devRepoPath}\n- Global node_modules\n- Local node_modules\n\nPlease ensure faf-mcp is installed.`,
           duration
         );
       }
@@ -2834,10 +2834,10 @@ Performance: <50ms per operation
         `✅ faf-expert skill installed successfully!\n\n` +
         `📍 Location: ${targetSkillPath}\n\n` +
         `🔄 RESTART REQUIRED:\n` +
-        `   Please restart Claude Desktop to activate the skill.\n\n` +
+        `   Please restart your MCP host to activate the skill.\n\n` +
         `🎯 Once restarted, invoke the faf-expert skill to reach\n` +
         `   99/100 AI-readiness with championship-grade guidance!\n\n` +
-        `💡 Usage: Just say "Invoke faf-expert skill" in Claude Desktop`,
+        `💡 Usage: Just say "Invoke faf-expert skill" in your MCP host`,
         duration
       );
     } catch (error: any) {

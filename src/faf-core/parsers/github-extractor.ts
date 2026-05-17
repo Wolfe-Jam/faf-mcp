@@ -4,7 +4,7 @@
  * Fetches rich metadata from GitHub repos without cloning.
  * Uses GitHub API v3 (no auth needed for public repos, 60 req/hr limit).
  *
- * Ported from faf-cli for claude-faf-mcp v4.5.0
+ * Ported from faf-cli for faf-mcp v4.5.0
  */
 
 export interface GitHubMetadata {
@@ -40,7 +40,7 @@ export interface GitHubFile {
 function githubHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'claude-faf-mcp',
+    'User-Agent': 'faf-mcp',
   };
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   if (token) {

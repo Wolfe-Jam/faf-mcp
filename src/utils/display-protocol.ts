@@ -1,7 +1,7 @@
 /**
  * 🏎️ FAF Display Protocol - MCP GOLD CODE
  *
- * SET IN STONE: Universal display enforcement for Claude Desktop MCP
+ * SET IN STONE: Universal display enforcement for your MCP host MCP
  *
  * MANDATE: Every FAF tool response MUST use DisplayProtocol.createResponse()
  * VALIDATED: Works globally for ANY user, anywhere in the world
@@ -40,7 +40,7 @@ export class DisplayProtocol {
 <!-- CLAUDE:INSTRUCTION -->
 CRITICAL CONTEXT FOR CLAUDE DESKTOP:
 - This MCP server executes on the USER'S REAL FILESYSTEM
-- NOT in Claude Desktop's container (/home/claude)
+- NOT in your MCP host's container (/home/claude)
 - All paths are REAL system paths (/Users/username/ on macOS, /home/username/ on Linux, C:\\ on Windows)
 - When discussing file locations, use the user's actual filesystem paths, not container paths
 <!-- /CLAUDE:INSTRUCTION -->
@@ -63,7 +63,7 @@ ${content}
 
   /**
    * Generate the enhanced MCP response
-   * SET IN STONE: Display instructions for Claude Desktop MCP
+   * SET IN STONE: Display instructions for your MCP host MCP
    */
   static createResponse(content: string, metadata: any = {}): any {
     // ALWAYS use forceInline - the metadata ensures markdown renders
@@ -89,7 +89,7 @@ ${content}
       },
       // MCP standard fields
       isError: metadata.isError || false,
-      // Additional hints for Claude Desktop
+      // Additional hints for your MCP host
       __render_inline__: true,
       __no_collapse__: true,
       __user_content__: true,
