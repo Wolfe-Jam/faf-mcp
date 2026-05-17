@@ -33,7 +33,7 @@ import { syncBiDirectional } from '../src/faf-core/commands/bi-sync';
 // Engine & Tools
 import { FafEngineAdapter } from '../src/handlers/engine-adapter';
 import { FafToolHandler } from '../src/handlers/tools';
-import { ClaudeFafMcpServer } from '../src/server';
+import { FafMcpServer } from '../src/server';
 
 // Visibility
 import {
@@ -53,8 +53,8 @@ import { VERSION } from '../src/version';
 // ============================================================================
 
 describe('BRAKE: Server Instantiation', () => {
-  it('ClaudeFafMcpServer constructs without throwing', () => {
-    expect(() => new ClaudeFafMcpServer({
+  it('FafMcpServer constructs without throwing', () => {
+    expect(() => new FafMcpServer({
       transport: 'stdio',
       fafEnginePath: 'faf',
     })).not.toThrow();
@@ -708,7 +708,7 @@ describe('AERO: Score Tier System', () => {
 
 describe('AERO: HTTP-SSE Transport (faf-mcp exclusive)', () => {
   it('server accepts http-sse transport config', () => {
-    expect(() => new ClaudeFafMcpServer({
+    expect(() => new FafMcpServer({
       transport: 'http-sse',
       port: 0,
       cors: true,

@@ -228,23 +228,23 @@ describe('TIER 1: Parser Units', () => {
   // --- GitHub URL Parser ---
   describe('parseGitHubUrl', () => {
     it('should parse full HTTPS URL', () => {
-      const result = parseGitHubUrl('https://github.com/Wolfe-Jam/claude-faf-mcp');
-      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'claude-faf-mcp' });
+      const result = parseGitHubUrl('https://github.com/Wolfe-Jam/faf-mcp');
+      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'faf-mcp' });
     });
 
     it('should parse URL without protocol', () => {
-      const result = parseGitHubUrl('github.com/Wolfe-Jam/claude-faf-mcp');
-      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'claude-faf-mcp' });
+      const result = parseGitHubUrl('github.com/Wolfe-Jam/faf-mcp');
+      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'faf-mcp' });
     });
 
     it('should parse owner/repo shorthand', () => {
-      const result = parseGitHubUrl('Wolfe-Jam/claude-faf-mcp');
-      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'claude-faf-mcp' });
+      const result = parseGitHubUrl('Wolfe-Jam/faf-mcp');
+      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'faf-mcp' });
     });
 
     it('should strip .git extension', () => {
-      const result = parseGitHubUrl('https://github.com/Wolfe-Jam/claude-faf-mcp.git');
-      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'claude-faf-mcp' });
+      const result = parseGitHubUrl('https://github.com/Wolfe-Jam/faf-mcp.git');
+      expect(result).toEqual({ owner: 'Wolfe-Jam', repo: 'faf-mcp' });
     });
 
     it('should strip query parameters and hash fragments', () => {

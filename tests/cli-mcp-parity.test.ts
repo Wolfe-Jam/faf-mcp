@@ -104,8 +104,8 @@ describe('CLI vs MCP Scoring Parity', () => {
 
   describe('Real .faf Files', () => {
 
-    test('claude-faf-mcp project.faf', async () => {
-      const projectFafPath = '/Users/wolfejam/FAF/claude-faf-mcp/project.faf';
+    test('faf-mcp project.faf', async () => {
+      const projectFafPath = '/Users/wolfejam/FAF/faf-mcp/project.faf';
 
       if (!fs.existsSync(projectFafPath)) {
         console.log('Skipping: project.faf not found');
@@ -119,7 +119,7 @@ describe('CLI vs MCP Scoring Parity', () => {
       // Get CLI score (if available)
       if (cliAvailable) {
         try {
-          const output = execSync(`cd /Users/wolfejam/FAF/claude-faf-mcp && faf score 2>&1`, {
+          const output = execSync(`cd /Users/wolfejam/FAF/faf-mcp && faf score 2>&1`, {
             encoding: 'utf-8',
             timeout: 5000
           });
@@ -407,7 +407,7 @@ describe('CLI vs MCP Scoring Parity', () => {
 describe('Cross-Validation with Real Projects', () => {
 
   const realProjects = [
-    '/Users/wolfejam/FAF/claude-faf-mcp/project.faf',
+    '/Users/wolfejam/FAF/faf-mcp/project.faf',
     '/Users/wolfejam/FAF/cli/project.faf',
     '/Users/wolfejam/GALLERY-SVELTE/project.faf',
     '/Users/wolfejam/theblockchain.ai/project.faf'

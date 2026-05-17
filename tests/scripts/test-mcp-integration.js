@@ -4,7 +4,7 @@
  * 🏎️ MCP Desktop Integration Validator
  * Tests actual MCP server integration without CLI dependency
  * 
- * This validates that Claude Desktop can connect and use our tools
+ * This validates that your MCP host can connect and use our tools
  */
 
 const { spawn } = require('child_process');
@@ -22,7 +22,7 @@ class MCPIntegrationTester {
     console.log('================================\n');
 
     // Step 1: Check if config exists
-    console.log('1️⃣ Checking Claude Desktop configuration...');
+    console.log('1️⃣ Checking your MCP host configuration...');
     const configExists = await this.checkConfig();
     
     // Step 2: Validate our MCP server entry
@@ -44,7 +44,7 @@ class MCPIntegrationTester {
   async checkConfig() {
     try {
       if (fs.existsSync(this.configPath)) {
-        console.log('  ✅ Claude Desktop config found');
+        console.log('  ✅ your MCP host config found');
         return true;
       } else {
         console.log('  ⚠️  Config not found at:', this.configPath);
@@ -66,7 +66,7 @@ class MCPIntegrationTester {
 
       const config = JSON.parse(fs.readFileSync(this.configPath, 'utf-8'));
       const hasFafMcp = config.mcpServers && 
-                        (config.mcpServers['claude-faf-mcp'] || 
+                        (config.mcpServers['faf-mcp'] || 
                          config.mcpServers['faf'] ||
                          config.mcpServers['FAF']);
 
@@ -74,7 +74,7 @@ class MCPIntegrationTester {
         console.log('  ✅ FAF MCP server configured');
         
         // Check the command
-        const serverConfig = config.mcpServers['claude-faf-mcp'] || 
+        const serverConfig = config.mcpServers['faf-mcp'] || 
                            config.mcpServers['faf'] || 
                            config.mcpServers['FAF'];
         
@@ -89,7 +89,7 @@ class MCPIntegrationTester {
         console.log('  ❌ FAF MCP not in config');
         console.log('  💡 Add this to mcpServers in config:');
         console.log(`
-    "claude-faf-mcp": {
+    "faf-mcp": {
       "command": "node",
       "args": ["${path.join(__dirname, 'dist', 'cli.js')}"],
       "env": {}
@@ -128,7 +128,7 @@ class MCPIntegrationTester {
   }
 
   startServer(serverPath, resolve) {
-    // Start server in stdio mode (how Claude Desktop connects)
+    // Start server in stdio mode (how your MCP host connects)
     const server = spawn('node', [serverPath, '--transport', 'stdio'], {
       cwd: __dirname,
       stdio: ['pipe', 'pipe', 'pipe']
@@ -233,7 +233,7 @@ class MCPIntegrationTester {
     }
 
     if (!fs.existsSync(this.configPath)) {
-      report.recommendations.push('Configure Claude Desktop');
+      report.recommendations.push('Configure your MCP host');
     }
 
     // Desktop-native verdict
