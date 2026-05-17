@@ -2,7 +2,7 @@
 /**
  * faf-mcp · style-sheet drift check
  *
- * Contract: docs/style-sheet.html is the canonical visual vROM.
+ * Contract: docs/style-source.html is the canonical visual vROM.
  * Every surface carries a sentinel-wrapped copy of the :root token block.
  * This gate verifies the BRAND SIGNATURE (token name→value map, whitespace
  * & case normalized) is identical across surfaces — fast, non-visual.
@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const SOURCE = 'docs/style-sheet.html';
+const SOURCE = 'docs/style-source.html';
 const SURFACES = ['docs/index.html', 'api/index.ts'];
 
 const OPEN = '/* === faf-mcp:stylesheet canonical';
@@ -108,7 +108,7 @@ for (const surface of SURFACES) {
 }
 
 if (failed) {
-  console.error('\nstyle-sheet drift gate FAILED — edit docs/style-sheet.html only, then re-sync surfaces.');
+  console.error('\nstyle-source drift gate FAILED — edit docs/style-source.html only, then re-sync surfaces.');
   process.exit(1);
 }
 console.log('\nstyle-sheet drift gate PASSED — all surfaces derive from canonical.');
