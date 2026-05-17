@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>faf-mcp · Visual vROM — MCPaaS Style-Sheet</title>
+  <meta name="description" content="The canonical visual vROM for faf-mcp surfaces. Optional, fixed-path, presence-is-signal. If it exists, every surface styles from it.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="https://faf.one/orange-smiley.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===================================================================
+       faf-mcp · Visual vROM · MCPaaS Design System
+       CANONICAL SOURCE OF TRUTH for every faf-mcp surface.
+       Contract: docs/style-sheet.html — optional, fixed-path,
+       presence-is-signal. If it exists, surfaces style from it.
+       The path IS the metadata. No registry. No drift.
+       =================================================================== */
+
+    :root {
+      /* — Palette — */
+      --bg:            #0a0a0a;  /* page base */
+      --ink:           #ffffff;  /* primary text */
+      --crimson:       #8B1A2B;  /* primary brand · accent · primary button */
+      --crimson-hot:   #a52035;  /* primary button hover */
+      --red:           #E23B3B;  /* bright accent · headings · strike */
+      --gold:          #FFD700;  /* lightning · gradient mid · highlight */
+      --cyan:          #00D4D4;  /* interaction confirm only (cyan sweetspot) */
+      --grey-1:        #cccccc;  /* secondary text */
+      --grey-2:        #999999;  /* tertiary text */
+      --grey-3:        #888888;  /* muted body */
+      --grey-4:        #666666;  /* faint */
+      --grey-5:        #555555;  /* labels */
+      --grey-6:        #444444;  /* hairline / disabled */
+
+      /* — Effects — */
+      --glow:          radial-gradient(ellipse at 70% 30%, rgba(139,26,43,0.12) 0%, transparent 60%);
+      --accent-grad:   linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
+      --card-bg:       rgba(139,26,43,0.06);
+      --card-border:   rgba(139,26,43,0.20);
+
+      /* — Type — */
+      --font:          'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono:          'SF Mono', 'Monaco', 'Courier New', monospace;
+      --w-regular:     400;
+      --w-semi:        600;
+      --w-bold:        700;
+      --w-x:           800;
+      --w-black:       900;
+
+      /* — Radius — */
+      --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-pill: 24px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      position: relative;
+      line-height: 1.5;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--glow);
+      pointer-events: none;
+    }
+    .accent-line {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent-grad);
+      z-index: 100;
+    }
+    .wrap {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 80px 2rem 80px;
+    }
+
+    .doc-head { margin-bottom: 64px; }
+    .doc-eyebrow {
+      font-size: 12px; font-weight: var(--w-bold); color: var(--grey-4);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .doc-title {
+      font-size: 3rem; font-weight: var(--w-black); letter-spacing: -2px;
+      line-height: 1; margin-bottom: 16px;
+    }
+    .doc-title .accent { color: var(--crimson); }
+    .doc-contract {
+      font-size: 0.95rem; color: var(--grey-2); max-width: 640px;
+      border-left: 2px solid var(--crimson); padding-left: 16px;
+    }
+    .doc-contract strong { color: var(--ink); }
+
+    section { margin-bottom: 72px; }
+    .sec-label {
+      font-size: 13px; font-weight: var(--w-bold); color: var(--red);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Palette swatches */
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; }
+    .swatch { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--r-md); overflow: hidden; }
+    .swatch-chip { height: 64px; }
+    .swatch-meta { padding: 12px 14px; }
+    .swatch-token { font-family: var(--mono); font-size: 12px; color: var(--ink); font-weight: var(--w-bold); }
+    .swatch-hex { font-family: var(--mono); font-size: 12px; color: var(--grey-3); }
+    .swatch-role { font-size: 11px; color: var(--grey-4); margin-top: 4px; }
+
+    /* Type scale */
+    .type-row { padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: baseline; gap: 24px; }
+    .type-tag { font-family: var(--mono); font-size: 11px; color: var(--grey-4); width: 200px; flex-shrink: 0; }
+
+    /* Component gallery */
+    .comp { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--r-lg); padding: 28px; margin-bottom: 18px; }
+    .comp-name { font-family: var(--mono); font-size: 12px; color: var(--red); margin-bottom: 18px; letter-spacing: 1px; }
+
+    /* — Canonical component classes (the real surface vocabulary) — */
+    .title { font-size: 5rem; font-weight: var(--w-black); line-height: 1; letter-spacing: -3px; }
+    .title .accent { color: var(--crimson); }
+    .subtitle { font-size: 1.4rem; font-weight: var(--w-semi); color: var(--grey-1); }
+    .subtitle .gold { color: var(--gold); }
+    .tagline { font-size: 1rem; color: var(--grey-4); }
+    .so-2025 { font-size: 14px; font-weight: var(--w-bold); color: var(--grey-4); letter-spacing: 3px; text-transform: uppercase; }
+    .so-2025 span { color: var(--red); text-decoration: line-through; }
+    .lightning { font-size: 80px; line-height: 1; filter: drop-shadow(0 0 40px rgba(255,215,0,0.4)); }
+    .hero-badge { display: inline-block; background: var(--crimson); color: var(--ink); padding: 10px 24px; border-radius: var(--r-pill); font-size: 12px; font-weight: var(--w-bold); letter-spacing: 2px; text-transform: uppercase; }
+    .iana-label { margin-top: 12px; font-size: 11px; color: var(--red); font-weight: var(--w-bold); letter-spacing: 1px; }
+    .stats { display: flex; gap: 40px; }
+    .stat-value { font-size: 2rem; font-weight: var(--w-x); }
+    .stat-label { font-size: 11px; font-weight: var(--w-semi); color: var(--grey-5); text-transform: uppercase; letter-spacing: 1px; }
+    .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .ctas a { display: inline-block; padding: 12px 28px; border-radius: var(--r-md); text-decoration: none; font-weight: var(--w-bold); font-size: 0.95rem; transition: transform 0.2s; }
+    .ctas a:hover { transform: translateY(-2px); }
+    .btn-primary { background: var(--crimson); color: var(--ink); }
+    .btn-primary:hover { background: var(--crimson-hot); }
+    .btn-secondary { background: var(--red); color: var(--ink); }
+    .btn-tertiary { background: transparent; border: 2px solid var(--grey-6); color: var(--grey-1); }
+    .btn-tertiary:hover { border-color: var(--grey-3); color: var(--ink); }
+    .features { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .feature { background: var(--card-bg); padding: 2rem; border-radius: var(--r-lg); border: 1px solid var(--card-border); }
+    .feature h3 { color: var(--red); margin: 0 0 0.5rem; font-size: 1rem; font-weight: var(--w-bold); }
+    .feature p { color: var(--grey-3); margin: 0; font-size: 0.9rem; line-height: 1.5; }
+    .three-doors { background: var(--card-bg); border: 1px solid rgba(139,26,43,0.3); border-radius: var(--r-lg); padding: 2rem; }
+    .three-doors h3 { color: var(--ink); font-size: 1.2rem; margin-bottom: 1.5rem; font-weight: var(--w-x); }
+    .door { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; margin: 0.5rem 0; background: rgba(0,0,0,0.4); border-radius: var(--r-md); border: 1px solid rgba(139,26,43,0.15); font-family: var(--mono); font-size: 0.9rem; }
+    .door-name { color: var(--grey-1); font-weight: var(--w-semi); }
+    .door-value { color: var(--red); font-weight: var(--w-semi); }
+
+    /* Canonical source block */
+    .source { background: #050505; border: 1px solid var(--card-border); border-radius: var(--r-lg); padding: 24px; overflow-x: auto; }
+    .source pre { font-family: var(--mono); font-size: 12px; color: var(--grey-1); line-height: 1.6; white-space: pre; }
+    .source-note { font-size: 0.85rem; color: var(--grey-4); margin-bottom: 14px; }
+
+    .doc-foot { border-top: 1px solid var(--card-border); padding-top: 28px; margin-top: 64px; font-size: 0.85rem; color: var(--grey-4); }
+    .doc-foot strong { color: var(--ink); }
+    a { color: var(--red); text-decoration: none; }
+    a:hover { color: var(--gold); }
+
+    @media (max-width: 768px) {
+      .title { font-size: 3rem; }
+      .features { grid-template-columns: 1fr; }
+      .type-row { flex-direction: column; gap: 8px; }
+      .type-tag { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="accent-line"></div>
+  <div class="wrap">
+
+    <header class="doc-head">
+      <div class="doc-eyebrow">faf-mcp · Visual vROM</div>
+      <h1 class="doc-title">MCP<span class="accent">aa</span>S Style-Sheet</h1>
+      <p class="doc-contract">
+        <strong>Optional. Fixed-path. Presence-is-signal.</strong> This file lives at
+        <code>docs/style-sheet.html</code>. If it exists, every faf-mcp surface — Vercel,
+        GH Pages, CF Worker, the faf.one route, and any AI surfacing the repo — styles from
+        it. If it doesn't, nobody looks twice. The path <strong>is</strong> the metadata:
+        no registry, no <code>.faf</code> slot, no drift. This page is styled by the system
+        it documents — it proves itself.
+      </p>
+    </header>
+
+    <section>
+      <div class="sec-label">Palette</div>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#0a0a0a;border-bottom:1px solid #222"></div><div class="swatch-meta"><div class="swatch-token">--bg</div><div class="swatch-hex">#0a0a0a</div><div class="swatch-role">page base</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#ffffff"></div><div class="swatch-meta"><div class="swatch-token">--ink</div><div class="swatch-hex">#ffffff</div><div class="swatch-role">primary text</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#8B1A2B"></div><div class="swatch-meta"><div class="swatch-token">--crimson</div><div class="swatch-hex">#8B1A2B</div><div class="swatch-role">brand · accent · primary button</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#a52035"></div><div class="swatch-meta"><div class="swatch-token">--crimson-hot</div><div class="swatch-hex">#a52035</div><div class="swatch-role">primary button hover</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#E23B3B"></div><div class="swatch-meta"><div class="swatch-token">--red</div><div class="swatch-hex">#E23B3B</div><div class="swatch-role">bright accent · headings · strike</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#FFD700"></div><div class="swatch-meta"><div class="swatch-token">--gold</div><div class="swatch-hex">#FFD700</div><div class="swatch-role">lightning · gradient mid</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#00D4D4"></div><div class="swatch-meta"><div class="swatch-token">--cyan</div><div class="swatch-hex">#00D4D4</div><div class="swatch-role">interaction confirm only</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#888888"></div><div class="swatch-meta"><div class="swatch-token">--grey-3</div><div class="swatch-hex">#888888</div><div class="swatch-role">muted body</div></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-label">Type Scale · Inter</div>
+      <div class="type-row"><div class="type-tag">.title · 5rem / 900 / -3px</div><div class="title" style="font-size:2.5rem">MCP<span class="accent">aa</span>S</div></div>
+      <div class="type-row"><div class="type-tag">.subtitle · 1.4rem / 600</div><div class="subtitle">The future of MCP is Instant <span class="gold">&#9889;</span></div></div>
+      <div class="type-row"><div class="type-tag">.stat-value · 2rem / 800</div><div class="stat-value">33k+</div></div>
+      <div class="type-row"><div class="type-tag">.tagline · 1rem / 400</div><div class="tagline">Model Context Protocol as a Service</div></div>
+      <div class="type-row"><div class="type-tag">.so-2025 · 14px / 700 / 3px caps</div><div class="so-2025">MCP Servers are <span>so 2025</span></div></div>
+      <div class="type-row"><div class="type-tag">.stat-label · 11px / 600 caps</div><div class="stat-label">Config Required</div></div>
+    </section>
+
+    <section>
+      <div class="sec-label">Components</div>
+
+      <div class="comp">
+        <div class="comp-name">.lightning · .hero-badge · .iana-label</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div class="lightning">&#9889;</div>
+          <div class="hero-badge">ZERO CONFIG DEPLOY</div>
+          <div class="iana-label" style="text-align:center">IANA REGISTERED<br><span style="color:#888;font-size:10px;letter-spacing:1.5px">SINCE OCT 2025</span></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-name">.stats</div>
+        <div class="stats">
+          <div><div class="stat-value">21</div><div class="stat-label">MCP Tools</div></div>
+          <div><div class="stat-value">0</div><div class="stat-label">Config Required</div></div>
+          <div><div class="stat-value">33k+</div><div class="stat-label">Downloads</div></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-name">.ctas · .btn-primary · .btn-secondary · .btn-tertiary</div>
+        <div class="ctas">
+          <a href="#" onclick="return false" class="btn-primary">mcpaas.live</a>
+          <a href="#" onclick="return false" class="btn-secondary">Deploy to Vercel</a>
+          <a href="#" onclick="return false" class="btn-tertiary">Learn More</a>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-name">.features · .feature</div>
+        <div class="features">
+          <div class="feature"><h3>Zero Install</h3><p>No npm. No pip. Just point your MCP client to a URL and go.</p></div>
+          <div class="feature"><h3>Universal</h3><p>Works with Claude, Grok, Gemini, Cursor, Windsurf, any MCP client.</p></div>
+          <div class="feature"><h3>Always Live</h3><p>Edge-deployed on 300+ locations. Sub-ms cold starts via 2.7KB Zig-WASM.</p></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-name">.three-doors · .door</div>
+        <div class="three-doors">
+          <h3>Three Ways to Deploy</h3>
+          <div class="door"><span class="door-name">Hosted</span><span class="door-value">mcpaas.live</span></div>
+          <div class="door"><span class="door-name">Self-Deploy</span><span class="door-value">Deploy to Vercel</span></div>
+          <div class="door"><span class="door-name">Local</span><span class="door-value">npx faf-mcp</span></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-name">.accent-line (fixed, top of every surface)</div>
+        <div style="position:relative;height:3px;background:var(--accent-grad);border-radius:2px"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-label">Canonical Source</div>
+      <p class="source-note">
+        The <code>:root</code> token block + component classes above are the source of
+        truth. A surface derives from this — copy the tokens, use the class vocabulary.
+        Edit here once; surfaces follow. Drift is a falsifiable diff against this block,
+        not a guess.
+      </p>
+      <div class="source"><pre>:root {
+  --bg:#0a0a0a;        --ink:#ffffff;
+  --crimson:#8B1A2B;   --crimson-hot:#a52035;
+  --red:#E23B3B;       --gold:#FFD700;       --cyan:#00D4D4;
+  --grey-1:#cccccc; --grey-2:#999999; --grey-3:#888888;
+  --grey-4:#666666; --grey-5:#555555; --grey-6:#444444;
+  --glow: radial-gradient(ellipse at 70% 30%, rgba(139,26,43,0.12) 0%, transparent 60%);
+  --accent-grad: linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
+  --card-bg: rgba(139,26,43,0.06);
+  --card-border: rgba(139,26,43,0.20);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'SF Mono','Monaco','Courier New',monospace;
+}
+/* Class vocabulary every surface shares:
+   .accent-line .title(.accent) .subtitle(.gold) .tagline .so-2025
+   .lightning .hero-badge .iana-label .stats .stat-value .stat-label
+   .ctas .btn-primary .btn-secondary .btn-tertiary
+   .features .feature .three-doors .door .door-name .door-value      */</pre></div>
+    </section>
+
+    <footer class="doc-foot">
+      <strong>FAF defines. The style-sheet is visual vROM.</strong><br>
+      faf-mcp pilot · the path is the metadata · no registry, no drift ·
+      <a href="https://wolfe-jam.github.io/faf-mcp/">surface</a> ·
+      <a href="https://faf.one">faf.one</a>
+    </footer>
+
+  </div>
+</body>
+</html>
