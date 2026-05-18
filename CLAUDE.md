@@ -1,33 +1,32 @@
-<!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: claim=project.faf | score=100 | family=FAF | siblings=README.md,CHANGELOG.md,server.json -->
+<!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible IDEs. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
+<!-- faf: claim=project.faf | family=FAF -->
 
-# 🏎️ CLAUDE.md - faf-mcp Persistent Context & Intelligence
+# CLAUDE.md — faf-mcp
 
-## PROJECT STATE: GOOD
-**Current Position:** USE>FAF™ - IANA-registered format (application/vnd.faf+yaml) • Universal AI context • MCP server for all platforms • Start with 'Use FAF'
-**Tyre Compound:** ULTRASOFT C5 (Maximum Performance)
+## What This Is
+
+The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible IDEs. IANA-registered application/vnd.faf+yaml. Start with "Use FAF".
+
+## Stack
+
+- **Language:** TypeScript
+- **Backend:** MCP SDK (TS)
+- **Api Type:** MCP (stdio/HTTP-SSE)
+- **Runtime:** Node.js >=18
+- **Hosting:** Vercel
+- **Build:** TypeScript (tsc)
+- **Cicd:** GitHub Actions
+- **Package Manager:** npm
+
+## Context
+
+- **Who:** Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
+- **What:** Universal MCP server providing .faf context tools — 25 core + 36 advanced, interop with AGENTS.md, .cursorrules, GEMINI.md
+- **Why:** Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
+- **Where:** Vercel web (faf-mcp.vercel.app) · npm · MCP Registry · any MCP-compatible IDE — people get it how they wish
+- **When:** Production/Stable — v2.0.0 WJTTC certified (309/309 tests, 9 suites)
+- **How:** npx faf-mcp or npm install -g faf-mcp, then add to your MCP config
 
 ---
 
-## CORE CONTEXT
-
-### Project Identity
-- **Name:** faf-mcp
-- **Stack:** CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
-- **Quality:** F1-INSPIRED (Championship Performance)
-
-### Technical Architecture
-- **What Building:** USE>FAF™ - IANA-registered format (application/vnd.faf+yaml) • Universal AI context • MCP server for all platforms • Start with 'Use FAF'
-- **Main Language:** TypeScript
-
-### Context Quality Status
-- **Overall Assessment:** Good
-- **Last Updated:** 2026-03-07
-
----
-
-**STATUS: BI-SYNC ACTIVE - Synchronized with .faf context!**
-
-*Last Sync: 2026-03-07T17:33:41.765Z*
-*Sync Engine: F1-Inspired Software Engineering*
-*🏎️⚡️_championship_sync*
+*STATUS: BI-SYNC ACTIVE — 2026-05-18T05:28:45.953Z*
