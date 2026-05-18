@@ -196,7 +196,7 @@ Working on REAL filesystem: ${targetDir}
         },
         {
           name: 'faf_display',
-          description: '🖼️ FAF Display - Generate HTML file showing your ACTUAL score with colors!',
+          description: '🖼️ Render project.faf → project.html (faf-cli\'s real scorer + renderer — the same context your AI reads)',
           inputSchema: {
             type: 'object',
             properties: {
