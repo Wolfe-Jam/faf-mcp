@@ -20,6 +20,15 @@ import { VERSION } from '../version.js';
 import { getVisibilityConfig } from '../config/visibility.js';
 import { filterTools } from './tool-registry.js';
 import { autoDetectPath } from '../utils/auto-path-detection.js';
+// Single source: faf-cli's real scorer + project.html renderer. handleDisplay
+// MUST use these — never reimplement scoring or HTML (kills divergence).
+import {
+  findFafFile as cliFindFafFile,
+  readFaf as cliReadFaf,
+  readFafRaw as cliReadFafRaw,
+  scoreFafYaml as cliScoreFafYaml,
+  generateProjectHtml,
+} from 'faf-cli';
 
 // 🏆 FAF Score uses the 3-3-1 system: 3 lines, 3 words, 1 emoji!
 // 💥 Format-Finder (FF) integration for GAME-CHANGING stack detection!
@@ -1106,117 +1115,33 @@ your MCP host needs a target directory:
 
 
   private async handleDisplay(args: ToolTypes.FafDisplayArgs): Promise<CallToolResult> {
-    // Generate HTML display of FAF score (v1.2.0: supports project.faf)
+    // Single-sourced render of project.faf → HTML. Same pipeline as
+    // faf-cli's `faf show` / `faf export --html`: the real scorer + the
+    // canonical project.html renderer. No reimplementation, no fake
+    // file-presence score, no divergent template.
     const targetDir = args?.directory || process.cwd();
-    const outputPath = args?.output || path.join(targetDir, 'faf-score-display.html');
 
-    // Calculate score using v1.2.0 file finder
-    let score = 0;
-    const fafResult = await findFafFile(targetDir);
-    if (fafResult) score += 40;
-    const hasClaude = await this.fileExists(path.join(targetDir, 'CLAUDE.md'));
-    if (hasClaude) score += 30;
-    const hasReadme = await this.fileExists(path.join(targetDir, 'README.md'));
-    if (hasReadme) score += 15;
-    const hasPackage = await this.fileExists(path.join(targetDir, 'package.json'));
-    if (hasPackage) score += 14;
-
-    // Generate 3-3-1 display
-    const barWidth = 24;
-    const filled = Math.round((score / 100) * barWidth);
-    const empty = barWidth - filled;
-    const progressBar = '█'.repeat(filled) + '░'.repeat(empty);
-
-    let status = '';
-    let emoji = '';
-    if (score >= 99) {
-      status = 'Trophy!';
-      emoji = '🏆';
-    } else if (score >= 90) {
-      status = 'Excellent!';
-      emoji = '🧡';
-    } else if (score >= 70) {
-      status = 'Very Good';
-      emoji = '⭐';
-    } else if (score >= 60) {
-      status = 'Good Progress';
-      emoji = '📈';
-    } else {
-      status = 'Building Up';
-      emoji = '🚀';
+    const fafPath = cliFindFafFile(targetDir);
+    if (!fafPath) {
+      return await this.formatResult(
+        '🖼️ FAF Display',
+        `No .faf found in ${targetDir}\n\n` +
+        `Run faf_init to create one, then faf_display to render it.`
+      );
     }
 
-    // Create HTML with ACTUAL output display
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>FAF Score - ${path.basename(targetDir)}</title>
-  <style>
-    body {
-      background: #000;
-      color: #fff;
-      font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
-      font-size: 14px;
-      padding: 40px;
-      line-height: 1.4;
-    }
-    pre {
-      background: #111;
-      padding: 30px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      font-family: inherit;
-      white-space: pre;
-      word-spacing: normal;
-      letter-spacing: normal;
-    }
-    .cyan { color: #00ffff; font-weight: bold; }
-    .orange { color: #ff6b35; }
-    .green { color: #00bf63; }
-    h1 { color: #ff6b35; }
-    .footer {
-      border-top: 1px solid #666;
-      border-bottom: 1px solid #666;
-      padding: 10px 0;
-      margin: 20px 0;
-      font-family: inherit;
-    }
-  </style>
-</head>
-<body>
-  <h1>FAF Score Display - ACTUAL Output!</h1>
-  <p>Generated: ${new Date().toISOString()}</p>
-  <pre>📊 FAF Score (${path.basename(targetDir)}) 🏎️ 1ms
+    const data = cliReadFaf(fafPath);
+    const result = cliScoreFafYaml(cliReadFafRaw(fafPath));
+    const html = generateProjectHtml(data, result, fafPath);
 
-🧡 <span class="cyan">Score: ${score}/100</span>
-${progressBar} ${score}%
-${emoji} <span class="cyan">Status: ${status}</span>
-
-Breakdown:
-• FAF:          ${fafResult ? `☑️ ${fafResult.filename}` : '❌'} ${fafResult ? '40pts' : 'Missing'}
-• CLAUDE.md:    ${hasClaude ? '☑️' : '❌'} ${hasClaude ? '30pts' : 'Missing'}
-• README.md:    ${hasReadme ? '☑️' : '❌'} ${hasReadme ? '15pts' : 'Missing'}
-• package.json: ${hasPackage ? '☑️' : '❌'} ${hasPackage ? '14pts' : 'Missing'}
-
-<div class="footer">━━━━━━━━━━━━━━━━━━━━━
-AI-Readiness: ${score}% ${emoji}
-━━━━━━━━━━━━━━━━━━━━━</div></pre>
-
-  <p style="color:#666; margin-top:40px;">
-    This HTML shows EXACTLY what FAF outputs - no Claude interpretation!<br>
-    The score, colors, and footer are all REAL and VISIBLE.
-  </p>
-</body>
-</html>`;
-
-    // Write the HTML file
+    const outputPath = args?.output || path.join(targetDir, 'project.html');
     await fs.writeFile(outputPath, html);
 
     return await this.formatResult(
       '🖼️ FAF Display Generated',
-      `HTML file created: ${outputPath}\n\n` +
-      `Open in browser to see your ACTUAL score with colors!\n` +
+      `Rendered project.faf → ${outputPath}\n\n` +
+      `Single-sourced from faf-cli — the real scorer and renderer, ` +
+      `the same truth your AI reads.\n` +
       `file://${outputPath}`
     );
   }
