@@ -9,17 +9,17 @@
   </div>
 </div>
 
+[![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-00D4D4)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
+[![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
+
+**Home:** [faf-mcp.vercel.app](https://faf-mcp.vercel.app)
+
 The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 36,000+ downloads across Claude and now Gemini, we bring you faf-mcp v2.0.0 to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
-**The only IANA-Registered Format for AI Context** · `application/vnd.faf+yaml`
-
 [![CI](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml)
-[![NPM Downloads](https://img.shields.io/npm/dt/faf-mcp?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
 [![npm version](https://img.shields.io/npm/v/faf-mcp?color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
-[![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
-[![Deploy](https://img.shields.io/badge/Deploy-Vercel-black)](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp)
 
 ---
 
