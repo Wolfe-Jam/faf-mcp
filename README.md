@@ -12,8 +12,7 @@
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-00D4D4)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 
-**Home:** [faf.one](https://faf.one)
-**Live demo:** [faf-mcp.vercel.app](https://faf-mcp.vercel.app)
+**Home:** [faf-mcp.vercel.app](https://faf-mcp.vercel.app)
 
 The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 36,000+ downloads across Claude and now Gemini, we bring you faf-mcp v2.0.0 to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
