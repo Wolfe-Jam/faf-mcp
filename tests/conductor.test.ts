@@ -7,7 +7,7 @@
  * @see /specs/FAF-CONDUCTOR-INTEROP.md
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
 import * as fs from 'fs';
 import * as path from 'path';
 
