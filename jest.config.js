@@ -18,9 +18,11 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   verbose: true,
-  // Tests pass cleanly, but benign exec/server handles can linger past the
-  // worker's exit check on CI runners (Windows/macOS), force-exiting a worker
-  // non-zero. Not a test failure — Jest's documented finish for lingering
-  // resources. Pairs with the memoized CLI detection (fewer handles).
-  forceExit: true
+  // Tests run in-band (package.json `test` → `jest --runInBand`). These MCP
+  // suites are small; serial execution removes Jest's worker pool — the source
+  // of the intermittent "worker failed to exit gracefully" red on constrained
+  // Windows/macOS CI runners (a worker missing its shutdown window, blaming
+  // whichever suite finalized last). In-band is deterministic and exits clean
+  // on its own: --detectOpenHandles reports ZERO open handles, so no forceExit
+  // is needed (and forceExit was suppressing that very diagnostic).
 };
