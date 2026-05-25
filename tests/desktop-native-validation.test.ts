@@ -19,11 +19,13 @@ const getTextContent = (content: unknown[]): string =>
 
 describe('🏁 Desktop-Native MCP Championship Tests', () => {
   let testDir: string;
+  let originalCwd: string;
 
   beforeAll(async () => {
     // Create isolated test environment
     testDir = path.join('/tmp', `faf-desktop-test-${Date.now()}`);
     fs.mkdirSync(testDir, { recursive: true });
+    originalCwd = process.cwd();
     process.chdir(testDir);
 
     // Initialize server WITHOUT CLI (for validation but not used in tests)
@@ -35,8 +37,10 @@ describe('🏁 Desktop-Native MCP Championship Tests', () => {
   });
   
   afterAll(async () => {
-    // Cleanup
-    process.chdir('/');
+    // Restore the original cwd — chdir('/') here left cwd polluted for later
+    // suites in single-process runs (in-band / bun). Harmless today by suite
+    // order, but a latent isolation bug; restore makes it robust + bun-ready.
+    process.chdir(originalCwd);
     fs.rmSync(testDir, { recursive: true, force: true });
   });
 
