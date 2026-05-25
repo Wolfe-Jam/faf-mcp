@@ -60,7 +60,14 @@ export class FafMcpServer {
 
     this.setupHandlers();
   }
-  
+
+  /** The underlying MCP SDK Server. Test/introspection hook — e.g. connect an
+   *  in-memory transport to drive real initialize/listTools/callTool round-trips
+   *  in conformance tests, without stdio/HTTP. */
+  getServer(): Server {
+    return this.server;
+  }
+
   private setupHandlers(): void {
     // Resource handlers
     this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
