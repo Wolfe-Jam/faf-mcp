@@ -14,7 +14,7 @@
 
 **Home:** [faf-mcp.vercel.app](https://faf-mcp.vercel.app)
 
-The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 36,000+ downloads across Claude and now Gemini, we bring you faf-mcp v2.0.0 to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
+The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 62,000+ downloads across the FAF ecosystem, we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
 [![CI](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/faf-mcp?color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
