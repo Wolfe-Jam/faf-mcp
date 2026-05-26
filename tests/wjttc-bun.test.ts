@@ -276,28 +276,27 @@ describe('🏁 WJTTC — bun migration + MCP integrity (faf-mcp)', () => {
     });
 
     // ─────────────────────────────────────────────────────────────────────
-    // Category 2: single-source score determinism + MCP repeatability
+    // Category 2: single-source score determinism + MCP repeatability + TRUE PARITY
     // ─────────────────────────────────────────────────────────────────────
     //
-    // INTENT (per the task brief): assert MCP `faf_score` text-score equals
+    // INTENT: assert MCP `faf_score` text-score equals
     // faf-cli's `scoreFafYaml(...).score` on the same YAML.
     //
-    // OBSERVED v2.1.0 (logged + asserted, not hidden): the active
-    // FafToolHandler (src/handlers/tools.ts, the one server.ts actually wires
-    // up) still uses the OLD file-presence pseudo-score (40+30+15+14). The
-    // truthful single-sourced scorer that imports `scoreFafYaml` lives in
-    // ChampionshipToolHandler (championship-tools.ts) — present in the repo
-    // but NOT wired into the MCP server. So MCP `faf_score` and `scoreFafYaml`
-    // are mathematically DIFFERENT functions today; demanding strict equality
-    // would be a guaranteed (and misleading) red.
+    // ✅ RESOLVED v2.1.1 (this PR): `FafToolHandler.handleFafScore` (the one
+    // server.ts wires up) now calls faf-cli's `scoreFafYaml` directly — same
+    // single-source path the championship handler was already using. Parity
+    // now holds. History breadcrumb: v2.1.0 observed the divergence between
+    // the active FafToolHandler (pseudo-score 40+30+15+14) and the sibling
+    // ChampionshipToolHandler (truthful scoreFafYaml) — surfaced honestly
+    // here, fixed in v2.1.1, loop closed.
     //
-    // What we assert instead — and what's still high-signal:
-    //   a) faf-cli's `scoreFafYaml` is reachable, deterministic, and produces
-    //      a sane score on the fixture (>0 <100, repeatable).
-    //   b) MCP `faf_score` returns a parseable percentage and is consistent
-    //      across two calls on identical state (no flap, no nondeterminism).
-    //   c) Both are well-formed numbers in [0,100]. We do NOT assert equality.
-    //      The divergence is the test's finding — see report.
+    // Three assertions, escalating:
+    //   a) determinism — faf-cli's `scoreFafYaml` is reachable, deterministic,
+    //      and produces a sane score on the fixture (>0 <100, repeatable).
+    //   b) repeatability — MCP `faf_score` returns a parseable percentage and
+    //      is consistent across two calls on identical state.
+    //   c) TRUE PARITY — MCP `faf_score` numeric == faf-cli `scoreFafYaml`
+    //      numeric on the same YAML. The loop-closing receipt.
     describe('2. score determinism (single-source via faf-cli)', () => {
       test('faf-cli scoreFafYaml is deterministic on the fixture (>0, <100)', () => {
         const raw = fs.readFileSync(path.join(tmpDir, 'project.faf'), 'utf-8');
@@ -338,6 +337,28 @@ describe('🏁 WJTTC — bun migration + MCP integrity (faf-mcp)', () => {
         expect(n1).toBe(n2); // repeatability
         expect(n1).toBeGreaterThanOrEqual(0);
         expect(n1).toBeLessThanOrEqual(100);
+      });
+
+      test('TRUE PARITY: MCP faf_score == faf-cli scoreFafYaml on the same YAML', async () => {
+        // The loop-closing receipt. v2.1.1 wires `handleFafScore` through
+        // faf-cli's real scorer — so the number MCP emits MUST equal the
+        // number `scoreFafYaml` returns. Single source of truth, no drift.
+        const raw = fs.readFileSync(path.join(tmpDir, 'project.faf'), 'utf-8');
+        const parityScore = fafCli.scoreFafYaml(raw).score;
+
+        const res = await client.callTool({
+          name: 'faf_score',
+          arguments: { path: tmpDir },
+        });
+        expect(res.isError).toBeFalsy();
+        const text = ((res.content as Array<{ text?: string }>)[0]?.text ?? '') as string;
+
+        const SCORE_RE = /(?:FAF SCORE:\s*|\b)(\d{1,3})\s*(?:%|\/\s*100)/;
+        const m = text.match(SCORE_RE);
+        expect(m).not.toBeNull();
+        const mcpScore = parseInt(m![1], 10);
+
+        expect(mcpScore).toBe(parityScore);
       });
     });
 

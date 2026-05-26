@@ -8,6 +8,24 @@ import { FuzzyDetector, applyIntelFriday } from '../utils/fuzzy-detector';
 import { findFafFile } from '../utils/faf-file-finder.js';
 import { VERSION } from '../version';
 import { resolveProjectPath, formatPathConfirmation } from '../utils/path-resolver';
+// v2.1.1: single-source scoring — same path the championship handler uses.
+// faf_score now reads faf-cli's real scorer (the IANA-spec one) instead of
+// the legacy 40+30+15+14 file-presence pseudo-score. NEVER reimplement
+// scoring or the tier ladder here — that's exactly the drift v2.1.0 set out
+// to kill across the surface; v2.1.1 closes the loop on the active handler.
+//
+// Imported via ../utils/faf-cli-bridge.js — a temporary one-file re-export
+// that pins the relative dist path (faf-cli 6.7.1's `bun` exports condition
+// resolves to a non-shipped src/, breaking the test runner). Both Node and
+// Bun load the same compiled module through the bridge. Bridge is removable
+// once faf-cli drops the bad `bun` condition. See the bridge header for full
+// rationale and the linked tracked issue.
+import {
+  findFafFile as cliFindFafFile,
+  readFafRaw as cliReadFafRaw,
+  scoreFafYaml as cliScoreFafYaml,
+  getNextTier as cliGetNextTier,
+} from '../utils/faf-cli-bridge.js';
 
 export class FafToolHandler {
   constructor(private engineAdapter: FafEngineAdapter) {}
@@ -779,137 +797,93 @@ export class FafToolHandler {
   }
 
   private async handleFafScore(args: any): Promise<CallToolResult> {
+    // v2.1.1: single-sourced from faf-cli's real scorer — same number `faf
+    // score` (CLI) and the championship handler emit. The legacy file-
+    // presence pseudo-score (40 + 30 + 15 + 14, capped at 100) is dead.
+    // Output format keeps "FAF SCORE: <n>/100" so the AERO score-parity
+    // regex (/(?:FAF SCORE:\s*|\b)(\d{1,3})\s*(?:%|\/\s*100)/) still matches.
     try {
-      const fs = await import('fs').then(m => m.promises);
-      const path = await import('path');
-
       // Get current working directory - uses path param or session context
       const cwd = this.getProjectPath(args?.path);
 
-      // Score calculation components
-      let score = 0;
-      const details: string[] = [];
-
-      // 1. Check for FAF file (40 points) - v1.2.0: project.faf, *.faf, or .faf
-      const fafResult = await findFafFile(cwd);
-      let hasFaf = false;
-      if (fafResult) {
-        hasFaf = true;
-        score += 40;
-        details.push(`✅ ${fafResult.filename} present (+40)`);
-      } else {
-        details.push('❌ FAF file missing (0/40)');
+      const fafPath = cliFindFafFile(cwd);
+      if (!fafPath) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                `FAF SCORE: 0/100  ♡ no .faf\n\n` +
+                `No \`.faf\` found in \`${cwd}\`.\n` +
+                `Run \`faf_init\` to create one — then \`faf_score\` reports the real score.`,
+            },
+          ],
+        };
       }
 
-      // 2. Check for CLAUDE.md (30 points)
-      const claudePath = path.join(cwd, 'CLAUDE.md');
-      let hasClaude = false;
-      try {
-        await fs.access(claudePath);
-        hasClaude = true;
-        score += 30;
-        details.push('✅ CLAUDE.md present (+30)');
-      } catch {
-        details.push('❌ CLAUDE.md missing (0/30)');
-      }
+      // Strip ANSI from tier indicator (faf-cli emits colored glyphs).
+      // eslint-disable-next-line no-control-regex
+      const strip = (s: string): string => s.replace(/\[[0-9;]*m/g, '').trim();
 
-      // 3. Check for README.md (15 points)
-      const readmePath = path.join(cwd, 'README.md');
-      let hasReadme = false;
-      try {
-        await fs.access(readmePath);
-        hasReadme = true;
-        score += 15;
-        details.push('✅ README.md present (+15)');
-      } catch {
-        details.push('⚠️  README.md missing (0/15)');
-      }
+      const raw = cliReadFafRaw(fafPath);
+      const result = cliScoreFafYaml(raw);
+      const score = result.score;
+      const tierDisplay = strip(result.tier.indicator);
+      const next = cliGetNextTier(score);
+      const nextTierDisplay = next ? `${strip(next.indicator)} (${next.threshold}%)` : null;
 
-      // 4. Check for package.json or other project files (14 points)
-      const projectFiles = ['package.json', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'pom.xml'];
-      let hasProjectFile = false;
-      for (const file of projectFiles) {
-        try {
-          await fs.access(path.join(cwd, file));
-          hasProjectFile = true;
-          score += 14;
-          details.push(`✅ ${file} detected (+14)`);
-          break;
-        } catch {
-          // Continue checking
-        }
-      }
-      if (!hasProjectFile) {
-        details.push('⚠️  No project file found (0/14)');
-      }
+      // Progress bar — same width/style as the championship handler.
+      const barWidth = 24;
+      const filled = Math.max(0, Math.min(barWidth, Math.round((score / 100) * barWidth)));
+      const progressBar = '█'.repeat(filled) + '░'.repeat(barWidth - filled);
 
-      // Format the output
-      let output = '';
+      // Headline carries the AERO-regex-matching token. Then the tier card.
+      let output =
+        `FAF SCORE: ${score}/100  ${tierDisplay}\n` +
+        `${progressBar} ${score}%\n` +
+        `${result.populated}/${result.total} slots populated` +
+        (nextTierDisplay ? `  ·  next: ${nextTierDisplay}` : '  ·  top tier') +
+        `\n\n` +
+        `Scored by faf-cli — the same context your AI reads.`;
 
-      if (score >= 100) {
-        // Perfect score - Trophy
-        output = `🏎️ FAF SCORE: 100%\n🏆 Trophy\n🏁 Championship Complete!\n\n`;
-        if (args?.details) {
-          output += `${details.join('\n')}\n\n`;
-          output += `🏆 PERFECT SCORE!\n`;
-          output += `Both .faf and CLAUDE.md are championship-quality!\n`;
-          output += `\n💡 Note: 🍊 Big Orange is a BADGE awarded separately for excellence beyond metrics.`;
-        }
-      } else {
-        // Regular score - FAF standard tiers
-        const percentage = Math.min(score, 100);
-        let rating = '';
-        let emoji = '';
+      if (args?.details) {
+        const populatedSlots = Object.entries(result.slots)
+          .filter(([, state]) => state === 'populated')
+          .map(([slot]) => slot);
+        const emptySlots = Object.entries(result.slots)
+          .filter(([, state]) => state === 'empty')
+          .map(([slot]) => slot);
+        const ignoredSlots = Object.entries(result.slots)
+          .filter(([, state]) => state === 'slotignored')
+          .map(([slot]) => slot);
 
-        if (percentage >= 99) {
-          rating = 'Gold';
-          emoji = '🥇';
-        } else if (percentage >= 95) {
-          rating = 'Silver';
-          emoji = '🥈';
-        } else if (percentage >= 85) {
-          rating = 'Bronze';
-          emoji = '🥉';
-        } else if (percentage >= 70) {
-          rating = 'Green';
-          emoji = '🟢';
-        } else if (percentage >= 55) {
-          rating = 'Yellow';
-          emoji = '🟡';
-        } else {
-          rating = 'Red';
-          emoji = '🔴';
-        }
-
-        // The 3-line killer display
-        output = `📊 FAF SCORE: ${percentage}%\n${emoji} ${rating}\n🏁 AI-Ready: ${percentage >= 85 ? 'Yes' : 'Building'}\n`;
-
-        if (args?.details) {
-          output += `\n${details.join('\n')}`;
-          if (percentage < 100) {
-            output += `\n\n💡 Tips to improve:\n`;
-            if (!hasFaf) output += `- Create .faf file with project context\n`;
-            if (!hasClaude) output += `- Add CLAUDE.md for AI instructions\n`;
-            if (!hasReadme) output += `- Include README.md for documentation\n`;
-            if (!hasProjectFile) output += `- Add project configuration file\n`;
-          }
+        output += `\n\n--- Slot breakdown ---\n`;
+        output += `Populated (${populatedSlots.length}): ${populatedSlots.join(', ') || '(none)'}\n`;
+        output += `Empty (${emptySlots.length}): ${emptySlots.join(', ') || '(none)'}\n`;
+        output += `Ignored (${ignoredSlots.length}): ${ignoredSlots.join(', ') || '(none)'}`;
+        if (score < 100 && emptySlots.length > 0) {
+          output += `\n\nTip: fill empty slots or mark them \`slotignored\` to climb tiers. Slot-by-slot detail: \`faf score\` (CLI).`;
         }
       }
 
       return {
-        content: [{
-          type: 'text',
-          text: output
-        }]
+        content: [
+          {
+            type: 'text',
+            text: output,
+          },
+        ],
       };
-
     } catch (error: any) {
-      // Fallback to displaying a motivational score
+      // Honest failure — no fake motivational scores. Loud-fail > silent-pass.
       return {
-        content: [{
-          type: 'text',
-          text: `📊 FAF SCORE: 92%\n⭐ Excellence Building\n🏁 Keep Going!\n\n${args?.details ? 'Unable to analyze project files, but your commitment to excellence is clear!' : ''}`
-        }]
+        content: [
+          {
+            type: 'text',
+            text: `FAF SCORE: error\n\nCould not score project: ${error?.message ?? String(error)}`,
+          },
+        ],
+        isError: true,
       };
     }
   }
