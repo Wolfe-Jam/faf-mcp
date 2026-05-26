@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.1.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v2.1.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,29 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.1.1] - 2026-05-26
+
+Loop closed on truthful, single-sourced scoring. The active MCP handler
+now reads faf-cli's real scorer directly — same path the championship
+layer was already using, same number `faf score` (CLI) emits.
+
+### Fixed
+
+- **`faf_score`** — now calls faf-cli's `scoreFafYaml` (the IANA-spec
+  scorer) directly, replacing the legacy file-presence pseudo-score
+  (40 + 30 + 15 + 14, max 100). Output reformatted to the canonical
+  tier card with `FAF SCORE: <n>/100`, progress bar, populated/total
+  slot count, and the next-tier hint. The banned medal / colored-circle
+  tier ladder is gone from this surface too.
+
+### Tests
+
+- **WJTTC AERO Phase 2** — score-parity assertion tightened to TRUE
+  parity: MCP `faf_score` numeric == faf-cli `scoreFafYaml(...).score`
+  on the same YAML. Determinism + repeatability tests retained as
+  high-signal companions; comment updated to mark the divergence
+  observed in v2.1.0 as resolved here.
 
 ## [2.1.0] - 2026-05-18
 

@@ -46,3 +46,6 @@ MARKETPLACE-*.md
 
 # MCP Registry auth tokens — NEVER commit these (secrets)
 .mcpregistry_*
+
+# Path-traversal security-test artifacts (1024-byte 'x' files left by some tests)
+test-*.txt
