@@ -158,14 +158,14 @@ AI assistants forget. They drift. Every new session, AI starts guessing again. B
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **TROPHY** | 100% | **AI Optimized** — Gold Code |
-| ★ **GOLD** | 99%+ | Near-perfect context |
-| ◆ **SILVER** | 95%+ | Excellent |
+| 🏆 **TROPHY** | 100% | Perfect — Gold Code |
+| ★ **GOLD** | 99%+ | Exceptional |
+| ◆ **SILVER** | 95%+ | Top tier |
 | ◇ **BRONZE** | 85%+ | Production ready |
 | ● **GREEN** | 70%+ | Solid foundation |
-| ● **YELLOW** | 55%+ | AI flipping coins |
-| ○ **RED** | <55% | AI working blind |
-| ♡ **WHITE** | 0% | No context at all |
+| ● **YELLOW** | 55%+ | Needs improvement |
+| ○ **RED** | <55% | Major work needed |
+| ♡ **WHITE** | 0% | Empty |
 
 **At 55%, AI is guessing half the time.** At 100%, AI is optimized.
 
