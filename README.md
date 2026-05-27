@@ -42,13 +42,13 @@ You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team
 ### Quick Start
 
 ```bash
-npx faf-mcp
+bunx faf-mcp
 ```
 
 Add to your MCP config:
 
 ```json
-{"mcpServers": {"faf": {"command": "npx", "args": ["-y", "faf-mcp"]}}}
+{"mcpServers": {"faf": {"command": "bunx", "args": ["faf-mcp"]}}}
 ```
 
 | Platform | Config File |
@@ -67,7 +67,7 @@ Add to your MCP config:
 |------|--------|----------|
 | **Hosted** | [mcpaas.live](https://mcpaas.live) | Zero-install, point any MCP client to the URL |
 | **Self-Deploy** | [Deploy to Vercel](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp) | Your own instance, full control |
-| **Local** | `npx faf-mcp` | IDE integration via stdio transport |
+| **Local** | `bunx faf-mcp` | IDE integration via stdio transport |
 
 ### Hosted (mcpaas.live)
 
