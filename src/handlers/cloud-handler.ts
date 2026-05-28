@@ -19,7 +19,7 @@ const MCPAAS_API = 'https://mcpaas.live/mcp';
 const MCPAAS_SOULS_BASE = 'https://mcpaas.live/souls';
 
 // Legacy auth token (will transition to OAuth)
-const DEFAULT_TOKEN = process.env.MCPAAS_TOKEN || 'wolfe-68-orange';
+const DEFAULT_TOKEN = process.env.MCPAAS_TOKEN || 'wolfe-77-red';
 
 interface McpRequest {
   jsonrpc: '2.0';
