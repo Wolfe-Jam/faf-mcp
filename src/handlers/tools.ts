@@ -330,20 +330,9 @@ export class FafToolHandler {
             additionalProperties: false
           }
         },
-        {
-          name: 'faf_chat',
-          description: '🗣️ Natural language project.faf generation - Ask 6W questions (Who/What/Why/Where/When/How) to build complete human context 🧡⚡️',
-          annotations: {
-            title: 'Chat about FAF',
-            readOnlyHint: true,
-            openWorldHint: false
-          },
-          inputSchema: {
-            type: 'object',
-            properties: {},
-            additionalProperties: false
-          }
-        },
+        // faf_chat — DEPRECATED, un-advertised. The host IS the chat — a chat-shim
+        // tool is redundant. Dispatch keeps a deprecation stub (below). Fleet sweep —
+        // mirrors grok-faf-mcp + claude-faf-mcp's retire.
         {
           name: 'faf_friday',
           description: '🎉 Friday Features - Chrome Extension detection, fuzzy matching & more! 🧡⚡️',
@@ -1352,39 +1341,18 @@ ${debugInfo.permissions.fafError ? `   FAF Error: ${debugInfo.permissions.fafErr
   }
 
   private async handleFafChat(_args: any): Promise<CallToolResult> {
-    try {
-      const result = await this.engineAdapter.callEngine('chat');
-
-      if (!result.success) {
-        return {
-          content: [{
-            type: 'text',
-            text: `Error running faf chat: ${result.error || 'Unknown error'}`
-          }],
-          isError: true
-        };
-      }
-
-      // Format the response text
-      const responseText = typeof result.data === 'string'
-        ? result.data
-        : result.data?.output || JSON.stringify(result.data, null, 2);
-
-      return {
-        content: [{
-          type: 'text',
-          text: responseText
-        }]
-      };
-    } catch (error) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Error running faf chat: ${error instanceof Error ? error.message : String(error)}`
-        }],
-        isError: true
-      };
-    }
+    // DEPRECATED: the host IS the chat — a chat-shim MCP tool is redundant.
+    // Un-advertised in listTools; this stub stays so anyone still wired gets a
+    // clear signal, not a crash. The old body shelled `faf chat` via the engine
+    // subprocess (a command faf-cli no longer ships) — removing it ends that dead shell.
+    return {
+      content: [{
+        type: 'text',
+        text:
+          'faf_chat is retired — the host is your chat, just talk here. ' +
+          'For FAF: faf_init / faf_score / faf_sync, or "ask questions" to build context.',
+      }],
+    };
   }
 
   private async handleFafFriday(args: any): Promise<CallToolResult> {
