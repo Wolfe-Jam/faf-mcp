@@ -947,19 +947,81 @@ export class FafCompiler {
       metadata: { compiled: new Date().toISOString() }
     };
 
-    // Calculate from IR
+    // --- Mk4 Kernel Scoring (WASM) — canonical, aligned with faf-cli/claude/grok ---
+    // The Bouncer: type detection → applicable slots → slotignored for the rest,
+    // then kernel.score_faf() returns the canonical Mk4 score. This replaces the
+    // old pure-TS scorer, which used its own denominator and diverged from
+    // canonical on partial .faf files. TS stays as a fallback when the kernel
+    // isn't available. (Same path as claude-faf-mcp / grok-faf-mcp.)
+    let mk4Score: number | null = null;
+    let mk4Filled: number | null = null;
+    let mk4Total: number | null = null;
+
+    try {
+      const kernel = require('faf-scoring-kernel');
+      const { stringify } = require('yaml');
+
+      const projectType = this.detectProjectTypeFromContext(ast);
+      const applicableSlots = getSlotsForType(projectType);
+      const userIgnored = parseSlotIgnore(ast);
+
+      const allSlotPaths = [
+        ...ALL_SLOTS.project,
+        ...ALL_SLOTS.frontend,
+        ...ALL_SLOTS.backend,
+        ...ALL_SLOTS.universal,
+        ...ALL_SLOTS.human
+      ];
+
+      const normalizedAst = JSON.parse(JSON.stringify(ast));
+      delete normalizedAst._discovered;
+
+      const setSlotIgnored = (slotPath: string) => {
+        const parts = slotPath.split('.');
+        if (parts[0] === 'project') {
+          if (!normalizedAst.project) normalizedAst.project = {};
+          normalizedAst.project[parts[1]] = 'slotignored';
+        } else if (parts[0] === 'stack') {
+          if (!normalizedAst.stack) normalizedAst.stack = {};
+          normalizedAst.stack[parts[1]] = 'slotignored';
+        } else if (parts[0] === 'human') {
+          if (!normalizedAst.human_context) normalizedAst.human_context = {};
+          normalizedAst.human_context[parts[1]] = 'slotignored';
+        }
+      };
+
+      for (const slotPath of allSlotPaths) {
+        if (!applicableSlots.includes(slotPath) || userIgnored.includes(slotPath)) {
+          setSlotIgnored(slotPath);
+        }
+      }
+
+      const normalizedYaml = stringify(normalizedAst);
+      const kernelResult = JSON.parse(kernel.score_faf(normalizedYaml));
+
+      mk4Score = kernelResult.score;
+      mk4Filled = kernelResult.populated;
+      mk4Total = kernelResult.active;
+    } catch (err) {
+      if (process.env.FAF_DEBUG) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.log(`[DEBUG] Mk4 kernel unavailable, using Mk3.1 TS fallback: ${message}`);
+      }
+    }
+
+    // Mk4 score when available, otherwise the Mk3.1 TS fallback
     const slots = this.calculateSlots(ir);
-    const score = this.calculateScore(slots);
+    const fallbackScore = this.calculateScore(slots);
 
     const result = {
-      score: Math.round(score),
-      filled: slots.filled,
-      total: slots.total,
+      score: mk4Score !== null ? mk4Score : Math.round(fallbackScore),
+      filled: mk4Filled !== null ? mk4Filled : slots.filled,
+      total: mk4Total !== null ? mk4Total : slots.total,
       breakdown: slots.breakdown
     };
 
     this.recordPass('generate', start, ast, result, [
-      `Generated score: ${result.score}% (${result.filled}/${result.total} slots)`
+      `Generated score: ${result.score}% (${result.filled}/${result.total} slots, ${mk4Score !== null ? 'Mk4 WASM' : 'Mk3.1 TS'})`
     ]);
 
     return result;

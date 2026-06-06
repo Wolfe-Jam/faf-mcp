@@ -5,7 +5,7 @@
   "description": "Persistent Project Context for Cursor, IDEs and VS Code. IANA-registered .faf format, 25 MCP tools, 309 tests.",
   "icon": "./assets/icons/faf-icon-256.png",
   "logo": "./assets/icons/faf-icon-256.png",
-  "displayName": ".faf 🐘",
+  "displayName": ".faf \ud83d\udc18",
   "main": "dist/src/index.js",
   "bin": {
     "faf-mcp": "dist/src/index.js"
@@ -105,6 +105,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "faf-cli": "^6.7.1",
+    "faf-scoring-kernel": "^2.0.3",
     "yaml": "^2.4.1"
   },
   "devDependencies": {
