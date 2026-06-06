@@ -1,6 +1,5 @@
 {
-  "buildCommand": "",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
+  "redirects": [
+    { "source": "/(.*)", "destination": "https://wolfe-jam.github.io/faf-mcp/", "permanent": true }
   ]
 }

@@ -13,7 +13,7 @@
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-00D4D4)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 
-**Home:** [faf-mcp.vercel.app](https://faf-mcp.vercel.app)
+**Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (SSE: `https://ide.faf.one/sse`)
 
 The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 62,000+ downloads across the FAF ecosystem, we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
