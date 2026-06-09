@@ -280,6 +280,7 @@
   </style>
 </head>
 <body>
+  <a id="versionBadge" href="https://github.com/Wolfe-Jam/faf-mcp" target="_blank" rel="noopener" style="position:fixed;top:14px;left:14px;z-index:9999;text-decoration:none;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);background:rgba(0,0,0,0.6);border:1px solid var(--card-border);border-radius:var(--r-pill);padding:6px 14px;" title="faf-mcp on GitHub">v2.1.2</a>
   <div class="accent-line"></div>
 
   <div class="container">
@@ -346,7 +347,7 @@
     </div>
 
     <div class="bottom-bar">
-      <div class="bottom-left">v2.1.2 · IANA Registered · application/vnd.faf+yaml</div>
+      <div class="bottom-left">The Interop MCP for Context · IANA Registered · application/vnd.faf+yaml</div>
       <div class="bottom-platforms">
         <span class="copy-cmd" data-cmd="npx claude-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Claude</span><span class="dot">&bull;</span>
         <span class="copy-cmd" data-cmd="npx grok-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Grok</span><span class="dot">&bull;</span>
@@ -367,6 +368,9 @@
         setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1500);
       });
     });
+    // Single source of truth for the version: read npm live so the badge can never drift.
+    // The hardcoded text on the badge is just a fallback if the fetch fails (offline / npm down).
+    fetch('https://registry.npmjs.org/faf-mcp/latest').then(r=>r.json()).then(d=>{if(d&&d.version)document.getElementById('versionBadge').textContent='v'+d.version;}).catch(()=>{});
   </script>
 </body>
 </html>
