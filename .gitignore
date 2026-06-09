@@ -49,3 +49,7 @@ MARKETPLACE-*.md
 
 # Path-traversal security-test artifacts (1024-byte 'x' files left by some tests)
 test-*.txt
+
+# Process/tracker docs (kept local)
+MCP-REGISTRY-TRACKER.md
+WJTTC-TEST-REPORT.md
