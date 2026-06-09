@@ -11,11 +11,11 @@ stack:
   ui_library: slotignored
   state_management: slotignored
   backend: MCP SDK (TS)
-  api_type: MCP (stdio/HTTP-SSE)
+  api_type: MCP (stdio + Streamable HTTP)
   runtime: Node.js >=18
   database: slotignored
   connection: slotignored
-  hosting: Vercel
+  hosting: npm + Cloudflare edge
   build: TypeScript (tsc)
   cicd: GitHub Actions
   monorepo_tool: slotignored
@@ -29,7 +29,7 @@ human_context:
   who: Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
   what: Universal MCP server providing .faf context tools — 25 core + 36 advanced, interop with AGENTS.md, .cursorrules, GEMINI.md
   why: Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
-  where: Vercel web (faf-mcp.vercel.app) · npm · MCP Registry · any MCP-compatible IDE — people get it how they wish
+  where: npm · MCP Registry · Cloudflare edge (ide.faf.one/mcp/v1) · any MCP-compatible IDE — people get it how they wish
   when: Production/Stable — v2.0.0 WJTTC certified (309/309 tests, 9 suites)
   how: npx faf-mcp or npm install -g faf-mcp, then add to your MCP config
 monorepo:

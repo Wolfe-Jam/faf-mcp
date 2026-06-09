@@ -13,7 +13,7 @@
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-00D4D4)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 
-**Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (SSE: `https://ide.faf.one/sse`)
+**Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (Streamable HTTP)
 
 The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on 62,000+ downloads across the FAF ecosystem, we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
@@ -71,14 +71,14 @@ Add to your MCP config:
 
 ### Hosted (mcpaas.live)
 
-Point your MCP client to `https://mcpaas.live/sse` — no install, no config, no maintenance. Served from 300+ Cloudflare edges with sub-ms cold starts via 2.7KB Zig-WASM engine.
+Point your MCP client to `https://ide.faf.one/mcp/v1` — no install, no config, no maintenance. Served from 300+ Cloudflare edges with sub-ms cold starts via 2.7KB Zig-WASM engine.
 
 ### Self-Deploy (Vercel)
 
 Deploy your own MCP server on Vercel in one click. Once deployed, your server exposes:
 - `/health` — Health check
 - `/info` — Server metadata + tool list
-- `/sse` — MCP Server-Sent Events transport
+- `/mcp/v1` — MCP Streamable HTTP transport
 
 ### Local (npm)
 
