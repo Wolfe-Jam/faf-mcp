@@ -238,7 +238,7 @@ describe('🏎️ Tool Visibility System', () => {
   });
 
   describe('Performance', () => {
-    it('should filter tools quickly (< 10ms for 61 tools)', () => {
+    it('should filter tools quickly (< 50ms for 61 tools)', () => {
       const mockTools: Tool[] = Array.from({ length: 61 }, (_, i) => ({
         name: `tool_${i}`,
         description: 'Test tool',
@@ -249,7 +249,10 @@ describe('🏎️ Tool Visibility System', () => {
       filterTools(mockTools, false);
       const duration = Date.now() - start;
 
-      expect(duration).toBeLessThan(10);
+      // Filtering 61 tools is sub-millisecond; the bound only guards against a
+      // real regression. Date.now() has ~15ms resolution on Windows runners, so
+      // a <10ms wall-clock assertion is unreliable there — 50ms is the regression gate.
+      expect(duration).toBeLessThan(50);
     });
   });
 });
