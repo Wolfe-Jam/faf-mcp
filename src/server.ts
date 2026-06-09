@@ -1,7 +1,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
-import { CallToolRequestSchema, ListResourcesRequestSchema, ListToolsRequestSchema, ReadResourceRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListResourcesRequestSchema, ListResourceTemplatesRequestSchema, ListToolsRequestSchema, ReadResourceRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { FafResourceHandler } from './handlers/resources';
 import { FafToolHandler } from './handlers/tools';
 import { FafEngineAdapter } from './handlers/engine-adapter';
@@ -41,8 +41,10 @@ export class FafMcpServer {
       },
       {
         capabilities: {
+          // No subscribe/unsubscribe handler is registered, so do NOT advertise
+          // `subscribe` — advertising it makes resources/subscribe -32601, which
+          // trips strict clients / Glama's capability health-check.
           resources: {
-            subscribe: true,
             listChanged: true,
           },
           tools: {
@@ -76,6 +78,13 @@ export class FafMcpServer {
 
     this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       return this.resourceHandler.readResource(request.params.uri);
+    });
+
+    // Resource templates: none defined. The advertised `resources` capability
+    // must answer this method with a valid (empty) list rather than -32601 —
+    // strict clients and Glama's MCP Inspector probe every advertised capability.
+    this.server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => {
+      return { resourceTemplates: [] };
     });
 
     // Tool handlers
@@ -138,7 +147,7 @@ export class FafMcpServer {
         description: 'Universal FAF MCP Server for Claude - AI Context Intelligence & Project Enhancement',
         transport: 'http-sse',
         capabilities: {
-          resources: { subscribe: true, listChanged: true },
+          resources: { listChanged: true },
           tools: { listChanged: true }
         },
         tools: [

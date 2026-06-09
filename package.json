@@ -1,11 +1,11 @@
 {
   "name": "faf-mcp",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "mcpName": "io.github.Wolfe-Jam/faf-mcp",
   "description": "Persistent Project Context for Cursor, IDEs and VS Code. IANA-registered .faf format, 25 MCP tools, 309 tests.",
   "icon": "./assets/icons/faf-icon-256.png",
   "logo": "./assets/icons/faf-icon-256.png",
-  "displayName": ".faf \ud83d\udc18",
+  "displayName": ".faf 🐘",
   "main": "dist/src/index.js",
   "bin": {
     "faf-mcp": "dist/src/index.js"
