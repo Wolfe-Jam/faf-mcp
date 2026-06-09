@@ -1,0 +1,18 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["Wolfe-Jam"],
+  "name": "faf-mcp",
+  "description": "FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, and VS Code via the IANA-registered .faf format. One file, bi-synced, optimized context for AI assistants.",
+  "author": "Wolfe-Jam",
+  "homepage": "https://faf.one",
+  "repository": "https://github.com/Wolfe-Jam/faf-mcp",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Knowledge & Memory"],
+  "keywords": ["faf", "context", "ide", "cursor", "windsurf", "cline", "vscode", "mcp", "project-context", "iana"],
+  "relatedServers": [
+    "claude-faf-mcp",
+    "grok-faf-mcp",
+    "gemini-faf-mcp",
+    "rust-faf-mcp"
+  ]
+}
