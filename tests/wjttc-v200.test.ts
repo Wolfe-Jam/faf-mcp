@@ -706,22 +706,12 @@ describe('AERO: Score Tier System', () => {
   });
 });
 
-describe('AERO: HTTP-SSE Transport (faf-mcp exclusive)', () => {
-  it('server accepts http-sse transport config', () => {
+describe('AERO: stdio Transport (faf-mcp)', () => {
+  it('server accepts stdio transport config', () => {
     expect(() => new FafMcpServer({
-      transport: 'http-sse',
-      port: 0,
-      cors: true,
+      transport: 'stdio',
       fafEnginePath: 'faf',
     })).not.toThrow();
-  });
-
-  it('server has express and cors in dependencies', () => {
-    const pkg = JSON.parse(fs.readFileSync(
-      path.join(__dirname, '..', 'package.json'), 'utf-8'
-    ));
-    expect(pkg.dependencies).toHaveProperty('express');
-    expect(pkg.dependencies).toHaveProperty('cors');
   });
 
   it('package.json version is 2.x', () => {
