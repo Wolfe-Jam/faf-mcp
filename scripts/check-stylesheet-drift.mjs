@@ -21,7 +21,7 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const SOURCE = 'docs/style-source.html';
-const SURFACES = ['docs/index.html', 'api/index.ts'];
+const SURFACES = ['docs/index.html'];
 
 const OPEN = '/* === faf-mcp:stylesheet canonical';
 const CLOSE = '/* === /faf-mcp:stylesheet canonical === */';
