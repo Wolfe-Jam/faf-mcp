@@ -8,6 +8,14 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**Interop now enhances your files.** The same solid, structured `.faf` data is prefixed to the top of your context files for rapid AI consumption upfront — and your Markdown stays in the instruction lane. Most important for `.cursorrules`, which IDE users hand-maintain.
+
+### Changed
+
+- **Non-destructive interop.** `faf_cursor`, `faf_agents`, `faf_gemini`, and `faf_sync` now inject a structured `.faf` block at the top of .cursorrules, AGENTS.md, GEMINI.md, and CLAUDE.md and preserve everything you've written below. Re-runs update the block in place (idempotent); existing faf-generated files upgrade cleanly in one pass.
+
 ## [2.1.2] - 2026-06-08
 
 MCP capability completeness — the stdio server now answers every capability it
