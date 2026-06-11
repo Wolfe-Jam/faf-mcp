@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.1.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v2.1.3 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,11 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.1.3] - 2026-06-11
+
+### Security
+- **Path confinement on every caller-supplied `path` argument (CWE-22 / CWE-73 / CWE-200).** The shared `getProjectPath()` chokepoint (feeding the `.faf` tools) and the `faf_read` / `faf_write` file tools resolved a caller path straight into a filesystem read/write with no confinement — so an absolute path or `../` traversal could read any file the server process could read (e.g. `/etc/passwd`, `~/.ssh/id_rsa`) or write outside the project. New `safe-path.ts` confines reads to `.faf` / `.fafm` context files and general file ops to the project root (cwd + system temp; override with `FAF_ALLOWED_ROOTS`), canonicalizes through symlinks (closing the symlink bypass), and rejects traversal/absolute escapes; `callTool()` gains a central PATH-DENIED guard. Reported via coordinated disclosure by Zhihao Zhang (Worcester Polytechnic Institute). Adds a security regression suite (incl. symlink bypass).
 
 ## [2.1.2] - 2026-06-08
 
