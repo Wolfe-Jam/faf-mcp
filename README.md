@@ -228,6 +228,8 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
+If `faf-mcp` has been useful, consider starring the repo — it helps others find it.
+
 ## License
 
 MIT License — Free and open source
