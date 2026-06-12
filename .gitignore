@@ -53,3 +53,4 @@ test-*.txt
 # Process/tracker docs (kept local)
 MCP-REGISTRY-TRACKER.md
 WJTTC-TEST-REPORT.md
+.faf-bench.json
