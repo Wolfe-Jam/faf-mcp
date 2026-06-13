@@ -24,6 +24,7 @@ import { resolveProjectPath, formatPathConfirmation } from '../utils/path-resolv
 import {
   fafCli,
 } from '../utils/faf-cli-bridge.js';
+import { composedTurboCat, composedTurboCatSlots, turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
 
 export class FafToolHandler {
   constructor(private engineAdapter: FafEngineAdapter) {}
@@ -1971,127 +1972,15 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       const fafContent = fs.readFileSync(fafResult.path, 'utf-8');
       const fafData = yaml.parse(fafContent) || {};
 
-      // Question registry - maps field paths to questions
-      const QUESTION_REGISTRY: Record<string, { question: string; header: string; type: string; required: boolean; options?: Array<{ label: string; value: string; description: string }> }> = {
-        'project.goal': {
-          question: 'What does this project do? (one sentence)',
-          header: 'Goal',
-          type: 'text',
-          required: true
-        },
-        'project.name': {
-          question: 'What is the name of this project?',
-          header: 'Name',
-          type: 'text',
-          required: true
-        },
-        'project.main_language': {
-          question: 'What is the primary programming language?',
-          header: 'Language',
-          type: 'select',
-          required: true,
-          options: [
-            { label: 'TypeScript', value: 'TypeScript', description: 'JavaScript with types' },
-            { label: 'JavaScript', value: 'JavaScript', description: 'Vanilla JS or Node.js' },
-            { label: 'Python', value: 'Python', description: 'Python 3.x' },
-            { label: 'Rust', value: 'Rust', description: 'Systems programming' },
-            { label: 'Go', value: 'Go', description: 'Golang' },
-            { label: 'Other', value: 'Other', description: 'Specify manually' }
-          ]
-        },
-        'human_context.why': {
-          question: 'Why does this project exist? (motivation)',
-          header: 'Why',
-          type: 'text',
-          required: true
-        },
-        'human_context.who': {
-          question: 'Who uses this project? (target audience)',
-          header: 'Who',
-          type: 'text',
-          required: false
-        },
-        'human_context.what': {
-          question: 'What problem does this solve?',
-          header: 'What',
-          type: 'text',
-          required: false
-        },
-        'human_context.where': {
-          question: 'Where does this run? (environment)',
-          header: 'Where',
-          type: 'text',
-          required: false
-        },
-        'human_context.when': {
-          question: 'When was this started or what phase is it in?',
-          header: 'When',
-          type: 'text',
-          required: false
-        },
-        'human_context.how': {
-          question: 'How should AI assist with this project?',
-          header: 'How',
-          type: 'text',
-          required: false
-        },
-        'stack.frontend': {
-          question: 'What frontend framework do you use?',
-          header: 'Frontend',
-          type: 'select',
-          required: false,
-          options: [
-            { label: 'React', value: 'React', description: 'React.js' },
-            { label: 'Vue', value: 'Vue', description: 'Vue.js' },
-            { label: 'Svelte', value: 'Svelte', description: 'Svelte/SvelteKit' },
-            { label: 'Next.js', value: 'Next.js', description: 'React framework' },
-            { label: 'None', value: 'None', description: 'No frontend' },
-            { label: 'Other', value: 'Other', description: 'Specify manually' }
-          ]
-        },
-        'stack.backend': {
-          question: 'What backend framework do you use?',
-          header: 'Backend',
-          type: 'select',
-          required: false,
-          options: [
-            { label: 'Express', value: 'Express', description: 'Node.js Express' },
-            { label: 'Fastify', value: 'Fastify', description: 'Node.js Fastify' },
-            { label: 'Django', value: 'Django', description: 'Python Django' },
-            { label: 'FastAPI', value: 'FastAPI', description: 'Python FastAPI' },
-            { label: 'None', value: 'None', description: 'No backend' },
-            { label: 'Other', value: 'Other', description: 'Specify manually' }
-          ]
-        },
-        'stack.database': {
-          question: 'What database do you use?',
-          header: 'Database',
-          type: 'select',
-          required: false,
-          options: [
-            { label: 'PostgreSQL', value: 'PostgreSQL', description: 'Relational database' },
-            { label: 'MongoDB', value: 'MongoDB', description: 'Document database' },
-            { label: 'SQLite', value: 'SQLite', description: 'File-based database' },
-            { label: 'Supabase', value: 'Supabase', description: 'Postgres + auth' },
-            { label: 'None', value: 'None', description: 'No database' },
-            { label: 'Other', value: 'Other', description: 'Specify manually' }
-          ]
-        },
-        'stack.hosting': {
-          question: 'Where is this hosted/deployed?',
-          header: 'Hosting',
-          type: 'select',
-          required: false,
-          options: [
-            { label: 'Vercel', value: 'Vercel', description: 'Frontend/serverless' },
-            { label: 'AWS', value: 'AWS', description: 'Amazon Web Services' },
-            { label: 'Cloudflare', value: 'Cloudflare', description: 'Workers/Pages' },
-            { label: 'Railway', value: 'Railway', description: 'App hosting' },
-            { label: 'Local only', value: 'Local', description: 'Not deployed' },
-            { label: 'Other', value: 'Other', description: 'Specify manually' }
-          ]
-        }
-      };
+      // Single-source the HUMAN interview from faf-cli's canonical SIX_WS_INTERVIEW
+      // (8 = the 6Ws + name + goal; public since 6.9.0). This is THE 6Ws — human-
+      // only context that can't be derived. main_language + stack are NOT here:
+      // they're SOURCED by Turbo-Cat (faf-cli's separate STACK_INTERVIEW if ever
+      // needed), never asked of a human. (Decision: single-source the 8-Q 6Ws
+      // Interview, wolfejam 2026-06-10 — language is not on the human side.)
+      const { SIX_WS_INTERVIEW } = await fafCli;
+      const QUESTION_REGISTRY: Record<string, (typeof SIX_WS_INTERVIEW)[number]> =
+        Object.fromEntries(SIX_WS_INTERVIEW.map((q) => [q.path, q]));
 
       // Priority order for questions
       const priorityOrder = [
@@ -2181,14 +2070,11 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         };
       }
 
-      // PHASE 1: Analyze and return questions
-      const missingFields: string[] = [];
-      for (const fieldPath of Object.keys(QUESTION_REGISTRY)) {
-        const value = getNestedValue(fafData, fieldPath);
-        if (isEmpty(value)) {
-          missingFields.push(fieldPath);
-        }
-      }
+      // PHASE 1: Analyze and return questions — the canonical 6Ws (SIX_WS_INTERVIEW),
+      // scoped to slots that are empty AND active (slotignored is never asked).
+      const missingFields: string[] = SIX_WS_INTERVIEW
+        .filter((q) => { const v = getNestedValue(fafData, q.path); return v !== 'slotignored' && isEmpty(v); })
+        .map((q) => q.path);
 
       // Calculate current score
       const totalFields = Object.keys(QUESTION_REGISTRY).length;
@@ -2319,13 +2205,15 @@ faffless: true
       const fafData = yaml.parse(fafContent) || {};
       currentScore = this.calculateSimpleScore(fafData);
 
-      // Step 2: Run TURBO-CAT format discovery
-      const formatsResult = await this.discoverFormatsInternal(cwd);
-      if (formatsResult.discoveredFormats.length > 0) {
-        // Apply slot fills to .faf
+      // Step 2: Run TURBO-CAT format discovery — composed from faf-cli's engine.
+      const formatsResult = await composedTurboCat(cwd);
+      if (formatsResult && formatsResult.discoveredFormats.length > 0) {
+        // Apply slot fills to .faf. turboCatSlots routes them into the correct
+        // .faf sections; fill the stack section (main_language lives under
+        // project, which is a string here) — clean keys, no noise.
+        const slots = await composedTurboCatSlots(cwd);
         if (!fafData.stack) fafData.stack = {};
-
-        for (const [key, value] of Object.entries(formatsResult.slotFillRecommendations)) {
+        for (const [key, value] of Object.entries(slots?.stack ?? {})) {
           if (!fafData.stack[key] || fafData.stack[key] === 'None') {
             fafData.stack[key] = value;
           }
@@ -2589,7 +2477,7 @@ ${fafData.stack_signature || 'Auto-detected stack'}
     const startTime = Date.now();
 
     try {
-      const analysis = await this.discoverFormatsInternal(cwd);
+      const analysis = await turboCatDisplay(cwd);
       const elapsed = Date.now() - startTime;
 
       if (args?.json) {
@@ -2634,130 +2522,6 @@ ${fafData.stack_signature || 'Auto-detected stack'}
         isError: true
       };
     }
-  }
-
-  /**
-   * Internal helper: Discover formats in a directory (TURBO-CAT logic)
-   */
-  private async discoverFormatsInternal(projectDir: string): Promise<{
-    discoveredFormats: Array<{ fileName: string; category: string; priority: number }>;
-    totalIntelligenceScore: number;
-    stackSignature: string;
-    slotFillRecommendations: Record<string, string>;
-    extractedContext: Record<string, any>;
-  }> {
-    const path = await import('path');
-
-    // Known format files and their categories
-    const KNOWN_FORMATS: Record<string, { category: string; priority: number }> = {
-      'package.json': { category: 'package-manager', priority: 35 },
-      'tsconfig.json': { category: 'typescript-config', priority: 30 },
-      'Cargo.toml': { category: 'package-manager', priority: 35 },
-      'pyproject.toml': { category: 'package-manager', priority: 35 },
-      'requirements.txt': { category: 'package-manager', priority: 25 },
-      'go.mod': { category: 'package-manager', priority: 35 },
-      'pom.xml': { category: 'package-manager', priority: 35 },
-      'README.md': { category: 'documentation', priority: 20 },
-      'CLAUDE.md': { category: 'ai-context', priority: 40 },
-      'project.faf': { category: 'faf-context', priority: 45 },
-      '.faf': { category: 'faf-context', priority: 45 },
-      'Dockerfile': { category: 'docker', priority: 25 },
-      'docker-compose.yml': { category: 'docker', priority: 25 },
-      'vercel.json': { category: 'deployment', priority: 20 },
-      'netlify.toml': { category: 'deployment', priority: 20 },
-      '.eslintrc.json': { category: 'linting', priority: 15 },
-      '.prettierrc': { category: 'linting', priority: 15 },
-      'jest.config.js': { category: 'testing', priority: 20 },
-      'vitest.config.ts': { category: 'testing', priority: 20 },
-      'svelte.config.js': { category: 'framework', priority: 30 },
-      'next.config.js': { category: 'framework', priority: 30 },
-      'vite.config.ts': { category: 'build', priority: 25 },
-      'webpack.config.js': { category: 'build', priority: 25 },
-      '.github': { category: 'ci-cd', priority: 20 },
-      'manifest.json': { category: 'chrome-extension', priority: 35 }
-    };
-
-    const discoveredFormats: Array<{ fileName: string; category: string; priority: number }> = [];
-    let totalIntelligenceScore = 0;
-    const slotFillRecommendations: Record<string, string> = {};
-    const extractedContext: Record<string, any> = {};
-
-    // Scan directory
-    try {
-      const files = fs.readdirSync(projectDir);
-
-      for (const file of files) {
-        if (KNOWN_FORMATS[file]) {
-          const format = KNOWN_FORMATS[file];
-          discoveredFormats.push({
-            fileName: file,
-            category: format.category,
-            priority: format.priority
-          });
-          totalIntelligenceScore += format.priority;
-        }
-      }
-
-      // Extract intelligence from package.json
-      const pkgPath = path.join(projectDir, 'package.json');
-      if (fs.existsSync(pkgPath)) {
-        const pkgContent = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        const allDeps = { ...pkgContent.dependencies, ...pkgContent.devDependencies };
-
-        extractedContext.projectName = pkgContent.name;
-        extractedContext.projectDescription = pkgContent.description;
-
-        // Detect frameworks and fill slots
-        if (allDeps['typescript'] || allDeps['@types/node']) {
-          slotFillRecommendations['mainLanguage'] = 'TypeScript';
-        }
-        if (allDeps['react'] || allDeps['next']) {
-          slotFillRecommendations['frontend'] = allDeps['next'] ? 'Next.js' : 'React';
-        }
-        if (allDeps['vue'] || allDeps['nuxt']) {
-          slotFillRecommendations['frontend'] = allDeps['nuxt'] ? 'Nuxt' : 'Vue';
-        }
-        if (allDeps['svelte'] || allDeps['@sveltejs/kit']) {
-          slotFillRecommendations['frontend'] = allDeps['@sveltejs/kit'] ? 'SvelteKit' : 'Svelte';
-        }
-        if (allDeps['express']) {
-          slotFillRecommendations['backend'] = 'Express';
-        }
-        if (allDeps['fastify']) {
-          slotFillRecommendations['backend'] = 'Fastify';
-        }
-        if (allDeps['vite']) {
-          slotFillRecommendations['build'] = 'Vite';
-        }
-        if (allDeps['jest'] || allDeps['vitest']) {
-          slotFillRecommendations['testing'] = allDeps['vitest'] ? 'Vitest' : 'Jest';
-        }
-      }
-
-      // Check for deployment indicators
-      if (fs.existsSync(path.join(projectDir, 'vercel.json'))) {
-        slotFillRecommendations['hosting'] = 'Vercel';
-      } else if (fs.existsSync(path.join(projectDir, 'netlify.toml'))) {
-        slotFillRecommendations['hosting'] = 'Netlify';
-      }
-
-    } catch (error) {
-      // Ignore errors, return empty results
-    }
-
-    // Generate stack signature
-    const parts: string[] = [];
-    if (slotFillRecommendations['mainLanguage']) parts.push(slotFillRecommendations['mainLanguage'].toLowerCase());
-    if (slotFillRecommendations['frontend']) parts.push(slotFillRecommendations['frontend'].toLowerCase());
-    const stackSignature = parts.length > 0 ? parts.join('-') : 'unknown-stack';
-
-    return {
-      discoveredFormats,
-      totalIntelligenceScore,
-      stackSignature,
-      slotFillRecommendations,
-      extractedContext
-    };
   }
 
   /**
