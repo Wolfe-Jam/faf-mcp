@@ -5,6 +5,7 @@ project:
   main_language: TypeScript
   type: mcp
   framework: MCP SDK (TS)
+  homepage: https://faf.one
 stack:
   frontend: slotignored
   css_framework: slotignored
