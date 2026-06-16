@@ -9,7 +9,7 @@
   </div>
 </div>
 
-[![npm](https://img.shields.io/npm/v/faf-mcp?color=008B8B)](https://www.npmjs.com/package/faf-mcp)[![downloads](https://img.shields.io/npm/dt/faf-mcp?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-mcp)
+[![npm](https://img.shields.io/npm/v/faf-mcp?color=008B8B)](https://www.npmjs.com/package/faf-mcp)[![downloads](https://img.shields.io/npm/dm/faf-mcp?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-mcp)
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
