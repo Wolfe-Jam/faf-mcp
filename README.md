@@ -9,9 +9,9 @@
   </div>
 </div>
 
-[![npm](https://img.shields.io/npm/v/faf-mcp?color=00CCFF)](https://www.npmjs.com/package/faf-mcp)
+[![npm](https://img.shields.io/npm/v/faf-mcp?color=008B8B)](https://www.npmjs.com/package/faf-mcp)[![downloads](https://img.shields.io/npm/dt/faf-mcp?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-mcp)
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
-[![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-00D4D4)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
+[![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 
 **Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (Streamable HTTP)
@@ -20,7 +20,7 @@ The MCP you didn't realise you needed, or wanted but didn't know who to ask, is 
 
 [![CI](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
+[![project.faf](https://img.shields.io/badge/project.faf-inside-008B8B)](https://github.com/Wolfe-Jam/faf)
 
 ---
 
