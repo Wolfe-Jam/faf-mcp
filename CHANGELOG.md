@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.2.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v2.2.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.2.1] - 2026-06-16
+
+Patch — inherits The Interop Edition. Honest 31-tool count, now machine-enforced; retired "Universal" language dropped for the Cursor / IDE Edition.
+
+### Fixed
+
+- **Tool count is honest and single-sourced — 31.** README, CLAUDE.md, project.faf, and the npm description now state the real runtime count (`listTools()` = 31), replacing drifted 25 / 33 / "36 advanced" claims. A new gate (`tests/tool-count.test.ts`) reads the runtime tool list and refuses any release whose docs disagree — across 5 surfaces, including the npm + MCP-registry descriptions.
+- **Retired "Universal" positioning.** Context surfaces now lead with the **Cursor / IDE Edition** (VS Code included), matching the shipping package and registry copy.
+- **Removed the unwired "core/advanced" tiering from the docs** — it described a visibility split the server doesn't actually apply.
 
 ## [2.2.0] - 2026-06-16 — The Interop Edition
 

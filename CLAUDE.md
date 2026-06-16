@@ -1,12 +1,12 @@
 <!-- faf:start -->
-<!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible IDEs. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
+<!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-mcp
 
 ## What This Is
 
-The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible IDEs. IANA-registered application/vnd.faf+yaml. Start with "Use FAF".
+The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF".
 
 ## Stack
 
@@ -22,7 +22,7 @@ The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cli
 ## Context
 
 - **Who:** Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
-- **What:** Universal MCP server providing .faf context tools — 25 core + 36 advanced, interop with AGENTS.md, .cursorrules, GEMINI.md
+- **What:** The Cursor / IDE Edition — persistent context for Cursor, VS Code, and every MCP-compatible IDE — 31 MCP tools, interop with AGENTS.md, .cursorrules, GEMINI.md
 - **Why:** Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
 - **Where:** npm · MCP Registry · Cloudflare edge (ide.faf.one/mcp/v1) · any MCP-compatible IDE — people get it how they wish
 - **When:** Production/Stable — v2.0.0 WJTTC certified (309/309 tests, 9 suites)

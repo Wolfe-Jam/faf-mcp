@@ -1,7 +1,7 @@
 faf_version: "3.0"
 project:
   name: faf-mcp
-  goal: The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible IDEs. IANA-registered application/vnd.faf+yaml. Start with "Use FAF".
+  goal: The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF".
   main_language: TypeScript
   type: mcp
   framework: MCP SDK (TS)
@@ -28,7 +28,7 @@ stack:
   storage: slotignored
 human_context:
   who: Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
-  what: Universal MCP server providing .faf context tools — 25 core + 36 advanced, interop with AGENTS.md, .cursorrules, GEMINI.md
+  what: The Cursor / IDE Edition — persistent context for Cursor, VS Code, and every MCP-compatible IDE — 31 MCP tools, interop with AGENTS.md, .cursorrules, GEMINI.md
   why: Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
   where: npm · MCP Registry · Cloudflare edge (ide.faf.one/mcp/v1) · any MCP-compatible IDE — people get it how they wish
   when: Production/Stable — v2.0.0 WJTTC certified (309/309 tests, 9 suites)

@@ -106,7 +106,7 @@ faf bi-sync --all
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**25 MCP tools** (with CLI fallback) · **309 tests** (9 suites) · **7 bundled parsers**
+**31 MCP tools** (with CLI fallback) · **309 tests** (9 suites) · **7 bundled parsers**
 
 ---
 
@@ -187,7 +187,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 25 Core MCP Tools
+## 31 MCP Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -211,7 +211,7 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_cloud_search` | Search souls |
 | `faf_cloud_share` | Generate share links |
 
-**Plus 36 advanced tools and CLI fallback** (via faf-cli v5.0.1):
+**Plus CLI fallback** (via faf-cli):
 - `faf readme` - Extract 6 Ws from README (+25-35% boost)
 - `faf human-add` - Non-interactive YAML merge (6Ws Builder)
 - `faf git` - GitHub repo analysis without cloning
