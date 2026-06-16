@@ -1,8 +1,11 @@
 name: 📡 MCP Registry Publish
 
 on:
-  release:
-    types: [created]
+  # release: trigger DISABLED for the one.faf migration — the `login github-oidc` step
+  # below authorises io.github.* ONLY, so a release-triggered publish 400s on one.faf/*.
+  # Registry publish is now the manual DNS step in /pubpro (mcp-publisher login dns).
+  # Restore CI auto-publish via the DNS-ready workflow (faf-mcp-rig reference) +
+  # the FAF_ONE_MCP_PRIVATE_KEY repo secret, switching the login step to `login dns`.
   workflow_dispatch:  # manual trigger for backfills / retries
 
 jobs:

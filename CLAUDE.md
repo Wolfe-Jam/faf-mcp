@@ -1,3 +1,4 @@
+<!-- faf:start -->
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cline, VS Code, and all MCP-compatible IDEs. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
 <!-- faf: claim=project.faf | family=FAF -->
 
@@ -29,4 +30,5 @@ The Interop MCP for Context. Universal .faf MCP server for Cursor, Windsurf, Cli
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-05-26T06:37:16.305Z*
+*STATUS: BI-SYNC ACTIVE — 2026-06-16T03:34:21.638Z*
+<!-- faf:end -->

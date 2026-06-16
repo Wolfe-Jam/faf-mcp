@@ -9,8 +9,12 @@ name: Publish to MCP Registry
 # identity to authorise the io.github.Wolfe-Jam/* namespace (repo owner matches).
 
 on:
-  release:
-    types: [published]      # each release = a new server.json version → publish it
+  # release: trigger DISABLED for the one.faf migration — `login github-oidc` below
+  # authorises io.github.* ONLY, so a release-triggered publish 400s on one.faf/*.
+  # Registry publish is now the manual DNS step in /pubpro (mcp-publisher login dns).
+  # Restore via the DNS-ready workflow (faf-mcp-rig reference) + FAF_ONE_MCP_PRIVATE_KEY.
+  #   release:
+  #     types: [published]
   workflow_dispatch: {}      # manual re-publish if ever needed
 
 permissions:
