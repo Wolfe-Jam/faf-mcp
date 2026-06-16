@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.1.3 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v2.2.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,11 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-**Interop now enhances your files.** The same solid, structured `.faf` data is prefixed to the top of your context files for rapid AI consumption upfront — and your Markdown stays in the instruction lane. Most important for `.cursorrules`, which IDE users hand-maintain.
+## [2.2.0] - 2026-06-16 — The Interop Edition
+
+faf-mcp now **enhances** your context files instead of replacing them — a structured `.faf` block injected at the top of `.cursorrules`/`AGENTS.md`/`GEMINI.md`/`CLAUDE.md`, your prose preserved, re-runs idempotent. Composes faf-cli's Turbo-Cat + 6Ws engines (forks deleted, single-source), now on the `one.faf` namespace.
 
 ### Changed
 
 - **Non-destructive interop.** `faf_cursor`, `faf_agents`, `faf_gemini`, and `faf_sync` now inject a structured `.faf` block at the top of .cursorrules, AGENTS.md, GEMINI.md, and CLAUDE.md and preserve everything you've written below. Re-runs update the block in place (idempotent); existing faf-generated files upgrade cleanly in one pass.
+- **Composes faf-cli's single-source engines.** Turbo-Cat (~200-format detection) and the 6Ws interview now come from faf-cli — faf-mcp's own forks are deleted. One source of truth, no drift between the CLI and the server.
+- **Migrated to the `one.faf` namespace.** MCP Registry identity `io.github.Wolfe-Jam/faf-mcp` → `one.faf/faf-mcp` (DNS-verified), carrying the single-source `one.faf/context` `_meta` block emitted by faf-cli. The npm package `faf-mcp`, its tools, and its downloads are **unchanged** — only the registry identity moves.
 
 ## [2.1.3] - 2026-06-11
 
