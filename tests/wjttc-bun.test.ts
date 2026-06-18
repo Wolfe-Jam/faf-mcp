@@ -225,7 +225,6 @@ describe('🏁 WJTTC — bun migration + MCP integrity (faf-mcp)', () => {
       const READ_ONLY_TOOLS = [
         'faf_about',
         'faf_what',
-        'faf_friday',
         'faf_guide',
       ] as const;
 

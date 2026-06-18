@@ -131,7 +131,7 @@ describe('BRAKE: Tool Handler Routes', () => {
 
   it('listTools returns object with tools array of correct count', async () => {
     const result = await handler.listTools();
-    expect(result.tools.length).toBeGreaterThanOrEqual(30);
+    expect(result.tools.length).toBeGreaterThanOrEqual(28); // 29 live (faf_enhance + faf_friday retired in The Curated Edition)
   });
 
   it('every interop tool resolves without "Unknown tool"', async () => {

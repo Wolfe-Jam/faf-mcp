@@ -106,7 +106,7 @@ faf bi-sync --all
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**31 MCP tools** (with CLI fallback) · **309 tests** (9 suites) · **7 bundled parsers**
+**29 MCP tools** (with CLI fallback) · **309 tests** (9 suites) · **7 bundled parsers**
 
 ---
 
@@ -187,7 +187,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ---
 
-## 31 MCP Tools
+## 29 MCP Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -195,7 +195,6 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_score` | Check AI-readiness (0-100%) |
 | `faf_sync` | Sync context across platforms |
 | `faf_bi_sync` | Bi-directional .faf ↔ CLAUDE.md |
-| `faf_enhance` | Intelligent enhancement |
 | `faf_read` | Parse and validate FAF files |
 | `faf_write` | Create/update FAF with validation |
 | **Interop Tools** | |

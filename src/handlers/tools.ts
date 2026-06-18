@@ -60,7 +60,7 @@ export class FafToolHandler {
       tools: [
         {
           name: 'faf_about',
-          description: 'Learn what .faf format is - project DNA for AI 🧡⚡️',
+          description: 'Learn what .faf format is - project DNA for AI',
           annotations: {
             title: 'About FAF',
             readOnlyHint: true,
@@ -74,7 +74,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_what',
-          description: 'What is .faf format? Quick explanation of project DNA for AI 🧡⚡️',
+          description: 'What is .faf format? Quick explanation of project DNA for AI',
           annotations: {
             title: 'What is FAF',
             readOnlyHint: true,
@@ -88,7 +88,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_status',
-          description: 'Check if your project has project.faf (project DNA for AI) - Shows AI-readability status 🧡⚡️',
+          description: 'Check if your project has project.faf (project DNA for AI) - Shows AI-readability status',
           annotations: {
             title: 'Project Status',
             readOnlyHint: true,
@@ -104,7 +104,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_score',
-          description: 'Calculate your project\'s AI-readability from project.faf (project DNA for AI) - F1-inspired metrics! 🧡⚡️',
+          description: 'Calculate your project\'s AI-readability from project.faf (project DNA for AI) - F1-inspired metrics!',
           annotations: {
             title: 'AI-Readiness Score',
             readOnlyHint: true,
@@ -121,7 +121,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_init',
-          description: 'Create project.faf (project DNA for AI) - Makes your project instantly AI-readable 🧡⚡️. Just enter path or project name. Examples: ~/Projects/my-app, my-app, /full/path/to/project',
+          description: 'Create project.faf (project DNA for AI) - Makes your project instantly AI-readable . Just enter path or project name. Examples: ~/Projects/my-app, my-app, /full/path/to/project',
           annotations: {
             title: 'Initialize .faf',
             readOnlyHint: false,
@@ -142,7 +142,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_trust',
-          description: 'Validate project.faf integrity - Trust metrics for project DNA for AI 🧡⚡️',
+          description: 'Validate project.faf integrity - Trust metrics for project DNA for AI',
           annotations: {
             title: 'Trust Score',
             readOnlyHint: true,
@@ -156,7 +156,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_sync',
-          description: 'Sync project.faf (project DNA for AI) with CLAUDE.md - Bi-directional context 🧡⚡️',
+          description: 'Sync project.faf (project DNA for AI) with CLAUDE.md - Bi-directional context',
           annotations: {
             title: 'Sync .faf to CLAUDE.md',
             readOnlyHint: false,
@@ -166,27 +166,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
-            },
-            additionalProperties: false
-          }
-        },
-        {
-          name: 'faf_enhance',
-          description: 'Enhance project.faf (project DNA for AI) with AI optimization - SPEEDY AI you can TRUST! 🧡⚡️',
-          annotations: {
-            title: 'Enhance .faf',
-            readOnlyHint: false,
-            destructiveHint: false,
-            openWorldHint: false
-          },
-          inputSchema: {
-            type: 'object',
-            properties: {
-              model: { type: 'string', description: 'Target AI model: claude|chatgpt|gemini|universal (default: claude)' },
-              focus: { type: 'string', description: 'Enhancement focus: claude-optimal|human-context|ai-instructions|completeness' },
-              consensus: { type: 'boolean', description: 'Build consensus from multiple AI models' },
-              dryRun: { type: 'boolean', description: 'Preview enhancement without applying changes' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             additionalProperties: false
@@ -331,26 +310,6 @@ export class FafToolHandler {
         },
         // faf_chat — DEPRECATED, un-advertised. The host IS the chat — a chat-shim
         // tool is redundant. Dispatch keeps a deprecation stub (below). Fleet sweep —
-        // mirrors grok-faf-mcp + claude-faf-mcp's retire.
-        {
-          name: 'faf_friday',
-          description: '🎉 Friday Features - Chrome Extension detection, fuzzy matching & more! 🧡⚡️',
-          annotations: {
-            title: 'Fun FAF Facts',
-            readOnlyHint: true,
-            openWorldHint: false
-          },
-          inputSchema: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-                description: 'Test fuzzy matching with typos like "raect" or "chr ext"'
-              }
-            },
-            additionalProperties: false
-          }
-        },
         {
           name: 'faf_guide',
           description: 'FAF MCP usage guide for your MCP host - Projects convention, path resolution, and UX patterns',
@@ -367,7 +326,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_readme',
-          description: '📖 Extract 6 Ws (Who/What/Why/Where/When/How) from README.md into human_context - Smart pattern matching 🧡⚡️',
+          description: 'Extract 6 Ws (Who/What/Why/Where/When/How) from README.md into human_context - Smart pattern matching',
           annotations: {
             title: 'Extract from README',
             readOnlyHint: false,
@@ -386,7 +345,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_human_add',
-          description: '🧡 Add a human_context field (who/what/why/where/when/how) - Non-interactive for MCP 🧡⚡️',
+          description: 'Add a human_context field (who/what/why/where/when/how) - Non-interactive for MCP',
           annotations: {
             title: 'Add Human Context',
             readOnlyHint: false,
@@ -410,10 +369,11 @@ export class FafToolHandler {
         },
         {
           name: 'faf_check',
-          description: '🔍 Quality inspection for human_context fields + field protection - Shows empty/generic/good/excellent ratings 🧡⚡️',
+          description: 'Inspect the human_context fields and rate each empty/generic/good/excellent. Returns the ratings; with protect it locks good/excellent fields from being overwritten, with unlock it releases them. Use this to gauge context quality and guard your best answers.',
           annotations: {
             title: 'Check .faf Health',
-            readOnlyHint: true,
+            readOnlyHint: false,
+            destructiveHint: false,
             openWorldHint: false
           },
           inputSchema: {
@@ -428,7 +388,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_context',
-          description: '📂 Set or view active project context - Path is remembered for subsequent faf_ calls 🧡⚡️',
+          description: 'Set or show the active project path that later faf_ calls resolve against. Returns the current context path. Call this once at the start of a session so the other tools target the right project.',
           annotations: {
             title: 'View Context',
             readOnlyHint: true,
@@ -444,7 +404,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_go',
-          description: '🎯 Guided interview to Gold Code - Claude asks questions till you hit 100%! Returns questions for missing fields, then apply answers to reach Gold Code 🧡⚡️',
+          description: 'Guided interview to Gold Code - Claude asks questions till you hit 100%! Returns questions for missing fields, then apply answers to reach Gold Code',
           annotations: {
             title: 'Guided Setup',
             readOnlyHint: false,
@@ -466,7 +426,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_auto',
-          description: '🏎️ ONE COMMAND TO RULE THEM ALL - Zero to Championship AI context instantly! Runs init + sync + formats + bi-sync + score in one go 🧡⚡️',
+          description: 'ONE COMMAND TO RULE THEM ALL - Zero to Championship AI context instantly! Runs init + sync + formats + bi-sync + score in one go',
           annotations: {
             title: 'Auto-detect Context',
             readOnlyHint: false,
@@ -484,7 +444,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_dna',
-          description: '🧬 Show your FAF DNA journey - See your evolution from birth to championship (22% → 85% → 99%) 🧡⚡️',
+          description: 'Show your FAF DNA journey - See your evolution from birth to championship (22% 85% 99%)',
           annotations: {
             title: 'View Project DNA',
             readOnlyHint: true,
@@ -500,7 +460,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_formats',
-          description: '😽 TURBO-CAT format discovery - Discovers all formats in your project (154+ validated types!) and fills stack slots 🧡⚡️',
+          description: 'Scan the project for tech-stack signals across 150+ manifest types (package.json, Cargo.toml, pyproject.toml, go.mod, and more) and surface which project.faf stack slots to fill. Returns the detected formats and slot-fill recommendations. Use this to populate the technical context.',
           annotations: {
             title: 'List Formats',
             readOnlyHint: true,
@@ -517,7 +477,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_quick',
-          description: '⚡ Lightning-fast .faf creation - One-liner format: "name, description, language, framework, hosting" 🧡⚡️',
+          description: 'Lightning-fast .faf creation - One-liner format: "name, description, language, framework, hosting"',
           annotations: {
             title: 'Quick Create',
             readOnlyHint: false,
@@ -537,7 +497,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_doctor',
-          description: '🏥 Health check for your .faf setup - Diagnose and fix common issues 🧡⚡️',
+          description: 'Diagnose a project.faf setup — report missing files, empty or weak slots, and common configuration issues, each with how to fix it. Returns a prioritized checklist. Use this when your score is low and you need to know why.',
           annotations: {
             title: 'Diagnose Issues',
             readOnlyHint: true,
@@ -640,12 +600,12 @@ export class FafToolHandler {
         },
         {
           name: 'faf_git',
-          description: 'Generate project.faf from any GitHub repo URL - 1-click context extraction!',
+          description: 'Generate a project.faf from any public GitHub repository URL — fetches the repo and extracts its stack and context. Returns the generated .faf. Use this to bootstrap context for a project you have the URL for but not cloned locally.',
           annotations: {
             title: 'Extract from GitHub',
             readOnlyHint: false,
             destructiveHint: false,
-            openWorldHint: false
+            openWorldHint: true
           },
           inputSchema: {
             type: 'object',
@@ -679,8 +639,6 @@ export class FafToolHandler {
         return await this.handleFafTrust(args);
       case 'faf_sync':
         return await this.handleFafSync(args);
-      case 'faf_enhance':
-        return await this.handleFafEnhance(args);
       case 'faf_bi_sync':
         return await this.handleFafBiSync(args);
       case 'faf_clear':
@@ -702,8 +660,6 @@ export class FafToolHandler {
       }
       case 'faf_chat':
         return await this.handleFafChat(args);
-      case 'faf_friday':
-        return await this.handleFafFriday(args);
       case 'faf_write':
         return await fileHandlers.faf_write(args);
       case 'faf_list':
@@ -1069,52 +1025,6 @@ package_manager: ${projectData.package_manager}` : ''}
     };
   }
 
-  private async handleFafEnhance(args: any): Promise<CallToolResult> {
-    // Set project context if path provided
-    if (args?.path) {
-      this.getProjectPath(args.path);
-    }
-
-    const enhanceArgs: string[] = [];
-
-    // Default to Claude optimization if no model specified
-    const model = args?.model || 'claude';
-    enhanceArgs.push('--model', model);
-
-    if (args?.focus) {
-      enhanceArgs.push('--focus', args.focus);
-    }
-    if (args?.consensus) {
-      enhanceArgs.push('--consensus');
-    }
-    if (args?.dryRun) {
-      enhanceArgs.push('--dry-run');
-    }
-
-    const result = await this.engineAdapter.callEngine('enhance', enhanceArgs);
-
-    if (!result.success) {
-      return {
-        content: [{
-          type: 'text',
-          text: `🚀 Claude FAF Enhancement:\n\nFailed to enhance: ${result.error}`
-        }],
-        isError: true
-      };
-    }
-
-    const output = typeof result.data === 'string'
-      ? result.data
-      : result.data?.message || result.data?.output || JSON.stringify(result.data, null, 2);
-
-    return {
-      content: [{
-        type: 'text',
-        text: `🚀 Claude FAF Enhancement:\n\n${output}`
-      }]
-    };
-  }
-
   private async handleFafBiSync(args: any): Promise<CallToolResult> {
     // Set project context if path provided
     if (args?.path) {
@@ -1202,7 +1112,7 @@ package_manager: ${projectData.package_manager}` : ''}
     const packageInfo = {
       name: 'faf-mcp',
       version: VERSION,
-      description: 'We ARE the C in MCP. I⚡🍊 - The formula that changes everything.',
+      description: 'We ARE the C in MCP. I - The formula that changes everything.',
       author: 'FAF Team (team@faf.one)',
       website: 'https://faf.one',
       npm: 'https://www.npmjs.com/package/faf-mcp'
@@ -1365,55 +1275,6 @@ ${debugInfo.permissions.fafError ? `   FAF Error: ${debugInfo.permissions.fafErr
           'faf_chat is retired — the host is your chat, just talk here. ' +
           'For FAF: faf_init / faf_score / faf_sync, or "ask questions" to build context.',
       }],
-    };
-  }
-
-  private async handleFafFriday(args: any): Promise<CallToolResult> {
-    const { test } = args || {};
-
-    let response = `🎉 **Friday Features in FAF MCP!**\n\n`;
-    response += `**Chrome Extension Auto-Detection** | Boosts scores to 90%+ automatically\n`;
-    response += `**Universal Fuzzy Matching** | Typo-tolerant: "raect"→"react", "chr ext"→"chrome extension"\n`;
-    response += `**Intel-Friday™** | Smart IF statements that add massive value\n\n`;
-
-    if (test) {
-      // Test fuzzy matching
-      const suggestion = FuzzyDetector.getSuggestion(test);
-      const projectType = FuzzyDetector.detectProjectType(test);
-      const chromeDetection = FuzzyDetector.detectChromeExtension(test);
-
-      response += `\n**Testing: "${test}"**\n`;
-
-      if (suggestion) {
-        response += `✅ Fuzzy Match: "${test}" → "${suggestion}"\n`;
-      }
-
-      response += `📦 Project Type Detected: ${projectType}\n`;
-
-      if (chromeDetection.detected) {
-        response += `🎯 Chrome Extension Detected! (Confidence: ${chromeDetection.confidence})\n`;
-        if (chromeDetection.corrected) {
-          response += `   Corrected from: "${test}" → "${chromeDetection.corrected}"\n`;
-        }
-      }
-
-      // Show what would be auto-filled
-      if (chromeDetection.detected && chromeDetection.confidence === 'high') {
-        response += `\n**Auto-fill Preview (7 slots for 90%+ score):**\n`;
-        const slots = FuzzyDetector.getChromeExtensionSlots();
-        for (const [key, value] of Object.entries(slots)) {
-          response += `• ${key}: ${value}\n`;
-        }
-      }
-    } else {
-      response += `\n💡 Try: \`faf_friday test:"raect"\` or \`faf_friday test:"chr ext"\``;
-    }
-
-    return {
-      content: [{
-        type: 'text',
-        text: response
-      }]
     };
   }
 
