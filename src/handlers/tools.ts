@@ -26,6 +26,29 @@ import {
 } from '../utils/faf-cli-bridge.js';
 import { composedTurboCat, composedTurboCatSlots, turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
 
+/**
+ * The Core tier — the 15 distinct, well-described tools advertised by default.
+ * Everything else is Extended: still callable by name (the dispatch in callTool
+ * is unchanged), but advertised only when FAF_TOOLS=all (or FAF_EXTENDED=1).
+ * Glama (and any client) runs the server and scores the default tools/list, so a
+ * tight, non-overlapping, craft-grade Core is what earns the quality grade —
+ * the 40%-MIN rule means one weak tool on the surface caps the whole server.
+ *
+ * Spine mirrors claude-faf-mcp's proven-A Core; the interop quad
+ * (faf_bi_sync + faf_agents/faf_cursor/faf_gemini) is this edition's identity —
+ * the Cursor / IDE multi-format sync — where CFM carries memory tools instead.
+ * See PLANET-FAF/strategy/claude-faf-mcp-core-tier-glama-a-2026-06-17.md.
+ */
+const CORE_TOOLS = new Set<string>([
+  // Spine — mirrors CFM
+  'faf_init', 'faf_auto', 'faf_go', 'faf_score', 'faf_doctor',
+  'faf_sync', 'faf_context', 'faf_trust', 'faf_about',
+  // IDE-edition interop — the differentiator
+  'faf_bi_sync', 'faf_agents', 'faf_cursor', 'faf_gemini',
+  // Craft-grade utility
+  'faf_check', 'faf_git',
+]);
+
 export class FafToolHandler {
   constructor(private engineAdapter: FafEngineAdapter) {}
 
@@ -56,11 +79,10 @@ export class FafToolHandler {
   }
 
   async listTools() {
-    return {
-      tools: [
+    const allTools = [
         {
           name: 'faf_about',
-          description: 'Learn what .faf format is - project DNA for AI',
+          description: 'Explain what the .faf format is — the IANA-registered, portable context file (application/vnd.faf+yaml) that gives any AI instant project understanding. Returns a plain-language overview of the format and its purpose. Use this when you or the user are new to FAF and want the concept before running other tools.',
           annotations: {
             title: 'About FAF',
             readOnlyHint: true,
@@ -104,7 +126,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_score',
-          description: 'Calculate your project\'s AI-readability from project.faf (project DNA for AI) - F1-inspired metrics!',
+          description: 'Calculate a project.faf AI-readiness score (0-100%) from the populated context slots. Returns the percentage and tier, and with details a slot-by-slot breakdown with improvement suggestions. Use this to measure how complete the AI context is and what to fill next.',
           annotations: {
             title: 'AI-Readiness Score',
             readOnlyHint: true,
@@ -121,7 +143,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_init',
-          description: 'Create project.faf (project DNA for AI) - Makes your project instantly AI-readable . Just enter path or project name. Examples: ~/Projects/my-app, my-app, /full/path/to/project',
+          description: 'Create a project.faf for a project, making it instantly AI-readable. Returns the new file location and starting score. Accepts a path or bare project name (e.g. ~/Projects/my-app, my-app) and omitting it uses the current directory.',
           annotations: {
             title: 'Initialize .faf',
             readOnlyHint: false,
@@ -142,7 +164,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_trust',
-          description: 'Validate project.faf integrity - Trust metrics for project DNA for AI',
+          description: 'Validate a project.faf for structural integrity and field consistency. Returns trust metrics flagging malformed, missing, or contradictory data. Use this to confirm the context is sound before relying on it or syncing it to other formats.',
           annotations: {
             title: 'Trust Score',
             readOnlyHint: true,
@@ -156,7 +178,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_sync',
-          description: 'Sync project.faf (project DNA for AI) with CLAUDE.md - Bi-directional context',
+          description: 'Sync a project.faf with CLAUDE.md so the two stay aligned. Returns what was written. Use this for the single CLAUDE.md target; use faf_bi_sync to fan out to AGENTS.md, .cursorrules, and GEMINI.md as well.',
           annotations: {
             title: 'Sync .faf to CLAUDE.md',
             readOnlyHint: false,
@@ -173,7 +195,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_bi_sync',
-          description: 'Bi-directional sync between project.faf and CLAUDE.md. v4.5.0: Also sync to AGENTS.md, .cursorrules, GEMINI.md!',
+          description: 'Bi-directionally sync a project.faf with CLAUDE.md and, with the format flags or all, also AGENTS.md, .cursorrules, and GEMINI.md. Returns the formats written and any conflicts. Use this to keep every AI tool context file aligned from the single .faf source.',
           annotations: {
             title: 'Bi-directional Sync',
             readOnlyHint: false,
@@ -404,7 +426,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_go',
-          description: 'Guided interview to Gold Code - Claude asks questions till you hit 100%! Returns questions for missing fields, then apply answers to reach Gold Code',
+          description: 'Drive a project.faf to 100% through a guided interview — returns the next questions for the missing human-context and goal fields, then applies the answers passed back. Returns the updated score after each round. Use this to close the gap to a complete context when auto-detection cannot fill the human slots.',
           annotations: {
             title: 'Guided Setup',
             readOnlyHint: false,
@@ -426,7 +448,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_auto',
-          description: 'ONE COMMAND TO RULE THEM ALL - Zero to Championship AI context instantly! Runs init + sync + formats + bi-sync + score in one go',
+          description: 'Run the full setup pipeline in one call — init, stack detection, sync, bi-sync, and score — taking a project from no context to a complete project.faf. Returns the final AI-readiness score and what was created. Use this as the fast path on a fresh project; use the individual tools when you need finer control.',
           annotations: {
             title: 'Auto-detect Context',
             readOnlyHint: false,
@@ -516,7 +538,7 @@ export class FafToolHandler {
         // ============================================================================
         {
           name: 'faf_agents',
-          description: 'Import/Export/Sync between AGENTS.md (OpenAI/Codex) and project.faf - AI interop!',
+          description: 'Import, export, or sync context between AGENTS.md (the OpenAI/Codex convention) and project.faf. Returns the merged or written result for the chosen action. Use this to keep a Codex/OpenAI-style AGENTS.md and your .faf in agreement from one source.',
           annotations: {
             title: 'Sync AGENTS.md',
             readOnlyHint: false,
@@ -537,7 +559,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_cursor',
-          description: 'Import/Export/Sync between .cursorrules (Cursor IDE) and project.faf - AI interop!',
+          description: 'Import, export, or sync context between .cursorrules (the Cursor IDE convention) and project.faf. Returns the merged or written result for the chosen action. Use this to keep Cursor rules and your .faf in agreement from one source.',
           annotations: {
             title: 'Sync .cursorrules',
             readOnlyHint: false,
@@ -558,7 +580,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_gemini',
-          description: 'Import/Export/Sync between GEMINI.md (Google Gemini CLI) and project.faf - AI interop!',
+          description: 'Import, export, or sync context between GEMINI.md (the Google Gemini CLI convention) and project.faf. Returns the merged or written result for the chosen action. Use this to keep a Gemini context file and your .faf in agreement from one source.',
           annotations: {
             title: 'Sync GEMINI.md',
             readOnlyHint: false,
@@ -617,8 +639,13 @@ export class FafToolHandler {
             additionalProperties: false
           }
         },
-      ] as Tool[]
-    };
+      ] as Tool[];
+
+    // Core-tier gate: advertise only the Core by default; FAF_TOOLS=all (or
+    // FAF_EXTENDED=1) exposes the full set. Dispatch in callTool keeps every
+    // tool callable by name regardless — the gate only shapes tools/list.
+    const showAll = process.env.FAF_TOOLS === 'all' || process.env.FAF_EXTENDED === '1';
+    return { tools: showAll ? allTools : allTools.filter((t) => CORE_TOOLS.has(t.name)) };
   }
 
   async callTool(name: string, args: any): Promise<CallToolResult> {

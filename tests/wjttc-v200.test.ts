@@ -129,9 +129,21 @@ describe('BRAKE: Tool Handler Routes', () => {
     handler = new FafToolHandler(engine);
   });
 
-  it('listTools returns object with tools array of correct count', async () => {
+  it('listTools default surface is the Core tier (gated)', async () => {
+    const prev = process.env.FAF_TOOLS;
+    delete process.env.FAF_TOOLS;
+    delete process.env.FAF_EXTENDED;
+    const result = await handler.listTools();
+    expect(result.tools.length).toBe(15); // Core tier — see CORE_TOOLS in tools.ts
+    if (prev !== undefined) process.env.FAF_TOOLS = prev;
+  });
+
+  it('FAF_TOOLS=all exposes the full set (catches accidental removal)', async () => {
+    const prev = process.env.FAF_TOOLS;
+    process.env.FAF_TOOLS = 'all';
     const result = await handler.listTools();
     expect(result.tools.length).toBeGreaterThanOrEqual(28); // 29 live (faf_enhance + faf_friday retired in The Curated Edition)
+    if (prev !== undefined) process.env.FAF_TOOLS = prev; else delete process.env.FAF_TOOLS;
   });
 
   it('every interop tool resolves without "Unknown tool"', async () => {

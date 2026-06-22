@@ -436,22 +436,27 @@ describe('🏁 WJTTC — bun migration + MCP integrity (faf-mcp)', () => {
         expect(info?.name).toBe('faf-mcp');
       });
 
-      test('listTools count is in a sane envelope (catches accidental removal)', async () => {
-        const { tools } = await client.listTools();
-        // Today's count is 32 (probed live); floor at 20 catches any major
-        // accidental removal without being brittle to incremental additions.
-        expect(tools.length).toBeGreaterThanOrEqual(20);
-        // Ceiling guards against accidental duplication / runaway tool
-        // registration.
-        expect(tools.length).toBeLessThanOrEqual(200);
+      test('listTools count is in a sane envelope (Core gated by default; full via FAF_TOOLS=all)', async () => {
+        // Default surface = the Core tier (what Glama and any client see).
+        delete process.env.FAF_TOOLS;
+        delete process.env.FAF_EXTENDED;
+        const core = (await client.listTools()).tools;
+        expect(core.length).toBe(15); // Core tier — see CORE_TOOLS in tools.ts
+        expect(core.length).toBeLessThanOrEqual(200);
+        // Full set — catches accidental removal from the codebase.
+        process.env.FAF_TOOLS = 'all';
+        const all = (await client.listTools()).tools;
+        expect(all.length).toBeGreaterThanOrEqual(28); // 29 live
+        delete process.env.FAF_TOOLS;
       });
 
-      test('core tool names are present', async () => {
+      test('core tool names are present on the default surface', async () => {
+        delete process.env.FAF_TOOLS;
+        delete process.env.FAF_EXTENDED;
         const { tools } = await client.listTools();
         const names = new Set(tools.map((t) => t.name));
-        // Verified live against FafToolHandler.listTools — these are the
-        // names the active handler actually advertises.
-        for (const required of ['faf_about', 'faf_score', 'faf_status', 'faf_init', 'faf_sync']) {
+        // All members of CORE_TOOLS — advertised by default (gate on).
+        for (const required of ['faf_about', 'faf_score', 'faf_init', 'faf_sync', 'faf_auto', 'faf_context']) {
           expect(names.has(required)).toBe(true);
         }
       });

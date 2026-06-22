@@ -165,12 +165,14 @@ describe('🏁 MCP Conformance — over real protocol via SDK + in-memory transp
   // Category 5: Tool identity / visibility
   // ───────────────────────────────────────────────────────────────────────
   describe('5. Tool identity / visibility', () => {
-    test('core advertised tools are present (faf_score, faf_about, faf_status)', async () => {
+    test('core advertised tools are present (faf_score, faf_about, faf_init)', async () => {
       const { tools } = await client.listTools();
       const names = new Set(tools.map((t) => t.name));
+      // Core-tier members (gate on by default). faf_status is Extended now —
+      // still callable by name, just not advertised. See CORE_TOOLS in tools.ts.
       expect(names.has('faf_score')).toBe(true);
       expect(names.has('faf_about')).toBe(true);
-      expect(names.has('faf_status')).toBe(true);
+      expect(names.has('faf_init')).toBe(true);
     });
 
     test('all advertised tools are namespaced under faf and have descriptions', async () => {
