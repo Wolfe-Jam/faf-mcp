@@ -106,7 +106,7 @@ faf bi-sync --all
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**29 MCP tools** (with CLI fallback) · **309 tests** (9 suites) · **7 bundled parsers**
+**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · with CLI fallback · **9 test suites** · **7 bundled parsers**
 
 ---
 
