@@ -28,10 +28,10 @@ stack:
   storage: slotignored
 human_context:
   who: Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
-  what: The Cursor / IDE Edition — persistent context for Cursor, VS Code, and every MCP-compatible IDE — 31 MCP tools, interop with AGENTS.md, .cursorrules, GEMINI.md
+  what: The Cursor / IDE Edition — persistent context for Cursor, VS Code, and every MCP-compatible IDE — 29 MCP tools (15 essential shown by default), interop with AGENTS.md, .cursorrules, GEMINI.md
   why: Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
   where: npm · MCP Registry · Cloudflare edge (ide.faf.one/mcp/v1) · any MCP-compatible IDE — people get it how they wish
-  when: Production/Stable — v2.0.0 WJTTC certified (309/309 tests, 9 suites)
+  when: Production/Stable — v2.3.0 The Curated Edition, WJTTC certified
   how: npx faf-mcp or npm install -g faf-mcp, then add to your MCP config
 monorepo:
   packages_count: slotignored

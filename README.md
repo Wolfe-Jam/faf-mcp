@@ -24,6 +24,12 @@ The MCP you didn't realise you needed, or wanted but didn't know who to ask, is 
 
 ---
 
+## What's New in 2.3.0 — The Curated Edition
+
+**The tools you actually need, up front.** faf-mcp now leads with **15 essential tools** by default — a clean, focused surface instead of a wall of options. Need everything? Set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way). And every Core tool's description was rewritten so your AI picks the right one, first time.
+
+---
+
 ## Define once. Sync everywhere.
 
 You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team just switched to Gemini. Every AI tool wants its own context file — and they all say the same thing in different formats.

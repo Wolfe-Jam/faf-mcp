@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.2.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v2.3.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.3.0] - 2026-06-23 — The Curated Edition
+
+The tools you actually need, up front — 15 essential tools by default, the full 29 one flag away (`FAF_TOOLS=all`).
+
+### Added
+
+- **Core-tier surface.** faf-mcp now advertises a curated **15 essential tools** by default — the ones you actually reach for, without the wall. Set `FAF_TOOLS=all` (or `FAF_EXTENDED=1`) to expose the full **29**; every tool stays callable by name either way.
+
+### Changed
+
+- **Craft-grade tool descriptions.** Every Core tool's description was rewritten to a clear, consistent pattern — what it does → what it returns → when to use it — so an AI agent picks the right tool first time.
+
+### Removed
+
+- **`faf_enhance`** (a fork that didn't compose faf-cli) and **`faf_friday`** (a novelty) — 31 → 29 tools.
 
 ## [2.2.1] - 2026-06-16
 

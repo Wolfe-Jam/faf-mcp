@@ -1,6 +1,6 @@
 {
   "name": "faf-mcp",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "mcpName": "one.faf/faf-mcp",
   "description": "Persistent Project Context for Cursor, IDEs and VS Code. IANA-registered .faf format, 31 MCP tools, 309 tests.",
   "icon": "./assets/icons/faf-icon-256.png",
