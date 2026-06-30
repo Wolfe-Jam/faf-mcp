@@ -39,3 +39,16 @@ monorepo:
   versioning_strategy: slotignored
   shared_configs: slotignored
   remote_cache: slotignored
+surfaces:
+  # Distribution map — the machine-checkable form of human_context.where. Score-neutral.
+  auto:                      # derived from manifests; regenerate with `faf surface --sync`
+    - { type: npm,          id: faf-mcp,           source: "package.json#name" }
+    - { type: github,       id: Wolfe-Jam/faf-mcp, source: "package.json#repository" }
+    - { type: mcp-registry, id: one.faf/faf-mcp,   state: active, source: "server.json#name" }
+  declared:                  # hand-authored: surfaces the manifests don't carry + targets
+    - { type: mcpaas,       id: faf, url: "https://ide.faf.one/mcp/v1", transport: streamable-http, status: live }
+    - { type: homebrew,     id: faf-mcp, status: live }
+    - { type: mcp-registry, id: io.github.Wolfe-Jam/faf-mcp, state: deprecated, superseded_by: one.faf/faf-mcp }
+    - { type: pulsemcp,            id: faf-mcp, status: pending }
+    - { type: glama,               id: faf-mcp, status: pending }
+    - { type: awesome-mcp-servers, id: faf-mcp, status: pending }
