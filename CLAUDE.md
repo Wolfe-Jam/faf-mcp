@@ -12,11 +12,11 @@ The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for
 
 - **Language:** TypeScript
 - **Backend:** MCP SDK (TS)
-- **Api Type:** MCP (stdio + Streamable HTTP)
+- **API:** MCP (stdio + Streamable HTTP)
 - **Runtime:** Node.js >=18
 - **Hosting:** npm + Cloudflare edge
 - **Build:** TypeScript (tsc)
-- **Cicd:** GitHub Actions
+- **CI/CD:** GitHub Actions
 - **Package Manager:** npm
 
 ## Context
@@ -30,5 +30,5 @@ The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-06-23T15:53:22.301Z*
+*STATUS: BI-SYNC ACTIVE — 2026-07-01T01:00:16.899Z*
 <!-- faf:end -->
