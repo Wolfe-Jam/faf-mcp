@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.3.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v2.3.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.3.1] - 2026-06-30
+
+### Fixed
+- **Working-directory resolution (cwd path-check).** `findBestWorkingDirectory()`
+  forced `~/Projects` as a "universal default" *above* `process.cwd()`, so every
+  no-path tool call (`faf_score`, …) operated on `~/Projects`'s `.faf` instead of
+  the project the IDE/host had open. In Cursor — which launches the server in the
+  workspace — that meant scoring the wrong folder (a stale `~/Projects`
+  score, never the real project). The caller's actual cwd now wins: prefer a real
+  FAF project (cwd contains `project.faf` — the path-check), else the cwd itself
+  when it's a usable, non-root directory. `~/Projects` remains a fallback **only**
+  when there's no usable workspace (cwd is the filesystem root), preserving the
+  no-context launch case. Regression test: `tests/wjttc-cwd-resolution.test.ts`.
+  faf-cli, `scoreFafYaml` and the scoring kernel were never at fault — this was
+  purely working-directory resolution.
 
 ## [2.3.0] - 2026-06-23 — The Curated Edition
 
