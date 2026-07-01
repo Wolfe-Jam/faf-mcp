@@ -4,8 +4,8 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #FF8C00;">faf-mcp</h1>
-    <p style="margin: 4px 0 0 0;"><strong>Persistent Project Context for Cursor, IDEs and VS Code. Define once. Sync everywhere.</strong></p>
+    <h1 style="margin: 0; color: #FF8C00;">.FAF Context</h1>
+    <p style="margin: 4px 0 0 0;"><strong>Persistent Project Context for Cursor, IDEs and VS Code. Define once. Sync everywhere.</strong> <sub>npm: <code>faf-mcp</code></sub></p>
   </div>
 </div>
 
