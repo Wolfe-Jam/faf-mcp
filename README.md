@@ -47,6 +47,10 @@ You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team
 
 ### Quick Start
 
+**Cursor — one click:** [![Add .FAF Context to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=faf-mcp&config=eyJjb21tYW5kIjoiYnVueCIsImFyZ3MiOlsiZmFmLW1jcCJdfQ==)
+
+**Everywhere else:**
+
 ```bash
 bunx faf-mcp
 ```
