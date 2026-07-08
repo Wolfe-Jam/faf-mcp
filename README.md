@@ -36,6 +36,16 @@ You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team
 
 **faf-mcp is the dedicated MCP server for Cursor, Windsurf, Cline, VS Code, and every non-Claude platform.** One `.faf` file in your repo, synced to every format your team needs.
 
+**Generator:** faf-cli (v7.1 AGENTS.md Edition) produces the files this server syncs:
+
+```bash
+bunx faf export --agents     # AGENTS.md for agents
+bunx faf export --all        # AGENTS.md + CLAUDE.md + .cursorrules + GEMINI.md + copilot-instructions
+bunx faf score               # Trophy target
+```
+
+Zero-install. Git-native. Non-destructive. Same command works for Cursor multi-agent, Grok sessions, or any AI tool. See the [faf-cli agent guide](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
+
 ```
                       project.faf
                            │
