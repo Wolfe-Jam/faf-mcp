@@ -36,7 +36,7 @@ You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team
 
 **faf-mcp is the dedicated MCP server for Cursor, Windsurf, Cline, VS Code, and every non-Claude platform.** One `.faf` file in your repo, synced to every format your team needs.
 
-**Context for Cursor & IDE agents:** faf-cli (v7.1) generates the files this server syncs — `bunx faf export --agents`, zero-install and git-native. See [FAF-CLI for Cursor & IDE agents 👀](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
+**Context for Cursor & IDE agents:** faf-cli (v7.1) authors the files this server syncs — `bunx faf export --agents`, zero-install and git-native. See [FAF-CLI for Cursor & IDE agents 👀](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
 
 ```
                       project.faf
@@ -108,7 +108,7 @@ npx faf-mcp
 | `faf_cursor` | Cursor IDE | Import/export/sync .cursorrules |
 | `faf_gemini` | Google Gemini | Import/export/sync GEMINI.md |
 | `faf_conductor` | Conductor | Import/export directory structure |
-| `faf_git` | GitHub | Generate .faf from any repo URL |
+| `faf_git` | GitHub | Author .faf from any repo URL |
 
 ```bash
 # Sync to all formats at once
@@ -214,7 +214,7 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_cursor` | Import/export/sync .cursorrules |
 | `faf_gemini` | Import/export/sync GEMINI.md |
 | `faf_conductor` | Import/export directory structure |
-| `faf_git` | Generate .faf from GitHub repo URL |
+| `faf_git` | Author .faf from GitHub repo URL |
 | **Cloud Tools** | |
 | `faf_cloud_publish` | Upload to mcpaas.live |
 | `faf_cloud_fetch` | Pull from cloud |
