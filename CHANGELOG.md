@@ -58,7 +58,7 @@ faf-mcp now **enhances** your context files instead of replacing them — a stru
 
 ### Changed
 
-- **Non-destructive interop.** `faf_cursor`, `faf_agents`, `faf_gemini`, and `faf_sync` now inject a structured `.faf` block at the top of .cursorrules, AGENTS.md, GEMINI.md, and CLAUDE.md and preserve everything you've written below. Re-runs update the block in place (idempotent); existing faf-generated files upgrade cleanly in one pass.
+- **Non-destructive interop.** `faf_cursor`, `faf_agents`, `faf_gemini`, and `faf_sync` now inject a structured `.faf` block at the top of .cursorrules, AGENTS.md, GEMINI.md, and CLAUDE.md and preserve everything you've written below. Re-runs update the block in place (idempotent); existing faf-authored files upgrade cleanly in one pass.
 - **Composes faf-cli's single-source engines.** Turbo-Cat (~200-format detection) and the 6Ws interview now come from faf-cli — faf-mcp's own forks are deleted. One source of truth, no drift between the CLI and the server.
 - **Migrated to the `one.faf` namespace.** MCP Registry identity `io.github.Wolfe-Jam/faf-mcp` → `one.faf/faf-mcp` (DNS-verified), carrying the single-source `one.faf/context` `_meta` block emitted by faf-cli. The npm package `faf-mcp`, its tools, and its downloads are **unchanged** — only the registry identity moves.
 
