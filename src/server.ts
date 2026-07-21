@@ -118,7 +118,7 @@ export class FafMcpServer {
         console.error('faf-mcp started with stdio transport');
       }
     } else {
-      throw new Error(`Unsupported transport: ${this.config.transport}`);
+      throw new Error(`Unsupported transport: ${String(this.config.transport)}`);
     }
   }
 

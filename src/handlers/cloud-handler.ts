@@ -107,7 +107,7 @@ export class FafCloudHandler {
       const fafContent = await fs.readFile(fafResult.path, 'utf-8');
 
       // Call mcpaas.live write_soul tool
-      const result = await this.makeRequest('tools/call', {
+      const _result = await this.makeRequest('tools/call', {
         name: 'write_soul',
         arguments: {
           name: soul_name,
