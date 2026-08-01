@@ -16,7 +16,7 @@
 
 **Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (Streamable HTTP)
 
-The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on [100,000+](https://faf.one/blog/hundred-thousand) downloads across the FAF ecosystem, we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
+The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on [100,000+ ecosystem downloads](https://faf.one/downloads) (hard floor · live), we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
 ⭐ **A star helps other devs discover faf-mcp** — despite the downloads, ~3 of 4 devs check stars first.
 
