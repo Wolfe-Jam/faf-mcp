@@ -238,6 +238,7 @@ Works on all platforms — stops web search, forces tool usage.
 - **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
 - **[faf.one](https://faf.one)** — Official website
+- **[docs/SKILLS-OVER-MCP.md](./docs/SKILLS-OVER-MCP.md)** — J1 Agent Skill `faf-ide` (stdio · skills/list · digests)
 
 ---
 
