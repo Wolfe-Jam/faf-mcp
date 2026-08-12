@@ -18,7 +18,7 @@
 
 The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on over 100k ecosystem downloads ([latest stats](https://faf.one/downloads)), we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
-⭐ **A star helps other devs discover faf-mcp** — despite the downloads, ~3 of 4 devs check stars first.
+⭐ Bookmarks it for you, helps other devs find it too.
 
 [![CI](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
