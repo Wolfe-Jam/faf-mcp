@@ -13,6 +13,7 @@
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
+[![DOI: Agents paper](https://img.shields.io/badge/DOI-Agents%20paper-FF6B35)](https://doi.org/10.5281/zenodo.21951641)
 
 **Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (Streamable HTTP)
 
@@ -245,6 +246,38 @@ Works on all platforms — stops web search, forces tool usage.
 ---
 
 If `faf-mcp` has been useful, consider starring the repo — it helps others find it.
+
+## Citation
+
+If you use `faf-mcp` or the `.faf` / `.fafa` formats in research or production, please cite the format papers:
+
+> Wolfe, J. (2025). *Format-Driven AI Context Architecture: The .faf Standard for Persistent Project Understanding*. Zenodo. https://doi.org/10.5281/zenodo.18251362
+
+> Wolfe, J. (2026). *Why Agents Need a Passport: .fafa — Portable Identity for the Agentic Era*. Zenodo. https://doi.org/10.5281/zenodo.21951641
+
+### BibTeX
+
+```bibtex
+@article{wolfe2025faf,
+  title     = {Format-Driven AI Context Architecture: The .faf Standard for Persistent Project Understanding},
+  author    = {Wolfe, James},
+  year      = {2025},
+  month     = {nov},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.18251362},
+  url       = {https://doi.org/10.5281/zenodo.18251362}
+}
+
+@article{wolfe2026fafa,
+  title     = {Why Agents Need a Passport: .fafa — Portable Identity for the Agentic Era},
+  author    = {Wolfe, James},
+  year      = {2026},
+  month     = {aug},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21951641},
+  url       = {https://doi.org/10.5281/zenodo.21951641}
+}
+```
 
 ## License
 
