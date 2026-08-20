@@ -1,6 +1,8 @@
 faf_version: "3.0"
 project:
   name: faf-mcp
+  title: .FAF Context
+  version: 2.3.1
   goal: The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF".
   main_language: TypeScript
   type: mcp
