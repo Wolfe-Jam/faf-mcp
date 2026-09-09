@@ -14,9 +14,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { injectFafBlock } from '../inject';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
-import { fafMetaTag, filled, fmtVal, present, slotLabel, titleLabel, HUMAN_PREF, NON_STACK } from './interop-render.js';
 
 // ============================================================================
 // Types
@@ -246,221 +244,16 @@ export async function agentsExport(
   fafContent: any,
   outputPath: string
 ): Promise<AgentsExportResult> {
-  const warnings: string[] = [];
-  const { SLOT_BY_PATH } = await fafCli;
-
-  const data = fafContent ?? {};
-  const project = data.project ?? {};
-  const ai = data.ai_instructions ?? {};
-  const prefs = data.preferences ?? {};
-  const instant = data.instant_context ?? {};
-  const security = data.security;
-  const commands = data.commands;
-  const keyFiles: string[] | undefined = data.key_files ?? instant.key_files;
-  // Integration branch — git-flow repos PR into dev/develop, not main.
-  const branch = present(project.default_branch) ? String(project.default_branch) : 'main';
-
-  const entries: [string, string][] = commands
-    ? Object.entries(commands).filter(([, v]) => present(v)).map(([k, v]): [string, string] => [k, fmtVal(v)])
-    : [];
-  // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
-  const testCmds = entries.filter(([k]) => /test/i.test(k));
-  const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));
-  const setupRaw = entries.filter(([k]) => !/test|lint|check/i.test(k));
-  // Stable setup order: install -> build -> dev -> start -> other.
-  const setupRank = (k: string): number => {
-    const n = k.toLowerCase();
-    if (/install|deps/.test(n)) return 0;
-    if (/^build$|build/.test(n) && !/rebuild/.test(n)) return 1;
-    if (/^dev$|develop/.test(n)) return 2;
-    if (/^start$|run/.test(n)) return 3;
-    return 4;
-  };
-  const setupCmds = [...setupRaw].sort(
-    (a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]),
-  );
-  // Verify bar: tests first, then lint/typecheck.
-  const verifyCmds = [...testCmds, ...lintCmds];
-  const testCmd = testCmds[0]?.[1];
-  const buildCmd = setupCmds.find(([k]) => /build/i.test(k))?.[1];
-
-  const lines: string[] = [];
-  const push = (s = '') => lines.push(s);
-
-  push(fafMetaTag(data));
-  push();
-  push(`# AGENTS.md — ${project.name ?? 'Project'}`);
-  push();
-
-  // Orientation — one line: what it is · language · type · version
-  const bits: string[] = [];
-  if (project.main_language) bits.push(String(project.main_language));
-  if (present(project.type)) bits.push(`type: ${String(project.type)}`);
-  if (present(project.version)) bits.push(`v${String(project.version)}`);
-  let orientation = project.goal ? String(project.goal).trim() : '';
-  if (bits.length) orientation += (orientation ? ' — ' : '') + bits.join(' · ');
-  if (orientation) {
-    push(orientation);
-    push();
-  }
-  // NOTE: deliberately does not spell out the literal `<!-- faf:start -->`/
-  // `<!-- faf:end -->` marker tokens in this prose — injectFafBlock finds
-  // markers by plain substring search, so echoing them verbatim inside the
-  // managed block collides with that search and corrupts re-injection on
-  // the next sync (found the hard way: faf-cli's own current renderAgentsMd
-  // does spell them out and would hit the same self-inflicted bug).
-  push(
-    '> Authored from project.faf — refresh with `faf_agents`. Hand-written content outside the faf-managed block above is preserved.',
-  );
-  push();
-
-  // Setup & build
-  if (setupCmds.length) {
-    push('## Setup & build');
-    push();
-    push('```bash');
-    for (const [k, v] of setupCmds) push(`${v}    # ${k}`);
-    push('```');
-    push();
-  }
-
-  // Run the tests — verify bar (tests + lint/typecheck)
-  if (verifyCmds.length) {
-    push('## Run the tests');
-    push();
-    push('```bash');
-    for (const [, v] of verifyCmds) push(String(v));
-    push('```');
-    push();
-  }
-
-  // Where things live — a Path | Role table when any entry carries a
-  // " — role" annotation; a plain list when they're all bare paths.
-  if (keyFiles && keyFiles.length) {
-    push('## Where things live');
-    push();
-    const rows = keyFiles.map((f) => {
-      const s = String(f);
-      const at = s.indexOf(' — ');
-      return at > 0 ? { path: s.slice(0, at), role: s.slice(at + 3) } : { path: s, role: '' };
-    });
-    if (rows.some((r) => r.role)) {
-      push('| Path | Role |');
-      push('|------|------|');
-      for (const r of rows) push(`| \`${r.path}\` | ${r.role} |`);
-    } else {
-      for (const r of rows) push(`- \`${r.path}\``);
-    }
-    push();
-  }
-
-  // Conventions — real repo constraints only (human<->assistant prefs excluded)
-  const conventions = new Map<string, string>();
-  const collect = (obj: Record<string, unknown> | undefined) => {
-    if (!obj) return;
-    for (const [k, v] of Object.entries(obj)) {
-      if (HUMAN_PREF.has(k) || !present(v)) continue;
-      const label = titleLabel(k);
-      if (!conventions.has(label)) conventions.set(label, fmtVal(v));
-    }
-  };
-  collect(ai.working_style);
-  collect(prefs);
-  const detectedConv: string[] = (data.conventions ?? []).filter((c: unknown) => present(c)).map((c: unknown) => fmtVal(c));
-  if (conventions.size || detectedConv.length) {
-    push('## Conventions');
-    push();
-    for (const [label, val] of conventions) push(`- **${label}:** ${val}`);
-    for (const c of detectedConv) push(`- ${c}`);
-    push();
-  }
-
-  // Guardrails — Always / Ask first / Never (three-tier)
-  const warningsList: string[] = (ai.warnings ?? []).filter((w: unknown) => present(w)).map((w: unknown) => fmtVal(w));
-  const always: string[] = ['read the tree'];
-  if (testCmd) always.push(`run the tests (\`${testCmd}\`)`);
-  if (buildCmd) always.push('build the project');
-  for (const [, v] of lintCmds.slice(0, 1)) always.push(`\`${v}\``);
-
-  push('## Guardrails');
-  push();
-  for (const w of warningsList) push(`- ${w}`);
-  push(`- **Always OK:** ${[...new Set(always)].join(' · ')}.`);
-  push('- **Ask first:** dependency installs, deletions, migrations, schema changes, publish/release.');
-  push(`- **Never:** force-push · push straight to \`${branch}\` (branch and open a PR) · commit secrets.`);
-  push();
-
-  // Definition of Done
-  const dod: string[] = [];
-  for (const [, v] of lintCmds) dod.push(`\`${v}\` exits 0`);
-  for (const [, v] of testCmds) dod.push(`\`${v}\` passes`);
-  dod.push('changes committed with a conventional message');
-  push('## Definition of Done');
-  push();
-  push(`Done when: ${[...new Set(dod)].join(' · ')}.`);
-  push();
-
-  // When stuck
-  push('## When stuck');
-  push();
-  push(
-    `Ask a clarifying question, propose a short plan, or open a draft PR with notes — do not push large speculative changes to \`${branch}\`.`,
-  );
-  push();
-
-  // Security & secrets — when detected (never the values)
-  if (security && (present(security.secrets) || (security.never ?? []).length)) {
-    push('## Security & secrets');
-    push();
-    if (present(security.secrets)) {
-      const ex = present(security.example) ? ` (see \`${security.example}\`)` : '';
-      push(`- Secrets live in \`${security.secrets}\`${ex}. Never read or commit them.`);
-    }
-    for (const n of security.never ?? []) if (present(n)) push(`- Never read or commit \`${n}\`.`);
-    push();
-  }
-
-  // Commit & PR — always (defaults + optional commit_style)
-  push('## Commit & PR');
-  push();
-  if (present(prefs.commit_style)) {
-    push(`- Commit style: ${fmtVal(prefs.commit_style)}`);
-  } else {
-    push('- Conventional Commits preferred (`feat:`, `fix:`, `chore:`, …).');
-  }
-  push(`- Branch off \`${branch}\` and open a PR — never commit to \`${branch}\` directly.`);
-  push('- If build/test scripts or layout change, refresh this file in the **same PR** (`faf_agents`).');
-  push();
-
-  // Stack (reference) — actual stack only; omit empty / all-slotignored noise
-  if (data.stack) {
-    const stackLines: string[] = [];
-    for (const [key, value] of Object.entries(data.stack)) {
-      if (NON_STACK.has(key)) continue;
-      if (filled(value)) stackLines.push(`- **${slotLabel(`stack.${key}`, SLOT_BY_PATH)}:** ${value.trim()}`);
-    }
-    if (stackLines.length) {
-      push('## Stack');
-      push();
-      for (const s of stackLines) push(s);
-      push();
-    }
-  }
-
-  // No Human Context section — who/why marketing is README/project.faf, not agent ops.
-
-  const gen = data.generated;
-  if (present(gen)) push(`*Context authored: ${String(gen)}*`);
-
-  // Write file — non-destructive: inject/update the faf block, preserve the rest.
-  const content = lines.join('\n');
-  await injectFafBlock(outputPath, content);
-
-  return {
-    success: true,
-    filePath: outputPath,
-    warnings,
-  };
+  // Composed from faf-cli (7.12.0+): the same bytes `faf export --agents`
+  // writes. enrichFromRepo fills commands / key files / secrets from the repo
+  // (hand-authored values win); renderAgentsMd is faf-cli's renderer; the
+  // block is injected with faf-cli's injector (whole-line markers). Nothing
+  // is ported here any more — a port drifted (thinner sections, a prose
+  // decoy) and this is the fix.
+  const { renderAgentsMd, enrichFromRepo, injectFafBlock } = await fafCli;
+  const dir = path.dirname(outputPath);
+  injectFafBlock(outputPath, renderAgentsMd(enrichFromRepo(dir, fafContent ?? {})));
+  return { success: true, filePath: outputPath, warnings: [] };
 }
 
 // ============================================================================

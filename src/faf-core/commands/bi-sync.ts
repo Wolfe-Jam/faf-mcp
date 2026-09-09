@@ -9,7 +9,6 @@ import * as path from 'path';
 import { promises as fs } from 'fs';
 import { findFafFile, fileExists } from '../utils/file-utils';
 import { agentsExportCommand } from './agents.js';
-import { injectFafBlock } from '../inject';
 import { cursorExportCommand } from './cursor.js';
 import { geminiExportCommand } from './gemini.js';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
@@ -35,68 +34,6 @@ export interface BiSyncResult {
 }
 
 /**
- * 🔄 Convert project.faf YAML content to CLAUDE.md Markdown format
- */
-export function fafToClaudeMd(fafContent: string): string {
-  try {
-    const fafData = parseYAML(fafContent);
-
-    let claudeMd = `# 🏎️ CLAUDE.md - ${fafData.project?.name || 'Project'} Persistent Context & Intelligence\n\n`;
-
-    // Project State
-    if (fafData.project) {
-      claudeMd += `## PROJECT STATE: ${fafData.context_quality?.overall_assessment || 'ACTIVE'} 🚀\n`;
-      if (fafData.project.goal) {
-        claudeMd += `**Current Position:** ${fafData.project.goal}\n`;
-      }
-      claudeMd += `**Tyre Compound:** ULTRASOFT C5 (Maximum Performance)\n\n`;
-      claudeMd += `---\n\n`;
-    }
-
-    // Core Context
-    claudeMd += `## 🎨 CORE CONTEXT\n\n`;
-
-    if (fafData.project) {
-      claudeMd += `### Project Identity\n`;
-      claudeMd += `- **Name:** ${fafData.project.name || 'Unknown'}\n`;
-      if (fafData.instant_context?.tech_stack) {
-        claudeMd += `- **Stack:** ${fafData.instant_context.tech_stack}\n`;
-      }
-      claudeMd += `- **Quality:** F1-INSPIRED (Championship Performance)\n\n`;
-    }
-
-    // Technical Context
-    if (fafData.instant_context) {
-      claudeMd += `### Technical Architecture\n`;
-      if (fafData.instant_context.what_building) {
-        claudeMd += `- **What Building:** ${fafData.instant_context.what_building}\n`;
-      }
-      if (fafData.instant_context.main_language) {
-        claudeMd += `- **Main Language:** ${fafData.instant_context.main_language}\n`;
-      }
-      claudeMd += `\n`;
-    }
-
-    // Context Quality
-    if (fafData.context_quality) {
-      claudeMd += `### 📊 Context Quality Status\n`;
-      claudeMd += `- **Overall Assessment:** ${fafData.context_quality.overall_assessment || 'Good'}\n`;
-      claudeMd += `- **Last Updated:** ${new Date().toISOString().split('T')[0]}\n\n`;
-    }
-
-    // Championship Footer
-    claudeMd += `---\n\n`;
-    claudeMd += `**STATUS: BI-SYNC ACTIVE 🔗 - Synchronized with .faf context!**\n\n`;
-    claudeMd += `*Last Sync: ${new Date().toISOString()}*\n`;
-    claudeMd += `*Sync Engine: F1-Inspired Software Engineering*\n`;
-    claudeMd += `*🏎️⚡️_championship_sync*\n`;
-
-    return claudeMd;
-
-  } catch (error) {
-    throw new Error(`Failed to convert .faf to CLAUDE.md: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
 
 /**
  * 🔗 Main Bi-Sync function
@@ -133,18 +70,19 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
     parseYAML(fafContent); // still validates the YAML before anything is written
     // The score in the message is the real one — faf-cli's scorer on the
     // bytes read — not a `faf_score` key nothing ever writes.
+    const { scoreFafYaml, readFaf, renderClaudeMd, writeClaudeMd } = await fafCli;
     let currentScore = 'unknown';
     try {
-      const { scoreFafYaml } = await fafCli;
       currentScore = `${scoreFafYaml(fafContent).score}%`;
     } catch {
       /* scorer unavailable — say so rather than invent a number */
     }
 
     if (!claudeMdExists) {
-      // Create CLAUDE.md from project.faf
-      const claudeMdContent = fafToClaudeMd(fafContent);
-      await injectFafBlock(claudeMdPath, claudeMdContent);
+      // CLAUDE.md is faf-cli's render of project.faf — the same bytes
+      // `faf sync` writes — injected with faf-cli's injector. The pre-v3
+      // template that lived here dropped Stack and every human_context slot.
+      writeClaudeMd(projectDir, renderClaudeMd(readFaf(fafPath)));
 
       result.success = true;
       result.direction = 'faf-to-claude';
@@ -152,9 +90,10 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
       result.message = `CLAUDE.md created! Bi-sync now active! FAF Score: ${currentScore}`;
 
     } else {
-      // Both files exist - update CLAUDE.md from project.faf
-      const claudeMdContent = fafToClaudeMd(fafContent);
-      await injectFafBlock(claudeMdPath, claudeMdContent);
+      // CLAUDE.md is faf-cli's render of project.faf — the same bytes
+      // `faf sync` writes — injected with faf-cli's injector. The pre-v3
+      // template that lived here dropped Stack and every human_context slot.
+      writeClaudeMd(projectDir, renderClaudeMd(readFaf(fafPath)));
 
       result.success = true;
       result.direction = 'faf-to-claude';

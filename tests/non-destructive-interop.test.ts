@@ -11,7 +11,7 @@ import { tmpdir } from 'os';
 import { agentsExport } from '../src/faf-core/parsers/agents-parser';
 import { geminiExport } from '../src/faf-core/parsers/gemini-parser';
 import { cursorExport } from '../src/faf-core/parsers/cursorrules-parser';
-import { injectFafBlock } from '../src/faf-core/inject';
+import { fafCli } from '../src/utils/faf-cli-bridge.js';
 
 const DATA: any = {
   project: { name: 'Demo', goal: 'a small api', main_language: 'TypeScript' },
@@ -19,12 +19,13 @@ const DATA: any = {
   stack: { backend: 'Express' },
 };
 const MARK = '## HAND-WRITTEN — MUST SURVIVE';
-// Count actual marker LINES, not any occurrence of the substring "faf:start"
-// — faf-cli's current AGENTS.md body (v3.0) legitimately mentions the
-// `<!-- faf:start -->` token in prose (documenting the managed-block syntax
-// to the reader), which is not itself a marker and must not double-count.
+// Count marker LINES (the injector's rule since faf-cli 7.12.0). Nothing faf
+// writes mentions the token in prose any more; a stray substring would be a
+// user's own text and must not count as a block.
 const blocks = (s: string) => (s.match(/^(?:<!-- faf:start -->|# faf:start)$/gm) || []).length;
 function tmp(): string { return mkdtempSync(join(tmpdir(), 'faf-mcp-nd-')); }
+// faf-mcp composes faf-cli's injector (no local copy since 3.0).
+const injectFafBlock = async (p: string, block: string): Promise<void> => { (await fafCli).injectFafBlock(p, block); };
 
 describe('injectFafBlock — non-destructive', () => {
   test('prefix preserves user content; markers update in place; idempotent', async () => {

@@ -14,9 +14,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { injectFafBlock } from '../inject';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
-import { fafMetaTag, filled, fmtVal, present, slotLabel, NON_STACK } from './interop-render.js';
 
 // ============================================================================
 // Types
@@ -225,105 +223,11 @@ export async function geminiExport(
   fafContent: any,
   outputPath: string
 ): Promise<GeminiExportResult> {
-  const warnings: string[] = [];
-  const { SLOT_BY_PATH } = await fafCli;
-
-  const data = fafContent ?? {};
-  const project = data.project ?? {};
-  const instant = data.instant_context ?? {};
-  const commands = data.commands;
-  const keyFiles: string[] | undefined = data.key_files ?? instant.key_files;
-
-  const entries: [string, string][] = commands
-    ? Object.entries(commands).filter(([, v]) => present(v)).map(([k, v]): [string, string] => [k, fmtVal(v)])
-    : [];
-  // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
-  const testCmds = entries.filter(([k]) => /test/i.test(k));
-  const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));
-  const setupRaw = entries.filter(([k]) => !/test|lint|check/i.test(k));
-  // Stable setup order: install -> build -> dev -> start -> other.
-  const setupRank = (k: string): number => {
-    const n = k.toLowerCase();
-    if (/install|deps/.test(n)) return 0;
-    if (/^build$|build/.test(n) && !/rebuild/.test(n)) return 1;
-    if (/^dev$|develop/.test(n)) return 2;
-    if (/^start$|run/.test(n)) return 3;
-    return 4;
-  };
-  const setupCmds = [...setupRaw].sort(
-    (a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]),
-  );
-  const verifyCmds = [...testCmds, ...lintCmds];
-
-  const lines: string[] = [];
-
-  lines.push(fafMetaTag(data));
-  lines.push('');
-  lines.push(`# GEMINI.md — ${project.name ?? 'Project'}`);
-  lines.push('');
-  lines.push('> Authored from project.faf — refresh with `faf_gemini`.');
-  lines.push('');
-
-  if (project.name) lines.push(`Project: ${project.name}`);
-  if (project.goal) lines.push(`Goal: ${project.goal}`);
-  if (project.main_language) lines.push(`Language: ${project.main_language}`);
-
-  if (setupCmds.length) {
-    lines.push('');
-    lines.push('## Setup & build');
-    lines.push('');
-    lines.push('```bash');
-    for (const [k, v] of setupCmds) lines.push(`${v}    # ${k}`);
-    lines.push('```');
-  }
-
-  if (verifyCmds.length) {
-    lines.push('');
-    lines.push('## Test & verify');
-    lines.push('');
-    lines.push('```bash');
-    for (const [, v] of verifyCmds) lines.push(String(v));
-    lines.push('```');
-  }
-
-  if (keyFiles && keyFiles.length) {
-    lines.push('');
-    lines.push('## Where things live');
-    lines.push('');
-    for (const f of keyFiles) lines.push(`- \`${f}\``);
-  }
-
-  if (data.stack) {
-    const stackLines: string[] = [];
-    for (const [key, value] of Object.entries(data.stack)) {
-      if (NON_STACK.has(key)) continue;
-      if (filled(value)) stackLines.push(`- ${slotLabel(`stack.${key}`, SLOT_BY_PATH)}: ${value.trim()}`);
-    }
-    if (stackLines.length) {
-      lines.push('');
-      lines.push('## Stack');
-      for (const s of stackLines) lines.push(s);
-    }
-  }
-
-  // Universal safety default — always renders, same as AGENTS.md's Guardrails.
-  lines.push('');
-  lines.push('## Before changing things');
-  lines.push('');
-  lines.push('- Ask first: dependency installs, deletions, migrations, schema changes, publish/release.');
-  lines.push('- Never: force-push · push straight to `main` · commit secrets.');
-
-  lines.push('');
-
-  // Write file — non-destructive: inject/update the faf block, preserve the rest.
-  const content = lines.join('\n');
-  await injectFafBlock(outputPath, content);
-
-  return {
-    success: true,
-    filePath: outputPath,
-    warnings,
-  };
+  // Composed from faf-cli (7.12.0+): the same bytes `faf export --gemini` writes.
+  const { renderGeminiMd, enrichFromRepo, injectFafBlock } = await fafCli;
+  const dir = path.dirname(outputPath);
+  injectFafBlock(outputPath, renderGeminiMd(enrichFromRepo(dir, fafContent ?? {})));
+  return { success: true, filePath: outputPath, warnings: [] };
 }
 
 // ============================================================================

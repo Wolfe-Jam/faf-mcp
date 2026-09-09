@@ -17,9 +17,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { injectFafBlock } from '../inject';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
-import { fafMetaTag, filled, slotLabel } from './interop-render.js';
 
 // ============================================================================
 // Types
@@ -285,44 +283,11 @@ export async function cursorExport(
   fafContent: any,
   outputPath: string
 ): Promise<CursorExportResult> {
-  const warnings: string[] = [];
-  const { SLOT_BY_PATH } = await fafCli;
-
-  const data = fafContent ?? {};
-  const project = data.project ?? {};
-  const lines: string[] = [];
-
-  lines.push(fafMetaTag(data));
-  lines.push('');
-  lines.push('# .cursorrules');
-  lines.push(`# Authored from project.faf — ${project.name ?? 'Project'}`);
-  lines.push('');
-
-  if (project.main_language) {
-    lines.push(`language: ${project.main_language}`);
-  }
-
-  if (data.stack) {
-    lines.push('');
-    lines.push('# Stack');
-    for (const [key, value] of Object.entries(data.stack)) {
-      if (filled(value)) {
-        lines.push(`# ${slotLabel(`stack.${key}`, SLOT_BY_PATH)}: ${value.trim()}`);
-      }
-    }
-  }
-
-  lines.push('');
-
-  // Write file — non-destructive: inject/update the faf block (hash-comment markers), preserve the rest.
-  const content = lines.join('\n');
-  await injectFafBlock(outputPath, content, '# faf:start', '# faf:end');
-
-  return {
-    success: true,
-    filePath: outputPath,
-    warnings,
-  };
+  // Composed from faf-cli (7.12.0+): the same bytes `faf export --cursor`
+  // writes (no repo enrichment for .cursorrules, matching faf-cli).
+  const { renderCursorrules, injectFafBlock } = await fafCli;
+  injectFafBlock(outputPath, renderCursorrules(fafContent ?? {}), '# faf:start', '# faf:end');
+  return { success: true, filePath: outputPath, warnings: [] };
 }
 
 // ============================================================================

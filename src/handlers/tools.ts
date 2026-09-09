@@ -2078,9 +2078,9 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
    * faf_auto - ONE COMMAND TO RULE THEM ALL
    * Zero to Championship in one command
    *
-   * v3.0: single-sourced from faf-cli's real `assembleFreshFaf` (the exact
-   * detect → interrogate → Turbo-Cat → Relentless pipeline faf-cli's own
-   * `faf auto` / `faf git` commands call — "so they can't drift") + the same
+   * v3.0: composes faf-cli's own `faf auto` chain — `updateExistingFaf` on an
+   * existing file, `assembleFreshFaf` on a new one, `writeFaf` for the bytes,
+   * `renderClaudeMd`/`writeClaudeMd` for CLAUDE.md — plus the same
    * `scoreFafYaml` faf_score reads. Previously this handler ran a bespoke
    * bootstrap template plus a local `calculateSimpleScore` pseudo-scorer,
    * which could (and did) report a different score than faf_score for the
@@ -2090,7 +2090,6 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
   private async handleFafAuto(args: any): Promise<CallToolResult> {
     const startTime = Date.now();
     const cwd = this.getProjectPath(args?.path);
-    const yaml = await import('yaml');
     const path = await import('path');
 
     try {
@@ -2102,7 +2101,10 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         readFafRaw,
         scoreFafYaml,
         assembleFreshFaf,
-        isPlaceholder,
+        updateExistingFaf,
+        writeFaf,
+        renderClaudeMd,
+        writeClaudeMd,
       } = await fafCli;
 
       // Step 1: locate any existing .faf and its real "before" score.
@@ -2110,62 +2112,27 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       const beforeScore = existingPath ? scoreFafYaml(readFafRaw(existingPath)).score : 0;
       steps.push(existingPath ? `✅ Found ${path.basename(existingPath)}` : '✅ Will create project.faf');
 
-      // Step 2: the real assembly pipeline (detect + interrogate + Turbo-Cat
-      // + README/6W extraction), one call — same as faf-cli's own `faf auto`.
-      const fresh = assembleFreshFaf(cwd);
-
+      // Step 2: exactly what faf-cli's own `faf auto` does — an existing file
+      // is updated with updateExistingFaf (existing values win; interrogated →
+      // detected → Turbo-Cat → Relentless fill the empties), a new one is
+      // assembled with assembleFreshFaf — and written with faf-cli's writer,
+      // so the bytes match `faf auto` (no runtime `_meta` block, same layout).
       let fafPath: string;
-      let mergedData: Record<string, unknown>;
-
       if (existingPath) {
-        // Non-destructive merge — existing values always win; `fresh` only
-        // fills what's currently empty. This is a local port of faf-cli's
-        // internal `fillEmpties` (not yet a public export alongside
-        // `assembleFreshFaf`), built from the exported `isPlaceholder`
-        // primitive so "empty" means exactly what faf-cli's own scorer
-        // means by empty — no separate judgment call invented here.
         fafPath = existingPath;
-        mergedData = this.mergeFreshIntoExisting(
-          readFaf(existingPath) as unknown as Record<string, unknown>,
-          fresh,
-          isPlaceholder,
-        );
+        writeFaf(fafPath, updateExistingFaf(cwd, readFaf(existingPath) as unknown as Record<string, unknown>) as any);
         steps.push('✅ Merged fresh facts into existing project.faf (existing values preserved)');
       } else {
         fafPath = path.join(cwd, 'project.faf');
-        mergedData = fresh;
+        writeFaf(fafPath, assembleFreshFaf(cwd) as any);
         steps.push('✅ Created project.faf');
       }
 
-      fs.writeFileSync(fafPath, yaml.stringify(mergedData), 'utf-8');
-
-      // Step 3: Create/Update CLAUDE.md (bi-sync)
-      const claudePath = path.join(cwd, 'CLAUDE.md');
-      if (!fs.existsSync(claudePath)) {
-        const project = mergedData.project as { name?: string; goal?: string } | undefined;
-        const humanContext = mergedData.human_context as { why?: string } | undefined;
-        const claudeContent = `# 🏎️ CLAUDE.md - AI Telemetry Link
-
-## Project: ${project?.name || path.basename(cwd)}
-**Championship-Grade Project DNA Foundation**
-
-### 🎯 Project Mission
-${humanContext?.why || project?.goal || 'AI-ready project context'}
-
-### 🏗️ Architecture Overview
-${String(mergedData.stack_signature || 'Auto-detected stack')}
-
----
-
-**STATUS: BI-SYNC ACTIVE 🔗**
-*Last Sync: ${new Date().toISOString()}*
-*Sync Engine: FAF Auto*
-`;
-        fs.writeFileSync(claudePath, claudeContent);
-        steps.push('✅ Created CLAUDE.md');
-      } else {
-        steps.push('✅ CLAUDE.md already exists');
-      }
+      // Step 3: CLAUDE.md — faf-cli's render of the file just written (the
+      // same bytes `faf sync` writes), injected non-destructively.
+      const claudeExisted = fs.existsSync(path.join(cwd, 'CLAUDE.md'));
+      writeClaudeMd(cwd, renderClaudeMd(readFaf(fafPath)));
+      steps.push(claudeExisted ? '✅ Updated CLAUDE.md (faf-managed block)' : '✅ Created CLAUDE.md');
 
       // Step 4: final score — same real scorer faf_score reads, on the file
       // just written. By construction this can never disagree with faf_score.
@@ -2430,43 +2397,6 @@ ${String(mergedData.stack_signature || 'Auto-detected stack')}
   }
 
   /**
-   * Internal helper: non-destructive merge of an `assembleFreshFaf` result
-   * into an existing, parsed .faf object — `target` (the existing file)
-   * always wins; `source` (the fresh assembly) only fills fields `target`
-   * doesn't already have. A local port of faf-cli's own internal
-   * `fillEmpties` (src/detect/assemble.ts) — not yet a public export
-   * alongside `assembleFreshFaf` itself — built from the exported
-   * `isPlaceholder` primitive so "empty" means exactly what faf-cli's own
-   * scorer means by empty. Used only by faf_auto's merge path.
-   */
-  private mergeFreshIntoExisting(
-    target: Record<string, unknown>,
-    source: Record<string, unknown>,
-    isPlaceholder: (value: unknown) => boolean,
-  ): Record<string, unknown> {
-    const result: Record<string, unknown> = { ...target };
-    for (const [key, value] of Object.entries(source)) {
-      const existing = result[key];
-      if (isPlaceholder(existing)) {
-        result[key] = value;
-      } else if (
-        typeof value === 'object' &&
-        value !== null &&
-        !Array.isArray(value) &&
-        typeof existing === 'object' &&
-        existing !== null &&
-        !Array.isArray(existing)
-      ) {
-        result[key] = this.mergeFreshIntoExisting(
-          existing as Record<string, unknown>,
-          value as Record<string, unknown>,
-          isPlaceholder,
-        );
-      }
-    }
-    return result;
-  }
-
   /**
    * faf_quick - Lightning-fast .faf creation
    * One-liner format: "name, description, language, framework, hosting"

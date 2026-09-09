@@ -4,7 +4,7 @@
  * BRAKE tier. Before this, injectFafBlock located the managed block with
  * plain indexOf(start)/indexOf(end) — a substring search. Two real triggers:
  *
- *   1. faf-cli 7.1.4–7.11.0 authors an AGENTS.md whose blockquote quotes the
+ *   1. faf-cli 7.1.4–7.11.0 authored an AGENTS.md whose blockquote quotes the
  *      marker tokens in prose ("Hand content outside `<!-- faf:start -->` …
  *      `<!-- faf:end -->` is preserved."). indexOf(end) hit that quote, so the
  *      old block was cut at the quote and its stale tail (Setup & build …
@@ -17,11 +17,20 @@
  * prose nor a fence can be mistaken for the block. Each case runs the
  * injection twice and asserts the second run is byte-identical.
  */
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, beforeAll } from 'bun:test';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { injectFafBlock, findFafBlock, FAF_START, FAF_END } from '../src/faf-core/inject';
+import { fafCli } from '../src/utils/faf-cli-bridge.js';
+
+// 3.0: faf-mcp no longer carries its own injector — it composes faf-cli's
+// (7.12.0+), which has the same whole-line rule. This suite now guards the
+// dependency's behaviour as seen through the bridge.
+const FAF_START = '<!-- faf:start -->';
+const FAF_END = '<!-- faf:end -->';
+let injectFafBlock: (p: string, block: string, start?: string, end?: string) => void;
+let findFafBlock: (text: string, start?: string, end?: string) => { start: number; end: number } | null;
+beforeAll(async () => { ({ injectFafBlock, findFafBlock } = await fafCli); });
 
 const BLOCK_V1 = '# AGENTS.md — demo\n\nfaf-mcp render v1\n\n## Guardrails\n\n- **Always OK:** read the tree.';
 const BLOCK_V2 = '# AGENTS.md — demo\n\nfaf-mcp render v2\n\n## Guardrails\n\n- **Always OK:** read the tree · run the tests.';

@@ -6,6 +6,7 @@
  *          Engine Adapter → Security → Performance → Roundtrip
  */
 
+import { mkdtempSync } from 'fs';
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import * as os from 'os';
 import * as path from 'path';
@@ -659,15 +660,18 @@ describe('TIER 4: Engine Adapter', () => {
     it('bi-sync module should export BiSyncOptions with interop fields', async () => {
       const mod = await import('../src/faf-core/commands/bi-sync');
       expect(typeof mod.syncBiDirectional).toBe('function');
-      expect(typeof mod.fafToClaudeMd).toBe('function');
     });
 
-    it('fafToClaudeMd should generate valid CLAUDE.md content', async () => {
-      const { fafToClaudeMd } = await import('../src/faf-core/commands/bi-sync');
-      const fafContent = `project:\n  name: BiSync Test\n  goal: Test bi-sync output\ncontext_quality:\n  overall_assessment: Excellent\ninstant_context:\n  tech_stack: TypeScript + Node.js\n  what_building: MCP Server\n  main_language: TypeScript`;
-      const result = fafToClaudeMd(fafContent);
-      expect(result).toContain('BiSync Test');
-      expect(result).toContain('BI-SYNC ACTIVE');
+    it('syncBiDirectional writes faf-cli\'s CLAUDE.md render (3.0: composed, not a local template)', async () => {
+      const { syncBiDirectional } = await import('../src/faf-core/commands/bi-sync');
+      const dir = mkdtempSync(path.join(os.tmpdir(), 'faf-bisync-'));
+      await fs.writeFile(path.join(dir, 'project.faf'), `faf_version: "3.0"\nproject:\n  name: BiSync Test\n  goal: Test bi-sync output\n  main_language: TypeScript\n  type: cli\n`);
+      const result = await syncBiDirectional(dir);
+      expect(result.success).toBe(true);
+      const claude = await fs.readFile(path.join(dir, 'CLAUDE.md'), 'utf-8');
+      expect(claude).toContain('<!-- faf:start -->');
+      expect(claude).toContain('BiSync Test');
+      expect(claude).toContain('BI-SYNC ACTIVE');
     });
   });
 
@@ -911,12 +915,11 @@ describe('TIER 7: Roundtrip', () => {
 
   it('BiSync should generate valid CLAUDE.md from project.faf', async () => {
     const fafPath = path.join(tmpDir, 'project.faf');
-    await fs.writeFile(fafPath, `project:\n  name: BiSync Roundtrip\n  goal: Prove bi-sync works\ncontext_quality:\n  overall_assessment: Good\ninstant_context:\n  tech_stack: TypeScript\n  what_building: MCP Server\n  main_language: TypeScript\n`);
-
-    const { fafToClaudeMd } = await import('../src/faf-core/commands/bi-sync');
-    const fafContent = await fs.readFile(fafPath, 'utf-8');
-    const claudeMd = fafToClaudeMd(fafContent);
-
+    await fs.writeFile(fafPath, `faf_version: "3.0"\nproject:\n  name: BiSync Roundtrip\n  goal: Prove bi-sync works\n  main_language: TypeScript\n  type: cli\n`);
+    const { syncBiDirectional } = await import('../src/faf-core/commands/bi-sync');
+    const result = await syncBiDirectional(tmpDir);
+    expect(result.success).toBe(true);
+    const claudeMd = await fs.readFile(path.join(tmpDir, 'CLAUDE.md'), 'utf-8');
     expect(claudeMd).toContain('BiSync Roundtrip');
     expect(claudeMd).toContain('BI-SYNC ACTIVE');
     expect(claudeMd).toContain('TypeScript');
