@@ -16,7 +16,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { injectFafBlock } from '../inject';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
-import { fafMetaTag, filled, present, slotLabel, NON_STACK } from './interop-render.js';
+import { fafMetaTag, filled, fmtVal, present, slotLabel, NON_STACK } from './interop-render.js';
 
 // ============================================================================
 // Types
@@ -234,7 +234,9 @@ export async function geminiExport(
   const commands = data.commands;
   const keyFiles: string[] | undefined = data.key_files ?? instant.key_files;
 
-  const entries = commands ? Object.entries(commands).filter(([, v]) => present(v)) : [];
+  const entries: [string, string][] = commands
+    ? Object.entries(commands).filter(([, v]) => present(v)).map(([k, v]): [string, string] => [k, fmtVal(v)])
+    : [];
   // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
   const testCmds = entries.filter(([k]) => /test/i.test(k));
   const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));

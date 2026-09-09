@@ -260,7 +260,9 @@ export async function agentsExport(
   // Integration branch — git-flow repos PR into dev/develop, not main.
   const branch = present(project.default_branch) ? String(project.default_branch) : 'main';
 
-  const entries = commands ? Object.entries(commands).filter(([, v]) => present(v)) : [];
+  const entries: [string, string][] = commands
+    ? Object.entries(commands).filter(([, v]) => present(v)).map(([k, v]): [string, string] => [k, fmtVal(v)])
+    : [];
   // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
   const testCmds = entries.filter(([k]) => /test/i.test(k));
   const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));
@@ -279,8 +281,8 @@ export async function agentsExport(
   );
   // Verify bar: tests first, then lint/typecheck.
   const verifyCmds = [...testCmds, ...lintCmds];
-  const testCmd = testCmds[0]?.[1] as string | undefined;
-  const buildCmd = setupCmds.find(([k]) => /build/i.test(k))?.[1] as string | undefined;
+  const testCmd = testCmds[0]?.[1];
+  const buildCmd = setupCmds.find(([k]) => /build/i.test(k))?.[1];
 
   const lines: string[] = [];
   const push = (s = '') => lines.push(s);
@@ -364,17 +366,17 @@ export async function agentsExport(
   };
   collect(ai.working_style);
   collect(prefs);
-  const detectedConv: unknown[] = data.conventions ?? [];
+  const detectedConv: string[] = (data.conventions ?? []).filter((c: unknown) => present(c)).map((c: unknown) => fmtVal(c));
   if (conventions.size || detectedConv.length) {
     push('## Conventions');
     push();
     for (const [label, val] of conventions) push(`- **${label}:** ${val}`);
-    for (const c of detectedConv) if (present(c)) push(`- ${c}`);
+    for (const c of detectedConv) push(`- ${c}`);
     push();
   }
 
   // Guardrails — Always / Ask first / Never (three-tier)
-  const warningsList: unknown[] = (ai.warnings ?? []).filter((w: unknown) => present(w));
+  const warningsList: string[] = (ai.warnings ?? []).filter((w: unknown) => present(w)).map((w: unknown) => fmtVal(w));
   const always: string[] = ['read the tree'];
   if (testCmd) always.push(`run the tests (\`${testCmd}\`)`);
   if (buildCmd) always.push('build the project');
