@@ -177,9 +177,11 @@ jobs:
 
       - name: Check build output
         run: |
+          test -f dist/src/index.js            # the bin (package.json "bin")
           test -f dist/src/server.js
           test -f dist/src/handlers/tools.js
-          test -f dist/src/utils/visual-style.js
+          test -f dist/src/handlers/engine-adapter.js
+          test ! -e dist/src/handlers/championship-tools.js   # deleted in 3.0 P2; prebuild must keep dist clean
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
