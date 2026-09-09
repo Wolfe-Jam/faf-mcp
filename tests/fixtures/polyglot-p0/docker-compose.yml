@@ -1,0 +1,28 @@
+version: "3.9"
+
+# P0 regression fixture (faf-mcp 3.0) — a real polyglot repo shape: two
+# services (Node API + Python worker) plus real infra images, so faf-cli's
+# interrogateRepo has real docker-compose facts to find (database/cache
+# stack slots). Mirrors the shape the original faf_auto/faf_score parity
+# bug was reproduced against.
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - cache
+
+  worker:
+    build: ./service-py
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: example
+
+  cache:
+    image: redis:7

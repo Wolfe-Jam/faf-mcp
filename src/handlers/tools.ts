@@ -24,7 +24,7 @@ import { resolveProjectPath, formatPathConfirmation } from '../utils/path-resolv
 import {
   fafCli,
 } from '../utils/faf-cli-bridge.js';
-import { composedTurboCat, composedTurboCatSlots, turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
+import { turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
 
 /**
  * The Core tier — the 15 distinct, well-described tools advertised by default.
@@ -2052,7 +2052,15 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
   /**
    * faf_auto - ONE COMMAND TO RULE THEM ALL
    * Zero to Championship in one command
-   * Runs: init + formats + sync + bi-sync + score
+   *
+   * v3.0: single-sourced from faf-cli's real `assembleFreshFaf` (the exact
+   * detect → interrogate → Turbo-Cat → Relentless pipeline faf-cli's own
+   * `faf auto` / `faf git` commands call — "so they can't drift") + the same
+   * `scoreFafYaml` faf_score reads. Previously this handler ran a bespoke
+   * bootstrap template plus a local `calculateSimpleScore` pseudo-scorer,
+   * which could (and did) report a different score than faf_score for the
+   * identical file in the same server run. NEVER reimplement detection or
+   * scoring here — compose faf-cli, exactly like faf_score/faf_formats do.
    */
   private async handleFafAuto(args: any): Promise<CallToolResult> {
     const startTime = Date.now();
@@ -2062,101 +2070,65 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 
     try {
       const steps: string[] = [];
-      let currentScore = 0;
 
-      // Step 1: Check/Create .faf file
-      const fafResult = await findFafFile(cwd);
+      const {
+        findFafFile: findFaf,
+        readFaf,
+        readFafRaw,
+        scoreFafYaml,
+        assembleFreshFaf,
+        isPlaceholder,
+      } = await fafCli;
+
+      // Step 1: locate any existing .faf and its real "before" score.
+      const existingPath = findFaf(cwd);
+      const beforeScore = existingPath ? scoreFafYaml(readFafRaw(existingPath)).score : 0;
+      steps.push(existingPath ? `✅ Found ${path.basename(existingPath)}` : '✅ Will create project.faf');
+
+      // Step 2: the real assembly pipeline (detect + interrogate + Turbo-Cat
+      // + README/6W extraction), one call — same as faf-cli's own `faf auto`.
+      const fresh = assembleFreshFaf(cwd) as Record<string, unknown>;
 
       let fafPath: string;
+      let mergedData: Record<string, unknown>;
 
-      if (!fafResult) {
-        // Create .faf file
-        const projectName = path.basename(cwd);
+      if (existingPath) {
+        // Non-destructive merge — existing values always win; `fresh` only
+        // fills what's currently empty. This is a local port of faf-cli's
+        // internal `fillEmpties` (not yet a public export alongside
+        // `assembleFreshFaf`), built from the exported `isPlaceholder`
+        // primitive so "empty" means exactly what faf-cli's own scorer
+        // means by empty — no separate judgment call invented here.
+        fafPath = existingPath;
+        mergedData = this.mergeFreshIntoExisting(
+          readFaf(existingPath) as unknown as Record<string, unknown>,
+          fresh,
+          isPlaceholder,
+        );
+        steps.push('✅ Merged fresh facts into existing project.faf (existing values preserved)');
+      } else {
         fafPath = path.join(cwd, 'project.faf');
-        const initFafContent = `# FAF - Foundational AI Context
-project: ${projectName}
-type: auto-detected
-context: I⚡🍊
-generated: ${new Date().toISOString()}
-version: ${VERSION}
-
-# Quick Context
-working_directory: ${cwd}
-initialized_by: faf-mcp-auto
-vitamin_context: true
-faffless: true
-`;
-        fs.writeFileSync(fafPath, initFafContent);
+        mergedData = fresh;
         steps.push('✅ Created project.faf');
-      } else {
-        fafPath = fafResult.path;
-        steps.push(`✅ Found ${fafResult.filename}`);
       }
 
-      // Get initial score
-      const fafContent = fs.readFileSync(fafPath, 'utf-8');
-      const fafData = yaml.parse(fafContent) || {};
-      currentScore = this.calculateSimpleScore(fafData);
+      fs.writeFileSync(fafPath, yaml.stringify(mergedData), 'utf-8');
 
-      // Step 2: Run TURBO-CAT format discovery — composed from faf-cli's engine.
-      const formatsResult = await composedTurboCat(cwd);
-      if (formatsResult && formatsResult.discoveredFormats.length > 0) {
-        // Apply slot fills to .faf. turboCatSlots routes them into the correct
-        // .faf sections; fill the stack section (main_language lives under
-        // project, which is a string here) — clean keys, no noise.
-        const slots = await composedTurboCatSlots(cwd);
-        if (!fafData.stack) fafData.stack = {};
-        for (const [key, value] of Object.entries(slots?.stack ?? {})) {
-          if (!fafData.stack[key] || fafData.stack[key] === 'None') {
-            fafData.stack[key] = value;
-          }
-        }
-
-        if (formatsResult.stackSignature) {
-          fafData.stack_signature = formatsResult.stackSignature;
-        }
-
-        fs.writeFileSync(fafPath, yaml.stringify(fafData), 'utf-8');
-        steps.push(`✅ TURBO-CAT discovered ${formatsResult.discoveredFormats.length} formats`);
-      } else {
-        steps.push('⚠️ No additional formats detected');
-      }
-
-      // Step 3: Extract human context from README
-      const readmePath = path.join(cwd, 'README.md');
-      if (fs.existsSync(readmePath)) {
-        const readmeContent = fs.readFileSync(readmePath, 'utf-8');
-        const extracted = this.extractSixWsFromReadme(readmeContent);
-
-        if (!fafData.human_context) fafData.human_context = {};
-
-        let extractedCount = 0;
-        for (const [field, value] of Object.entries(extracted)) {
-          if (value && !fafData.human_context[field]) {
-            fafData.human_context[field] = value;
-            extractedCount++;
-          }
-        }
-
-        if (extractedCount > 0) {
-          fs.writeFileSync(fafPath, yaml.stringify(fafData), 'utf-8');
-          steps.push(`✅ Extracted ${extractedCount} human context fields from README`);
-        }
-      }
-
-      // Step 4: Create/Update CLAUDE.md (bi-sync)
+      // Step 3: Create/Update CLAUDE.md (bi-sync)
       const claudePath = path.join(cwd, 'CLAUDE.md');
       if (!fs.existsSync(claudePath)) {
+        const project = mergedData.project as { name?: string; goal?: string } | undefined;
+        const humanContext = mergedData.human_context as { why?: string } | undefined;
         const claudeContent = `# 🏎️ CLAUDE.md - AI Telemetry Link
 
-## Project: ${fafData.project || path.basename(cwd)}
+## Project: ${project?.name || path.basename(cwd)}
 **Championship-Grade Project DNA Foundation**
 
 ### 🎯 Project Mission
-${fafData.human_context?.why || fafData.project?.goal || 'AI-ready project context'}
+${humanContext?.why || project?.goal || 'AI-ready project context'}
 
 ### 🏗️ Architecture Overview
-${fafData.stack_signature || 'Auto-detected stack'}
+${mergedData.stack_signature || 'Auto-detected stack'}
 
 ---
 
@@ -2170,11 +2142,10 @@ ${fafData.stack_signature || 'Auto-detected stack'}
         steps.push('✅ CLAUDE.md already exists');
       }
 
-      // Step 5: Calculate final score
-      const updatedContent = fs.readFileSync(fafPath, 'utf-8');
-      const updatedData = yaml.parse(updatedContent) || {};
-      const newScore = this.calculateSimpleScore(updatedData);
-      const scoreDelta = newScore - currentScore;
+      // Step 4: final score — same real scorer faf_score reads, on the file
+      // just written. By construction this can never disagree with faf_score.
+      const newScore = scoreFafYaml(readFafRaw(fafPath)).score;
+      const scoreDelta = newScore - beforeScore;
 
       // Calculate elapsed time
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -2187,7 +2158,7 @@ ${fafData.stack_signature || 'Auto-detected stack'}
       output += steps.join('\n') + '\n\n';
       output += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
       output += `⏱️ Completed in ${elapsed}s\n`;
-      output += `📊 Before: ${currentScore}% | After: ${newScore}% ${deltaDisplay}\n`;
+      output += `📊 Before: ${beforeScore}% | After: ${newScore}% ${deltaDisplay}\n`;
       output += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
       if (newScore >= 99) {
@@ -2237,11 +2208,10 @@ ${fafData.stack_signature || 'Auto-detected stack'}
           };
         }
 
-        // .faf exists but no DNA - create initial DNA
-        const yaml = await import('yaml');
-        const fafContent = fs.readFileSync(fafResult.path, 'utf-8');
-        const fafData = yaml.parse(fafContent) || {};
-        const currentScore = this.calculateSimpleScore(fafData);
+        // .faf exists but no DNA - create initial DNA. Real scorer — same
+        // one faf_score reads — never a local pseudo-score (v3.0 fix).
+        const { readFafRaw, scoreFafYaml } = await fafCli;
+        const currentScore = scoreFafYaml(readFafRaw(fafResult.path)).score;
 
         const dna = {
           birthCertificate: {
@@ -2418,33 +2388,41 @@ ${fafData.stack_signature || 'Auto-detected stack'}
   }
 
   /**
-   * Internal helper: Calculate simple score from .faf data
+   * Internal helper: non-destructive merge of an `assembleFreshFaf` result
+   * into an existing, parsed .faf object — `target` (the existing file)
+   * always wins; `source` (the fresh assembly) only fills fields `target`
+   * doesn't already have. A local port of faf-cli's own internal
+   * `fillEmpties` (src/detect/assemble.ts) — not yet a public export
+   * alongside `assembleFreshFaf` itself — built from the exported
+   * `isPlaceholder` primitive so "empty" means exactly what faf-cli's own
+   * scorer means by empty. Used only by faf_auto's merge path.
    */
-  private calculateSimpleScore(fafData: any): number {
-    let score = 0;
-    const maxScore = 100;
-
-    // Project section (30 points)
-    if (fafData.project) score += 15;
-    if (fafData.project?.goal || fafData.description) score += 15;
-
-    // Human context (30 points)
-    const humanContext = fafData.human_context || {};
-    const wFields = ['who', 'what', 'why', 'where', 'when', 'how'];
-    const filledW = wFields.filter(f => humanContext[f] && humanContext[f] !== 'null').length;
-    score += Math.round((filledW / wFields.length) * 30);
-
-    // Stack section (20 points)
-    const stack = fafData.stack || {};
-    const stackFields = ['frontend', 'backend', 'database', 'hosting', 'build'];
-    const filledStack = stackFields.filter(f => stack[f] && stack[f] !== 'None').length;
-    score += Math.round((filledStack / stackFields.length) * 20);
-
-    // Files exist bonus (20 points)
-    if (fafData.initialized_by || fafData.generated) score += 10;
-    if (fafData.stack_signature) score += 10;
-
-    return Math.min(score, maxScore);
+  private mergeFreshIntoExisting(
+    target: Record<string, unknown>,
+    source: Record<string, unknown>,
+    isPlaceholder: (value: unknown) => boolean,
+  ): Record<string, unknown> {
+    const result: Record<string, unknown> = { ...target };
+    for (const [key, value] of Object.entries(source)) {
+      const existing = result[key];
+      if (isPlaceholder(existing)) {
+        result[key] = value;
+      } else if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        typeof existing === 'object' &&
+        existing !== null &&
+        !Array.isArray(existing)
+      ) {
+        result[key] = this.mergeFreshIntoExisting(
+          existing as Record<string, unknown>,
+          value as Record<string, unknown>,
+          isPlaceholder,
+        );
+      }
+    }
+    return result;
   }
 
   /**
@@ -2671,25 +2649,30 @@ Use force: true to overwrite, or use faf_enhance to modify.`
               });
             }
 
-            // Check 4: Score
-            const score = this.calculateSimpleScore(fafData);
+            // Check 4: Score — real scorer (same one faf_score reads), never
+            // a local pseudo-score (v3.0 fix). Slot breakdown included so
+            // faf_doctor's "score could be better" fix advice is actionable.
+            const { scoreFafYaml } = await fafCli;
+            const scoreResult = scoreFafYaml(content);
+            const score = scoreResult.score;
+            const slotSummary = `${scoreResult.populated}/${scoreResult.total} slots populated`;
 
             if (score < 30) {
               results.push({
                 status: 'error',
-                message: `Score too low: ${score}%`,
+                message: `Score too low: ${score}% (${slotSummary})`,
                 fix: 'Run: faf_enhance or faf_go to improve context'
               });
             } else if (score < 70) {
               results.push({
                 status: 'warning',
-                message: `Score could be better: ${score}%`,
+                message: `Score could be better: ${score}% (${slotSummary})`,
                 fix: 'Target 70%+ for championship AI context'
               });
             } else {
               results.push({
                 status: 'ok',
-                message: `Great score: ${score}%`
+                message: `Great score: ${score}% (${slotSummary})`
               });
             }
           }

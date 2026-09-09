@@ -1,0 +1,13 @@
+{
+  "name": "polyglot-p0-fixture",
+  "version": "1.0.0",
+  "description": "P0 regression fixture: a real two-language, docker-compose + Makefile repo used to prove faf_auto and faf_score never disagree on the same file.",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo ok",
+    "lint": "echo ok"
+  },
+  "dependencies": {
+    "express": "^4.19.0"
+  }
+}
