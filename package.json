@@ -88,7 +88,6 @@
     "dist/**/*",
     "assets/**/*",
     "scripts/**/*",
-    "skill/SKILL.md",
     "skills/**",
     "README.md",
     "CLAUDE.md",
