@@ -32,7 +32,7 @@ human_context:
   who: Developers using Claude, Cursor, Windsurf, VS Code, Cline, and any MCP-compatible IDE
   what: The Cursor / IDE Edition — persistent context for Cursor, VS Code, and every MCP-compatible IDE — 29 MCP tools (15 essential shown by default), interop with AGENTS.md, .cursorrules, GEMINI.md
   why: Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
-  where: npm · MCP Registry · Cloudflare edge (ide.faf.one/mcp/v1) · any MCP-compatible IDE — people get it how they wish
+  where: npm · MCP Registry · any MCP-compatible IDE — people get it how they wish
   when: Production/Stable — v2.3.0 The Curated Edition, WJTTC certified
   how: npx faf-mcp or npm install -g faf-mcp, then add to your MCP config
 monorepo:
@@ -48,7 +48,12 @@ surfaces:
     - { type: github,       id: Wolfe-Jam/faf-mcp, source: "package.json#repository" }
     - { type: mcp-registry, id: one.faf/faf-mcp,   state: active, source: "server.json#name" }
   declared:                  # hand-authored: surfaces the manifests don't carry + targets
-    - { type: mcpaas,       id: faf, url: "https://ide.faf.one/mcp/v1", transport: streamable-http, status: live }
+    # v3.0: removed a false hosted-endpoint `mcpaas` entry here (the
+    # ide.faf.one MCP subdomain, path /mcp/v1) — verified live, it serves
+    # grok-faf-mcp's tool surface (get_soul, faf_memory, etc.), not this
+    # package's (faf_init/faf_auto/faf_cursor/faf_agents). No real hosted
+    # deployment of faf-mcp's actual tools exists today; revisit for 3.1
+    # if/when one ships.
     - { type: homebrew,     id: faf-mcp, status: live }
     - { type: mcp-registry, id: io.github.Wolfe-Jam/faf-mcp, state: deprecated, superseded_by: one.faf/faf-mcp }
     - { type: pulsemcp,            id: faf-mcp, status: pending }

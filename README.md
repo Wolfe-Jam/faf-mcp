@@ -15,7 +15,7 @@
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Agents paper](https://img.shields.io/badge/DOI-Agents%20paper-FF6B35)](https://doi.org/10.5281/zenodo.21951641)
 
-**Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/) · **Hosted MCP endpoint:** `https://ide.faf.one/mcp/v1` (Streamable HTTP)
+**Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/)
 
 The MCP you didn't realise you needed, or wanted but didn't know who to ask, is here. Building on over 100k ecosystem downloads ([latest stats](https://faf.one/downloads)), we bring you faf-mcp to cure your syncing pain and fuel your chosen AI with optimized context, on-demand.
 
@@ -76,17 +76,12 @@ Add to your MCP config:
 
 ---
 
-## Three Ways to Deploy
+## Two Ways to Deploy
 
 | Door | Method | Best For |
 |------|--------|----------|
-| **Hosted** | [mcpaas.live](https://mcpaas.live) | Zero-install, point any MCP client to the URL |
 | **Self-Deploy** | [Deploy to Vercel](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp) | Your own instance, full control |
 | **Local** | `bunx faf-mcp` | IDE integration via stdio transport |
-
-### Hosted (mcpaas.live)
-
-Point your MCP client to `https://ide.faf.one/mcp/v1` — no install, no config, no maintenance. Served from 300+ Cloudflare edges with sub-ms cold starts via 2.7KB Zig-WASM engine.
 
 ### Self-Deploy (Vercel)
 
