@@ -23,6 +23,7 @@ import { resolveProjectPath, formatPathConfirmation } from '../utils/path-resolv
 // rationale and the linked tracked issue.
 import {
   fafCli,
+  bundledFafCliVersion,
 } from '../utils/faf-cli-bridge.js';
 import { turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
 
@@ -178,9 +179,9 @@ export class FafToolHandler {
         },
         {
           name: 'faf_sync',
-          description: 'Sync a project.faf with CLAUDE.md so the two stay aligned. Returns what was written. Use this for the single CLAUDE.md target; use faf_bi_sync to fan out to AGENTS.md, .cursorrules, and GEMINI.md as well.',
+          description: 'Reconcile project.faf with what the repo manifests say now (package.json name, description, framework dependencies). Dry-run by default: reports the fields that would change. Pass apply:true to write them into project.faf. Does not touch CLAUDE.md — use faf_bi_sync for CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md.',
           annotations: {
-            title: 'Sync .faf to CLAUDE.md',
+            title: 'Reconcile .faf with repo manifests',
             readOnlyHint: false,
             destructiveHint: false,
             openWorldHint: false
@@ -188,6 +189,7 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
+              apply: { type: 'boolean', description: 'Write the detected changes into project.faf (default: dry-run report only)' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             additionalProperties: false
@@ -195,9 +197,9 @@ export class FafToolHandler {
         },
         {
           name: 'faf_bi_sync',
-          description: 'Bi-directionally sync a project.faf with CLAUDE.md and, with the format flags or all, also AGENTS.md, .cursorrules, and GEMINI.md. Returns the formats written and any conflicts. Use this to keep every AI tool context file aligned from the single .faf source.',
+          description: 'Write CLAUDE.md from project.faf (one direction: .faf → CLAUDE.md) and, with the format flags or all, also AGENTS.md, .cursorrules and GEMINI.md. Content outside the faf-managed block is preserved. Returns the files written. Use this to keep every AI tool\'s context file current from one source.',
           annotations: {
-            title: 'Bi-directional Sync',
+            title: 'Sync .faf to CLAUDE.md and IDE formats',
             readOnlyHint: false,
             destructiveHint: false,
             openWorldHint: false
@@ -205,9 +207,6 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              auto: { type: 'boolean', description: 'Enable automatic synchronization' },
-              watch: { type: 'boolean', description: 'Start real-time file watching for changes' },
-              force: { type: 'boolean', description: 'Force overwrite conflicting changes' },
               agents: { type: 'boolean', description: 'Also sync to AGENTS.md (OpenAI/Codex format)' },
               cursor: { type: 'boolean', description: 'Also sync to .cursorrules (Cursor IDE format)' },
               gemini: { type: 'boolean', description: 'Also sync to GEMINI.md (Google Gemini format)' },
@@ -219,7 +218,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_clear',
-          description: 'Clear caches, temporary files, and reset FAF state for a fresh start',
+          description: 'Clear faf-mcp\'s local cache (~/.faf-cli-cache). That is the only persisted state this version keeps outside your project files.',
           annotations: {
             title: 'Clear .faf Data',
             readOnlyHint: false,
@@ -229,17 +228,15 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              cache: { type: 'boolean', description: 'Clear trust cache only' },
-              todos: { type: 'boolean', description: 'Clear todo lists only' },
-              backups: { type: 'boolean', description: 'Clear backup files only' },
-              all: { type: 'boolean', description: 'Clear everything (default)' }
+              cache: { type: 'boolean', description: 'Clear the local cache (~/.faf-cli-cache)' },
+              all: { type: 'boolean', description: 'Clear everything faf-mcp persists (default; today that is the cache)' }
             },
             additionalProperties: false
           }
         },
         {
           name: 'faf_debug',
-          description: 'Debug faf-mcp environment - show working directory, permissions, and FAF CLI status',
+          description: 'Debug faf-mcp environment - show working directory, write permissions, the bundled faf-cli version, and whether a project.faf is present',
           annotations: {
             title: 'Debug Info',
             readOnlyHint: true,
@@ -458,8 +455,10 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' },
-              force: { type: 'boolean', description: 'Force overwrite existing files' }
+              path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
+              // `force` used to be declared here; handleFafAuto never read it.
+              // faf_auto merges into an existing project.faf non-destructively
+              // and there is no overwrite mode to switch on.
             },
             additionalProperties: false
           }
@@ -984,7 +983,7 @@ package_manager: ${projectData.package_manager}` : ''}
             chromeDetection.detected ? '\n\n🎯 Friday Feature: Chrome Extension detected!\n📈 Auto-filled 7 slots for 90%+ score!' : ''
           }${
             chromeDetection.corrected ? `\n📝 Auto-corrected: "${args?.description}" → "${chromeDetection.corrected}"` : ''
-          }\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_sync to create CLAUDE.md\n  • Run faf_enhance to improve context`
+          }\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_bi_sync to create CLAUDE.md\n  • Run faf_go to fill the gaps`
         }]
       };
     } catch (error: any) {
@@ -1068,7 +1067,9 @@ package_manager: ${projectData.package_manager}` : ''}
     if (args?.path) {
       this.getProjectPath(args.path);
     }
-    const result = await this.engineAdapter.callEngine('sync');
+    // `apply` maps to the bundled sync command's --auto; without it the
+    // command only reports what would change.
+    const result = await this.engineAdapter.callEngine('sync', args?.apply ? ['--auto'] : []);
 
     if (!result.success) {
       return {
@@ -1098,17 +1099,10 @@ package_manager: ${projectData.package_manager}` : ''}
       this.getProjectPath(args.path);
     }
 
+    // auto / watch / force used to be declared here too; none of them was
+    // ever read by syncBiDirectional, so the schema no longer promises them.
     const biSyncArgs: string[] = [];
 
-    if (args?.auto) {
-      biSyncArgs.push('--auto');
-    }
-    if (args?.watch) {
-      biSyncArgs.push('--watch');
-    }
-    if (args?.force) {
-      biSyncArgs.push('--force');
-    }
     // v3.0 fix: the tool's own schema advertises agents/cursor/gemini/all,
     // but they were never forwarded to engine-adapter's bi-sync dispatch —
     // faf_bi_sync silently ignored them and only ever wrote CLAUDE.md.
@@ -1161,17 +1155,14 @@ package_manager: ${projectData.package_manager}` : ''}
    *
    * Rewired as a genuinely local operation — no CLI dependency, bundled or
    * ambient, at all. `cache` clears the one real cache path this codebase
-   * writes (~/.faf-cli-cache, faf-core/utils/technical-credit.ts). `todos`
-   * and `backups` are reported honestly as nothing-to-clear: no persisted
-   * todo list or backup-file store exists anywhere in faf-mcp today —
-   * fabricating a fake "cleared" message for a store that doesn't exist
-   * would be exactly the kind of false claim this release is fixing.
+   * writes (~/.faf-cli-cache, faf-core/utils/technical-credit.ts). The
+   * schema used to advertise `todos` and `backups` as well; no persisted todo
+   * list or backup-file store exists anywhere in faf-mcp, so those flags are
+   * gone rather than answered with a made-up "cleared".
    */
   private async handleFafClear(args: any): Promise<CallToolResult> {
     const wantCache = !!args?.cache;
-    const wantTodos = !!args?.todos;
-    const wantBackups = !!args?.backups;
-    const wantAll = !!args?.all || (!wantCache && !wantTodos && !wantBackups);
+    const wantAll = !!args?.all || !wantCache;
 
     const lines: string[] = [];
 
@@ -1184,14 +1175,6 @@ package_manager: ${projectData.package_manager}` : ''}
       } else {
         lines.push('✅ cache: nothing to clear');
       }
-    }
-
-    if (wantTodos || wantAll) {
-      lines.push('ℹ️ todos: no persisted todo store in this version — nothing to clear');
-    }
-
-    if (wantBackups || wantAll) {
-      lines.push('ℹ️ backups: no persisted backup store in this version — nothing to clear');
     }
 
     return {
@@ -1281,19 +1264,16 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
     try {
       const fs = await import('fs');
       const path = await import('path');
-      const { exec } = await import('child_process');
-      const { promisify } = await import('util');
-      const _execAsync = promisify(exec);
 
       const cwd = this.engineAdapter.getWorkingDirectory();
       const debugInfo = {
         workingDirectory: cwd,
         canWrite: false,
-        fafCliPath: null as string | null,
-        fafVersion: null as string | null,
+        // Every tool runs on the faf-cli bundled in node_modules — report
+        // that, not whatever `which faf` happens to find on PATH.
+        fafVersion: bundledFafCliVersion(),
         permissions: {} as any,
         enginePath: this.engineAdapter.getEnginePath(),
-        pathEnv: process.env.PATH?.split(':') || []
       };
       
       // Check write permissions
@@ -1306,21 +1286,6 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
         debugInfo.permissions.writeError = error instanceof Error ? error.message : String(error);
       }
       
-      // Check FAF CLI availability using championship auto-detection
-      try {
-        const cliInfo = this.engineAdapter.getCliInfo();
-
-        if (cliInfo.detected && cliInfo.path) {
-          debugInfo.fafCliPath = cliInfo.path;
-          debugInfo.fafVersion = cliInfo.version || null;
-        } else {
-          debugInfo.fafCliPath = null;
-          debugInfo.fafVersion = null;
-        }
-      } catch (error) {
-        debugInfo.permissions.fafError = error instanceof Error ? error.message : String(error);
-      }
-      
       // Check for existing FAF file (v1.2.0: project.faf, *.faf, or .faf)
       const fafResult = await findFafFile(cwd);
       const hasFaf = fafResult !== null;
@@ -1330,15 +1295,12 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
 📂 Working Directory: ${debugInfo.workingDirectory}
 ✏️ Write Permissions: ${debugInfo.canWrite ? '✅ Yes' : '❌ No'}
 ${debugInfo.permissions.writeError ? `   Error: ${debugInfo.permissions.writeError}\n` : ''}🤖 FAF Engine Path: ${debugInfo.enginePath}
-🏎️ FAF CLI Path: ${debugInfo.fafCliPath || '❌ Not found'}
-📋 FAF Version: ${debugInfo.fafVersion || 'Unknown'}
-${debugInfo.permissions.fafError ? `   FAF Error: ${debugInfo.permissions.fafError}\n` : ''}📄 FAF File: ${hasFaf ? `✅ ${fafResult.filename} exists` : '❌ Not found (run faf_init)'}
-🛤️ System PATH: ${debugInfo.pathEnv.slice(0, 3).join(', ')}${debugInfo.pathEnv.length > 3 ? '...' : ''}
+📋 faf-cli (bundled): ${debugInfo.fafVersion ? `v${debugInfo.fafVersion}` : '❌ not found in node_modules — reinstall faf-mcp'}
+📄 FAF File: ${hasFaf ? `✅ ${fafResult.filename} exists` : '❌ Not found (run faf_init)'}
 
 💡 Quick Start:
-   1. If FAF CLI not found: npm install -g faf-cli
-   2. If .faf file missing: use faf_init tool
-   3. For optimization: use faf_enhance tool with model="claude"
+   1. If .faf file missing: use faf_init or faf_auto
+   2. To check AI-readiness: use faf_score
 `;
       
       return {
@@ -2065,7 +2027,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
             text: JSON.stringify({
               score: currentScore,
               message: `Score is ${currentScore}%. All fields filled but content may need enhancement.`,
-              suggestion: 'Use faf_enhance to improve content quality.',
+              suggestion: 'Use faf_go or faf_human_add to improve content quality.',
               context: 'faf_go'
             }, null, 2)
           }]
@@ -2239,7 +2201,7 @@ ${String(mergedData.stack_signature || 'Auto-detected stack')}
         output += `🚀 Good start! Run faf_go for guided improvement.\n`;
       }
 
-      output += `\n💡 Next: faf_score --details | faf_go | faf_enhance`;
+      output += `\n💡 Next: faf_score | faf_go | faf_bi_sync`;
 
       return { content: [{ type: 'text', text: output }] };
 
@@ -2558,7 +2520,7 @@ Example: "my-app, e-commerce platform"`
 
 ⚠️ project.faf already exists at: ${fafPath}
 
-Use force: true to overwrite, or use faf_enhance to modify.`
+Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
           }]
         };
       }
@@ -2601,7 +2563,6 @@ Use force: true to overwrite, or use faf_enhance to modify.`
       output += `✅ Created: ${fafPath}\n\n`;
       output += `Next steps:\n`;
       output += `  • faf_score - Check AI-readiness\n`;
-      output += `  • faf_enhance - Improve context\n`;
       output += `  • faf_go - Guided interview to 100%`;
 
       return { content: [{ type: 'text', text: output }] };
@@ -2708,7 +2669,7 @@ Use force: true to overwrite, or use faf_enhance to modify.`
               results.push({
                 status: 'warning',
                 message: `Missing important fields: ${missingFields.join(', ')}`,
-                fix: 'Run: faf_enhance or faf_go to add missing info'
+                fix: 'Run: faf_go to add missing info'
               });
             } else {
               results.push({
@@ -2729,7 +2690,7 @@ Use force: true to overwrite, or use faf_enhance to modify.`
               results.push({
                 status: 'error',
                 message: `Score too low: ${score}% (${slotSummary})`,
-                fix: 'Run: faf_enhance or faf_go to improve context'
+                fix: 'Run: faf_go to improve context'
               });
             } else if (score < 70) {
               results.push({

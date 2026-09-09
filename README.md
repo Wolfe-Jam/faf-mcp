@@ -192,8 +192,8 @@ Works on all platforms — stops web search, forces tool usage.
 |------|---------|
 | `faf_init` | Initialize project.faf |
 | `faf_score` | Check AI-readiness (0-100%) |
-| `faf_sync` | Sync context across platforms |
-| `faf_bi_sync` | Bi-directional .faf ↔ CLAUDE.md |
+| `faf_sync` | Reconcile project.faf with package.json / git (dry-run; `apply:true` writes) |
+| `faf_bi_sync` | Write CLAUDE.md (+ AGENTS.md, .cursorrules, GEMINI.md) from project.faf |
 | `faf_read` | Parse and validate FAF files |
 | `faf_write` | Create/update FAF with validation |
 | **Interop Tools** | |

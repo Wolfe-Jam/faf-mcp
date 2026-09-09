@@ -17,8 +17,8 @@ Product playbook for **faf-mcp** (`one.faf/faf-mcp`) — IANA `.faf` project con
 | `faf_init` | Create or enhance `project.faf` |
 | `faf_score` | AI-readiness 0–100% + gaps |
 | `faf_context` | Current project context snapshot |
-| `faf_sync` | Sync `project.faf` ↔ human-readable guide |
-| `faf_bi_sync` | Bi-directional context ↔ IDE format files |
+| `faf_sync` | Reconcile `project.faf` with package.json / git (dry-run; `apply:true` writes) |
+| `faf_bi_sync` | Write CLAUDE.md + IDE format files from `project.faf` |
 | `faf_cursor` | Cursor / `.cursorrules` interop |
 | `faf_agents` | `AGENTS.md` interop |
 | `faf_gemini` | Gemini context interop |

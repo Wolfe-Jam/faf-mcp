@@ -62,6 +62,17 @@ function findFafCliDist(startDir: string): string {
   );
 }
 
+/** Version of the faf-cli this package bundles (node_modules/faf-cli/package.json). */
+export function bundledFafCliVersion(): string | null {
+  try {
+    const pkg = path.join(path.dirname(path.dirname(findFafCliDist(__dirname))), 'package.json');
+    const parsed = JSON.parse(fs.readFileSync(pkg, 'utf-8')) as { version?: string };
+    return parsed.version ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Cached promise — module evaluation happens once.
 export const fafCli: Promise<typeof FafCli> = (async () => {
   const distPath = findFafCliDist(__dirname);

@@ -139,13 +139,14 @@ describe('🏁 WJTTC — P0 PATH-resolution (faf_trust / faf_clear / resources n
       expect(text).not.toContain('unrecognized subcommand');
     });
 
-    test('faf_clear with no flags clears all three categories, honestly', async () => {
+    test('faf_clear with no flags clears the cache and claims nothing else', async () => {
       const res = (await client.callTool({ name: 'faf_clear', arguments: {} })) as ToolText;
       expect(res.isError).toBeFalsy();
       const text = firstText(res);
       expect(text).toContain('cache:');
-      expect(text).toContain('todos:');
-      expect(text).toContain('backups:');
+      // todos/backups were never real stores; the schema no longer offers them.
+      expect(text).not.toContain('todos:');
+      expect(text).not.toContain('backups:');
     });
 
     test('claude-faf://status resource reports the real fixture score, not a foreign tool\'s banner', async () => {
