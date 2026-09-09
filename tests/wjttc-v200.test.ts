@@ -123,10 +123,27 @@ describe('BRAKE: Tool Registry Integrity', () => {
 
 describe('BRAKE: Tool Handler Routes', () => {
   let handler: FafToolHandler;
+  let tmpDir: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // The interop tools write AGENTS.md / .cursorrules / GEMINI.md into the
+    // engine's working directory. Pin it to a temp dir so the suite never
+    // writes into the repo root — it used to rewrite the tracked AGENTS.md
+    // and drop .cursorrules + GEMINI.md there on every run.
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wjttc-handler-'));
+    const yaml = await import('yaml');
+    fs.writeFileSync(path.join(tmpDir, 'project.faf'), yaml.stringify({
+      version: '1.0',
+      project: { name: 'handler-test', type: 'cli' },
+      human: { who: 'Tester' },
+    }));
     const engine = new FafEngineAdapter();
+    engine.setWorkingDirectory(tmpDir);
     handler = new FafToolHandler(engine);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it('listTools default surface is the Core tier (gated)', async () => {
@@ -155,6 +172,10 @@ describe('BRAKE: Tool Handler Routes', () => {
       const text = (result.content[0] as any).text || '';
       expect(text).not.toContain('Unknown tool');
     }
+    // The exports landed in the temp dir, not in process.cwd().
+    expect(fs.existsSync(path.join(tmpDir, 'AGENTS.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, '.cursorrules'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'GEMINI.md'))).toBe(true);
   });
 
   it('calling faf_tri_sync errors (not routed in faf-mcp)', async () => {
