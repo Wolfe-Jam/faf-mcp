@@ -18,6 +18,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { injectFafBlock } from '../inject';
+import { fafCli } from '../../utils/faf-cli-bridge.js';
+import { fafMetaTag, filled, slotLabel } from './interop-render.js';
 
 // ============================================================================
 // Types
@@ -84,7 +86,18 @@ export function parseCursorRules(content: string): CursorRulesFile {
     // Skip faf's own block markers — they are not headings or content.
     if (line.trim() === '# faf:start' || line.trim() === '# faf:end') continue;
 
-    // H1 = Project name
+    // faf-cli's current .cursorrules shape (v3.0) has no project-name H1 at
+    // all — just `# .cursorrules` then a comment line naming the project.
+    // Recognize that comment line explicitly, and skip the bare file-type
+    // header so it never gets mistaken for a project name below.
+    const authoredMatch = line.match(/^#\s+Authored from project\.faf\s+—\s+(.+)$/);
+    if (authoredMatch) {
+      projectName = authoredMatch[1].trim();
+      continue;
+    }
+    if (line.trim() === '# .cursorrules') continue;
+
+    // H1 = Project name (legacy/hand-written .cursorrules fallback)
     const h1Match = line.match(/^#\s+(?:Project:\s*)?(.+)$/);
     if (h1Match) {
       projectName = h1Match[1].trim();
@@ -253,107 +266,52 @@ function createEmptyFaf(): FafFromCursor {
 // Export: FAF -> .cursorrules
 // ============================================================================
 
+/**
+ * Render .cursorrules content from .faf data.
+ *
+ * v3.0: ported from faf-cli's CURRENT `renderCursorrules`
+ * (~/FAF/cli/src/interop/cursorrules.ts, faf-cli 7.11.0) — deliberately
+ * minimal. Modern Cursor reads `.cursor/rules/*.mdc` (`alwaysApply: true`)
+ * every turn; `.cursorrules` is the legacy, largely-ignored format faf-cli
+ * itself keeps thin rather than richly authored — the previous v4.5.0-
+ * vintage version here (Tech Stack / Coding Standards / Preferences /
+ * Build Commands / General Instructions) was MORE elaborate than faf-cli's
+ * own current .cursorrules, which is backwards: it over-invested in a
+ * format Cursor barely reads. Real richness for Cursor now lives in
+ * AGENTS.md (which Cursor also reads) — see agents-parser.ts. A first-
+ * class `.cursor/rules/*.mdc` emitter is P1 scope, not this fix.
+ */
 export async function cursorExport(
   fafContent: any,
   outputPath: string
 ): Promise<CursorExportResult> {
   const warnings: string[] = [];
+  const { SLOT_BY_PATH } = await fafCli;
 
-  // Build .cursorrules content
+  const data = fafContent ?? {};
+  const project = data.project ?? {};
   const lines: string[] = [];
 
-  // Project header
-  const projectName = fafContent.project?.name || fafContent.name || 'My Project';
-  const projectGoal = fafContent.project?.goal || fafContent.project?.description || fafContent.ai_tldr?.project || '';
-  lines.push(`# ${projectName}`);
+  lines.push(fafMetaTag(data));
   lines.push('');
-  if (projectGoal) {
-    lines.push(projectGoal);
-    lines.push('');
+  lines.push('# .cursorrules');
+  lines.push(`# Authored from project.faf — ${project.name ?? 'Project'}`);
+  lines.push('');
+
+  if (project.main_language) {
+    lines.push(`language: ${project.main_language}`);
   }
 
-  // Tech Stack section
-  const stack = fafContent.stack || fafContent.project?.stack || {};
-  const hasStack = stack.frontend || stack.backend || stack.build || stack.runtime;
-  if (hasStack) {
-    lines.push('## Tech Stack');
+  if (data.stack) {
     lines.push('');
-    if (stack.frontend) lines.push(`- Frontend: ${stack.frontend}`);
-    if (stack.backend) lines.push(`- Backend: ${stack.backend}`);
-    if (stack.runtime) lines.push(`- Runtime: ${stack.runtime}`);
-    if (stack.build) lines.push(`- Build: ${stack.build}`);
-    if (stack.package_manager) lines.push(`- Package Manager: ${stack.package_manager}`);
-    if (stack.languages?.length > 0) {
-      lines.push(`- Languages: ${stack.languages.join(', ')}`);
+    lines.push('# Stack');
+    for (const [key, value] of Object.entries(data.stack)) {
+      if (filled(value)) {
+        lines.push(`# ${slotLabel(`stack.${key}`, SLOT_BY_PATH)}: ${value.trim()}`);
+      }
     }
-    if (stack.frameworks?.length > 0) {
-      lines.push(`- Frameworks: ${stack.frameworks.join(', ')}`);
-    }
-    lines.push('');
   }
 
-  // Coding Standards section
-  const warnings_list = fafContent.ai_instructions?.warnings || [];
-  const workingStyle = fafContent.ai_instructions?.working_style || {};
-  const codingStyleItems = fafContent.project?.codingStyle || [];
-  const styleItems = [...codingStyleItems, ...warnings_list];
-
-  if (workingStyle.quality_bar) styleItems.push(`Quality bar: ${workingStyle.quality_bar}`);
-  if (workingStyle.testing) styleItems.push(`Testing: ${workingStyle.testing}`);
-
-  if (styleItems.length > 0) {
-    lines.push('## Coding Standards');
-    lines.push('');
-    for (const item of styleItems) {
-      lines.push(`- ${item}`);
-    }
-    lines.push('');
-  }
-
-  // Preferences section
-  const preferences = fafContent.preferences || {};
-  const prefItems: string[] = [];
-  if (preferences.quality_bar) prefItems.push(`Quality bar: ${preferences.quality_bar}`);
-  if (preferences.commit_style) prefItems.push(`Commit style: ${preferences.commit_style}`);
-  if (preferences.response_style) prefItems.push(`Response style: ${preferences.response_style}`);
-  if (preferences.testing) prefItems.push(`Testing: ${preferences.testing}`);
-  if (preferences.documentation) prefItems.push(`Documentation: ${preferences.documentation}`);
-
-  if (prefItems.length > 0) {
-    lines.push('## Preferences');
-    lines.push('');
-    for (const item of prefItems) {
-      lines.push(`- ${item}`);
-    }
-    lines.push('');
-  }
-
-  // Build Commands section
-  const howContext = fafContent.human_context?.how || fafContent.context?.how;
-  if (howContext) {
-    lines.push('## Build Commands');
-    lines.push('');
-    lines.push(`- ${howContext}`);
-    lines.push('');
-  }
-
-  // General Instructions (rules + guidelines)
-  const ruleItems = fafContent.project?.rules || [];
-  const guidelineItems = fafContent.project?.guidelines || [];
-  const generalInstructions = [...ruleItems, ...guidelineItems];
-
-  if (generalInstructions.length > 0) {
-    lines.push('## General Instructions');
-    lines.push('');
-    for (const item of generalInstructions) {
-      lines.push(`- ${item}`);
-    }
-    lines.push('');
-  }
-
-  // Footer
-  lines.push('---');
-  lines.push(`Generated from project.faf by faf-mcp — ${new Date().toISOString().split('T')[0]}`);
   lines.push('');
 
   // Write file — non-destructive: inject/update the faf block (hash-comment markers), preserve the rest.

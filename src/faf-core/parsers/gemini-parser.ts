@@ -15,6 +15,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { injectFafBlock } from '../inject';
+import { fafCli } from '../../utils/faf-cli-bridge.js';
+import { fafMetaTag, filled, present, slotLabel, NON_STACK } from './interop-render.js';
 
 // ============================================================================
 // Types
@@ -72,8 +74,9 @@ export function parseGeminiMd(content: string): GeminiMdFile {
   let currentSection: GeminiMdSection | null = null;
 
   for (const line of lines) {
-    // H1 = Project name
-    const h1Match = line.match(/^#\s+(?:Project:\s*)?(.+)$/);
+    // H1 = Project name. Strips faf-cli's current `# GEMINI.md — <name>`
+    // shape (v3.0) as well as the legacy bare `# <name>` / `# Project: <name>`.
+    const h1Match = line.match(/^#\s+(?:Project:\s*|GEMINI\.md\s+—\s+)?(.+)$/);
     if (h1Match) {
       projectName = h1Match[1].trim();
       continue;
@@ -208,86 +211,107 @@ function createEmptyFaf(): FafFromGemini {
 // Export: FAF -> GEMINI.md
 // ============================================================================
 
+/**
+ * Render GEMINI.md content from .faf data.
+ *
+ * v3.0: ported from faf-cli's CURRENT `renderGeminiMd`
+ * (~/FAF/cli/src/interop/gemini.ts, faf-cli 7.11.0) — matches Gemini CLI's
+ * own GEMINI.md convention (hierarchical, concatenation-friendly,
+ * `@file.md`-importable): commands, key files, and confirmation-required
+ * actions, not the AGENTS.md guardrail ladder — a different spec for a
+ * different reader.
+ */
 export async function geminiExport(
   fafContent: any,
   outputPath: string
 ): Promise<GeminiExportResult> {
   const warnings: string[] = [];
+  const { SLOT_BY_PATH } = await fafCli;
 
-  // Build GEMINI.md content
+  const data = fafContent ?? {};
+  const project = data.project ?? {};
+  const instant = data.instant_context ?? {};
+  const commands = data.commands;
+  const keyFiles: string[] | undefined = data.key_files ?? instant.key_files;
+
+  const entries = commands ? Object.entries(commands).filter(([, v]) => present(v)) : [];
+  // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
+  const testCmds = entries.filter(([k]) => /test/i.test(k));
+  const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));
+  const setupRaw = entries.filter(([k]) => !/test|lint|check/i.test(k));
+  // Stable setup order: install -> build -> dev -> start -> other.
+  const setupRank = (k: string): number => {
+    const n = k.toLowerCase();
+    if (/install|deps/.test(n)) return 0;
+    if (/^build$|build/.test(n) && !/rebuild/.test(n)) return 1;
+    if (/^dev$|develop/.test(n)) return 2;
+    if (/^start$|run/.test(n)) return 3;
+    return 4;
+  };
+  const setupCmds = [...setupRaw].sort(
+    (a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]),
+  );
+  const verifyCmds = [...testCmds, ...lintCmds];
+
   const lines: string[] = [];
 
-  // Project header
-  const projectName = fafContent.project?.name || fafContent.name || 'My Project';
-  lines.push(`# Project: ${projectName}`);
+  lines.push(fafMetaTag(data));
+  lines.push('');
+  lines.push(`# GEMINI.md — ${project.name ?? 'Project'}`);
+  lines.push('');
+  lines.push('> Authored from project.faf — refresh with `faf_gemini`.');
   lines.push('');
 
-  // Description as intro paragraph if exists
-  const description = fafContent.project?.description || fafContent.description;
-  if (description) {
-    lines.push(description);
+  if (project.name) lines.push(`Project: ${project.name}`);
+  if (project.goal) lines.push(`Goal: ${project.goal}`);
+  if (project.main_language) lines.push(`Language: ${project.main_language}`);
+
+  if (setupCmds.length) {
     lines.push('');
+    lines.push('## Setup & build');
+    lines.push('');
+    lines.push('```bash');
+    for (const [k, v] of setupCmds) lines.push(`${v}    # ${k}`);
+    lines.push('```');
   }
 
-  // General Instructions section
-  const guidelineItems = fafContent.project?.guidelines || fafContent.guidelines || [];
-  const ruleItems = fafContent.project?.rules || fafContent.rules || [];
-  const generalInstructions = [...guidelineItems, ...ruleItems];
-
-  if (generalInstructions.length > 0) {
-    lines.push('## General Instructions');
+  if (verifyCmds.length) {
     lines.push('');
-    for (const item of generalInstructions) {
-      lines.push(`- ${item}`);
+    lines.push('## Test & verify');
+    lines.push('');
+    lines.push('```bash');
+    for (const [, v] of verifyCmds) lines.push(String(v));
+    lines.push('```');
+  }
+
+  if (keyFiles && keyFiles.length) {
+    lines.push('');
+    lines.push('## Where things live');
+    lines.push('');
+    for (const f of keyFiles) lines.push(`- \`${f}\``);
+  }
+
+  if (data.stack) {
+    const stackLines: string[] = [];
+    for (const [key, value] of Object.entries(data.stack)) {
+      if (NON_STACK.has(key)) continue;
+      if (filled(value)) stackLines.push(`- ${slotLabel(`stack.${key}`, SLOT_BY_PATH)}: ${value.trim()}`);
     }
-    lines.push('');
-  }
-
-  // Coding Style section
-  const codingStyleItems = fafContent.project?.codingStyle || fafContent.codingStyle || [];
-  const stack = fafContent.project?.stack || {};
-
-  // Add languages/frameworks to coding style context
-  const styleItems = [...codingStyleItems];
-  if (stack.languages?.length > 0) {
-    styleItems.push(`Languages: ${stack.languages.join(', ')}`);
-  }
-  if (stack.frameworks?.length > 0) {
-    styleItems.push(`Frameworks: ${stack.frameworks.join(', ')}`);
-  }
-
-  if (styleItems.length > 0) {
-    lines.push('## Coding Style');
-    lines.push('');
-    for (const item of styleItems) {
-      lines.push(`- ${item}`);
+    if (stackLines.length) {
+      lines.push('');
+      lines.push('## Stack');
+      for (const s of stackLines) lines.push(s);
     }
-    lines.push('');
   }
 
-  // Tech Stack section (if detailed)
-  if (stack.databases?.length > 0 || stack.infrastructure?.length > 0) {
-    lines.push('## Tech Stack');
-    lines.push('');
-    if (stack.databases?.length > 0) {
-      lines.push(`- Databases: ${stack.databases.join(', ')}`);
-    }
-    if (stack.infrastructure?.length > 0) {
-      lines.push(`- Infrastructure: ${stack.infrastructure.join(', ')}`);
-    }
-    lines.push('');
-  }
+  // Universal safety default — always renders, same as AGENTS.md's Guardrails.
+  lines.push('');
+  lines.push('## Before changing things');
+  lines.push('');
+  lines.push('- Ask first: dependency installs, deletions, migrations, schema changes, publish/release.');
+  lines.push('- Never: force-push · push straight to `main` · commit secrets.');
 
-  // Goals section
-  const goals = fafContent.project?.goals || [];
-  if (goals.length > 0) {
-    lines.push('## Project Goals');
-    lines.push('');
-    for (const goal of goals) {
-      lines.push(`- ${goal}`);
-    }
-    lines.push('');
-  }
+  lines.push('');
 
   // Write file — non-destructive: inject/update the faf block, preserve the rest.
   const content = lines.join('\n');

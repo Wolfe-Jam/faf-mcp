@@ -1109,6 +1109,21 @@ package_manager: ${projectData.package_manager}` : ''}
     if (args?.force) {
       biSyncArgs.push('--force');
     }
+    // v3.0 fix: the tool's own schema advertises agents/cursor/gemini/all,
+    // but they were never forwarded to engine-adapter's bi-sync dispatch —
+    // faf_bi_sync silently ignored them and only ever wrote CLAUDE.md.
+    if (args?.agents) {
+      biSyncArgs.push('--agents');
+    }
+    if (args?.cursor) {
+      biSyncArgs.push('--cursor');
+    }
+    if (args?.gemini) {
+      biSyncArgs.push('--gemini');
+    }
+    if (args?.all) {
+      biSyncArgs.push('--all');
+    }
 
     const result = await this.engineAdapter.callEngine('bi-sync', biSyncArgs);
 
@@ -2140,7 +2155,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 
       // Step 2: the real assembly pipeline (detect + interrogate + Turbo-Cat
       // + README/6W extraction), one call — same as faf-cli's own `faf auto`.
-      const fresh = assembleFreshFaf(cwd) as Record<string, unknown>;
+      const fresh = assembleFreshFaf(cwd);
 
       let fafPath: string;
       let mergedData: Record<string, unknown>;
@@ -2181,7 +2196,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 ${humanContext?.why || project?.goal || 'AI-ready project context'}
 
 ### 🏗️ Architecture Overview
-${mergedData.stack_signature || 'Auto-detected stack'}
+${String(mergedData.stack_signature || 'Auto-detected stack')}
 
 ---
 

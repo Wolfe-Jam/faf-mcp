@@ -19,7 +19,11 @@ const DATA: any = {
   stack: { backend: 'Express' },
 };
 const MARK = '## HAND-WRITTEN — MUST SURVIVE';
-const blocks = (s: string) => (s.match(/faf:start/g) || []).length;
+// Count actual marker LINES, not any occurrence of the substring "faf:start"
+// — faf-cli's current AGENTS.md body (v3.0) legitimately mentions the
+// `<!-- faf:start -->` token in prose (documenting the managed-block syntax
+// to the reader), which is not itself a marker and must not double-count.
+const blocks = (s: string) => (s.match(/^(?:<!-- faf:start -->|# faf:start)$/gm) || []).length;
 function tmp(): string { return mkdtempSync(join(tmpdir(), 'faf-mcp-nd-')); }
 
 describe('injectFafBlock — non-destructive', () => {
