@@ -49,16 +49,6 @@ import {
   getScoreTier,
 } from '../src/faf-core/parsers/faf-git-generator';
 
-// Visibility / registry imports
-import {
-  TOOL_REGISTRY,
-  getCoreTools,
-  getAdvancedTools,
-  getAllTools,
-  isCoreTool,
-  isAdvancedTool,
-  validateToolCounts,
-} from '../src/types/tool-visibility';
 
 // ============================================================================
 // TIER 1: Parser Unit Tests (~20 tests)
@@ -627,103 +617,6 @@ describe('TIER 2: Import/Export', () => {
 });
 
 // ============================================================================
-// TIER 3: MCP Integration (~15 tests)
-// ============================================================================
-
-describe('TIER 3: MCP Integration', () => {
-  describe('New tool registration', () => {
-    it('faf_agents should be registered as core', () => {
-      expect(TOOL_REGISTRY['faf_agents']).toBeDefined();
-      expect(TOOL_REGISTRY['faf_agents'].visibility).toBe('core');
-      expect(TOOL_REGISTRY['faf_agents'].category).toBe('sync');
-    });
-
-    it('faf_cursor should be registered as core', () => {
-      expect(TOOL_REGISTRY['faf_cursor']).toBeDefined();
-      expect(TOOL_REGISTRY['faf_cursor'].visibility).toBe('core');
-      expect(TOOL_REGISTRY['faf_cursor'].category).toBe('sync');
-    });
-
-    it('faf_gemini should be registered as core', () => {
-      expect(TOOL_REGISTRY['faf_gemini']).toBeDefined();
-      expect(TOOL_REGISTRY['faf_gemini'].visibility).toBe('core');
-      expect(TOOL_REGISTRY['faf_gemini'].category).toBe('sync');
-    });
-
-    it('faf_git should be registered as core', () => {
-      expect(TOOL_REGISTRY['faf_git']).toBeDefined();
-      expect(TOOL_REGISTRY['faf_git'].visibility).toBe('core');
-      expect(TOOL_REGISTRY['faf_git'].category).toBe('workflow');
-    });
-
-    it('faf_conductor should be registered as advanced', () => {
-      expect(TOOL_REGISTRY['faf_conductor']).toBeDefined();
-      expect(TOOL_REGISTRY['faf_conductor'].visibility).toBe('advanced');
-      expect(TOOL_REGISTRY['faf_conductor'].category).toBe('sync');
-    });
-  });
-
-  describe('Tool count integrity', () => {
-    it('should have 25 core tools after v4.5.0', () => {
-      const counts = validateToolCounts();
-      expect(counts.core).toBe(25);
-    });
-
-    it('should have 36 advanced tools after v4.5.0', () => {
-      const counts = validateToolCounts();
-      expect(counts.advanced).toBe(36);
-    });
-
-    it('should have 61 total tools after v4.5.0', () => {
-      const counts = validateToolCounts();
-      expect(counts.total).toBe(61);
-    });
-  });
-
-  describe('New tools appear in correct lists', () => {
-    it('faf_agents should appear in core tools list', () => {
-      const coreTools = getCoreTools();
-      expect(coreTools.find(t => t.name === 'faf_agents')).toBeDefined();
-    });
-
-    it('faf_cursor should appear in core tools list', () => {
-      const coreTools = getCoreTools();
-      expect(coreTools.find(t => t.name === 'faf_cursor')).toBeDefined();
-    });
-
-    it('faf_gemini should appear in core tools list', () => {
-      const coreTools = getCoreTools();
-      expect(coreTools.find(t => t.name === 'faf_gemini')).toBeDefined();
-    });
-
-    it('faf_git should appear in core tools list', () => {
-      const coreTools = getCoreTools();
-      expect(coreTools.find(t => t.name === 'faf_git')).toBeDefined();
-    });
-
-    it('faf_conductor should appear in advanced tools list', () => {
-      const advancedTools = getAdvancedTools();
-      expect(advancedTools.find(t => t.name === 'faf_conductor')).toBeDefined();
-    });
-
-    it('new tools should all have descriptions', () => {
-      const newTools = ['faf_agents', 'faf_cursor', 'faf_gemini', 'faf_git', 'faf_conductor'];
-      for (const name of newTools) {
-        expect(TOOL_REGISTRY[name].description).toBeDefined();
-        expect(TOOL_REGISTRY[name].description.length).toBeGreaterThan(0);
-      }
-    });
-
-    it('no duplicate tools should exist', () => {
-      const allTools = getAllTools();
-      const names = allTools.map(t => t.name);
-      const unique = new Set(names);
-      expect(names.length).toBe(unique.size);
-    });
-  });
-});
-
-// ============================================================================
 // TIER 4: Engine Adapter (~10 tests)
 // ============================================================================
 
@@ -930,39 +823,6 @@ describe('TIER 6: Performance', () => {
       }
       const duration = performance.now() - start;
       expect(duration).toBeLessThan(50);
-    });
-  });
-
-  describe('Registry speed', () => {
-    it('getCoreTools should complete in < 10ms', () => {
-      const start = performance.now();
-      getCoreTools();
-      const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10);
-    });
-
-    it('getAdvancedTools should complete in < 10ms', () => {
-      const start = performance.now();
-      getAdvancedTools();
-      const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10);
-    });
-
-    it('validateToolCounts should complete in < 10ms', () => {
-      const start = performance.now();
-      validateToolCounts();
-      const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10);
-    });
-
-    it('isCoreTool/isAdvancedTool should be fast lookups', () => {
-      const start = performance.now();
-      for (let i = 0; i < 1000; i++) {
-        isCoreTool('faf_agents');
-        isAdvancedTool('faf_conductor');
-      }
-      const duration = performance.now() - start;
-      expect(duration).toBeLessThan(10);
     });
   });
 });

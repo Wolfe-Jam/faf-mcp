@@ -11,11 +11,10 @@
     "faf-mcp": "dist/src/index.js"
   },
   "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "tsc",
-    "start": "node start-http.js",
     "dev": "ts-node src/server.ts",
     "dev:stdio": "ts-node src/cli.ts --transport stdio",
-    "dev:http": "ts-node src/cli.ts --transport http-sse --port 3001",
     "test": "bun test --isolate --timeout=120000 --path-ignore-patterns=\"**/performance.test.ts\"",
     "test:performance": "bun test tests/performance.test.ts",
     "test:mcp": "mcp-inspector stdio ts-node src/cli.ts",
@@ -23,13 +22,10 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "type-check": "tsc --noEmit",
     "check:stylesheet": "node scripts/check-stylesheet-drift.mjs",
-    "format:check": "prettier --check \"src/**/*.ts\"",
-    "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",
     "sync-version": "node scripts/sync-version.js",
     "version": "npm run sync-version && git add project.faf",
     "prepublishOnly": "npm run build",
-    "postinstall": "node scripts/postinstall.js",
     "debug": "node --inspect-brk=0.0.0.0:9229 -r ts-node/register src/cli.ts"
   },
   "keywords": [
@@ -91,7 +87,6 @@
     "skills/**",
     "README.md",
     "CLAUDE.md",
-    ".faf",
     "project.faf",
     "LICENSE",
     "CHANGELOG.md",

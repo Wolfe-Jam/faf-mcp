@@ -26,24 +26,12 @@ import { agentsImportCommand, agentsExportCommand } from '../src/faf-core/comman
 import { cursorImportCommand, cursorExportCommand } from '../src/faf-core/commands/cursor';
 import { geminiImportCommand, geminiExportCommand } from '../src/faf-core/commands/gemini';
 import { conductorImportCommand, conductorExportCommand } from '../src/faf-core/commands/conductor';
-import { humanAddCommand, humanSetCommand } from '../src/faf-core/commands/human';
-import { extractSixWs } from '../src/faf-core/commands/readme';
 import { syncBiDirectional } from '../src/faf-core/commands/bi-sync';
 
 // Engine & Tools
 import { FafEngineAdapter } from '../src/handlers/engine-adapter';
 import { FafToolHandler } from '../src/handlers/tools';
 import { FafMcpServer } from '../src/server';
-
-// Visibility
-import {
-  validateToolCounts,
-  getCoreTools,
-  getAdvancedTools,
-  getAllTools,
-  isCoreTool,
-  isAdvancedTool,
-} from '../src/types/tool-visibility';
 
 // Version
 import { VERSION } from '../src/version';
@@ -71,53 +59,6 @@ describe('BRAKE: Server Instantiation', () => {
 
   it('VERSION is a valid semver string', () => {
     expect(VERSION).toMatch(/^\d+\.\d+\.\d+/);
-  });
-});
-
-describe('BRAKE: Tool Registry Integrity', () => {
-  it('tool counts match v2.0.0 spec: 25 core + 36 advanced = 61', () => {
-    const counts = validateToolCounts();
-    expect(counts.core).toBe(25);
-    expect(counts.advanced).toBe(36);
-    expect(counts.total).toBe(61);
-  });
-
-  it('no duplicate tool names in registry', () => {
-    const all = getAllTools();
-    const names = all.map(t => t.name);
-    const unique = new Set(names);
-    expect(unique.size).toBe(names.length);
-  });
-
-  it('every tool has a non-empty description', () => {
-    const all = getAllTools();
-    for (const tool of all) {
-      expect(tool.description.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('every tool has a valid category', () => {
-    const validCategories = ['workflow', 'quality', 'intelligence', 'sync', 'ai', 'help', 'trust', 'file', 'utility', 'display'];
-    const all = getAllTools();
-    for (const tool of all) {
-      expect(validCategories).toContain(tool.category);
-    }
-  });
-
-  it('interop tools are registered as core', () => {
-    expect(isCoreTool('faf_agents')).toBe(true);
-    expect(isCoreTool('faf_cursor')).toBe(true);
-    expect(isCoreTool('faf_gemini')).toBe(true);
-    expect(isCoreTool('faf_git')).toBe(true);
-  });
-
-  it('conductor is advanced (power user)', () => {
-    expect(isAdvancedTool('faf_conductor')).toBe(true);
-  });
-
-  it('tri_sync is NOT registered (Claude-only, excluded from faf-mcp)', () => {
-    expect(isCoreTool('faf_tri_sync')).toBe(false);
-    expect(isAdvancedTool('faf_tri_sync')).toBe(false);
   });
 });
 
@@ -467,79 +408,6 @@ describe('ENGINE: Slot Counter', () => {
   });
 });
 
-describe('ENGINE: README 6Ws Extraction', () => {
-  it('extracts project info from a standard README', () => {
-    const readme = [
-      '# MyProject',
-      '',
-      'A CLI tool for managing configuration files.',
-      '',
-      '## Installation',
-      '```bash',
-      'npm install myproject',
-      '```',
-    ].join('\n');
-
-    const result = extractSixWs(readme);
-    expect(result).toBeDefined();
-  });
-
-  it('handles empty README gracefully', () => {
-    const result = extractSixWs('');
-    expect(result).toBeDefined();
-  });
-});
-
-describe('ENGINE: Human Context Commands', () => {
-  let tmpDir: string;
-
-  beforeEach(async () => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wjttc-human-'));
-    const yaml = await import('yaml');
-    fs.writeFileSync(path.join(tmpDir, 'project.faf'), yaml.stringify({
-      version: '1.0',
-      project: { name: 'human-test', type: 'cli' },
-    }));
-  });
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
-  });
-
-  it('humanAddCommand adds human_context to .faf', async () => {
-    const result = await humanAddCommand(tmpDir, {
-      field: 'who',
-      value: 'Test Engineer',
-    });
-    expect(result.success).toBe(true);
-
-    const yaml = await import('yaml');
-    const content = yaml.parse(fs.readFileSync(path.join(tmpDir, 'project.faf'), 'utf-8'));
-    expect(content.human_context?.who).toBe('Test Engineer');
-  });
-
-  it('humanSetCommand sets a specific field', async () => {
-    const result = await humanSetCommand(tmpDir, 'what', 'Building the future');
-    expect(result.success).toBe(true);
-
-    const yaml = await import('yaml');
-    const content = yaml.parse(fs.readFileSync(path.join(tmpDir, 'project.faf'), 'utf-8'));
-    expect(content.human_context?.what).toBe('Building the future');
-  });
-
-  it('humanAddCommand creates .faf if missing (auto-create)', async () => {
-    const emptyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wjttc-nofaf-'));
-    try {
-      const result = await humanAddCommand(emptyDir, { field: 'who', value: 'test' });
-      // humanAdd creates project.faf if missing
-      expect(result.success).toBe(true);
-      expect(fs.existsSync(path.join(emptyDir, 'project.faf'))).toBe(true);
-    } finally {
-      fs.rmSync(emptyDir, { recursive: true, force: true });
-    }
-  });
-});
-
 describe('ENGINE: Engine Adapter Routes Interop', () => {
   let adapter: FafEngineAdapter;
   let tmpDir: string;
@@ -580,36 +448,6 @@ describe('ENGINE: Engine Adapter Routes Interop', () => {
 
   it('bi-sync --all routes through adapter', async () => {
     const result = await adapter.callEngine('bi-sync', [tmpDir, '--all']);
-    expect(result).toBeDefined();
-    expect(result.success).toBe(true);
-  });
-
-  it('human command routes through adapter', async () => {
-    const result = await adapter.callEngine('human', [tmpDir, '--field=who', '--value=Champion']);
-    expect(result).toBeDefined();
-    expect(result.success).toBe(true);
-  });
-
-  it('readme command routes through adapter', async () => {
-    fs.writeFileSync(path.join(tmpDir, 'README.md'), [
-      '# AdapterTest',
-      '',
-      'A CLI tool for testing engine adapter routing.',
-      '',
-      '## Installation',
-      '```bash',
-      'npm install adapter-test',
-      '```',
-      '',
-      '## Features',
-      '- Fast routing',
-      '- Zero dependencies',
-      '',
-      '## Tech Stack',
-      '- TypeScript',
-      '- Node.js',
-    ].join('\n'));
-    const result = await adapter.callEngine('readme', [tmpDir]);
     expect(result).toBeDefined();
     expect(result.success).toBe(true);
   });

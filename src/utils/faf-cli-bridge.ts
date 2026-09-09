@@ -78,3 +78,7 @@ export const fafCli: Promise<typeof FafCli> = (async () => {
   const distPath = findFafCliDist(__dirname);
   return (await import(pathToFileURL(distPath).href)) as typeof FafCli;
 })();
+// If faf-cli is missing the rejection must reach the tool call that awaits
+// it (a clear per-call error), not crash the server at startup as an
+// unhandled rejection before the host has even sent `initialize`.
+fafCli.catch(() => { /* surfaced by every `await fafCli` */ });

@@ -154,10 +154,6 @@ jobs:
         run: npm run type-check
         continue-on-error: true  # Don't block on type errors
 
-      - name: Format Check
-        run: npm run format:check
-        continue-on-error: true  # Don't block on format errors
-
   # 🏗️ Build
   build:
     name: 🏗️ Build

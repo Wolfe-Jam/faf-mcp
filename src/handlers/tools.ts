@@ -218,7 +218,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_clear',
-          description: 'Clear faf-mcp\'s local cache (~/.faf-cli-cache). That is the only persisted state this version keeps outside your project files.',
+          description: 'Remove the ~/.faf-cli-cache directory left by older faf-mcp versions. This version persists nothing outside your project files.',
           annotations: {
             title: 'Clear .faf Data',
             readOnlyHint: false,
@@ -228,8 +228,8 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              cache: { type: 'boolean', description: 'Clear the local cache (~/.faf-cli-cache)' },
-              all: { type: 'boolean', description: 'Clear everything faf-mcp persists (default; today that is the cache)' }
+              cache: { type: 'boolean', description: 'Remove ~/.faf-cli-cache (written by faf-mcp < 3.0)' },
+              all: { type: 'boolean', description: 'Remove everything older versions persisted (default; today that is the cache)' }
             },
             additionalProperties: false
           }
