@@ -5,6 +5,13 @@ import { fafCli } from '../utils/faf-cli-bridge.js';
 export class FafResourceHandler {
   constructor(private engineAdapter: FafEngineAdapter) {}
 
+  /**
+   * v3.0: renamed from `claude-faf://` to `faf://` — an identity leftover
+   * from before this became the generic Cursor/IDE edition (no Claude-
+   * specific behavior lives behind these URIs). `faf://` is primary and
+   * listed first; `claude-faf://` stays registered as an alias for one
+   * release so an existing client pointed at the old URI doesn't break.
+   */
   async listResources() {
     // Get the working directory for file system resources
     const workingDir = process.env.FAF_WORKING_DIR ?? process.cwd();
@@ -12,15 +19,27 @@ export class FafResourceHandler {
     return {
       resources: [
         {
-          uri: 'claude-faf://context',
+          uri: 'faf://context',
           name: 'Current FAF Context',
           description: 'Current project FAF context and metadata',
           mimeType: 'application/json'
         },
         {
-          uri: 'claude-faf://status',
+          uri: 'faf://status',
           name: 'FAF Status Summary',
           description: 'Project health and AI readiness status',
+          mimeType: 'text/plain'
+        },
+        {
+          uri: 'claude-faf://context',
+          name: 'Current FAF Context (legacy alias)',
+          description: 'Alias for faf://context — kept for one release, prefer faf://context.',
+          mimeType: 'application/json'
+        },
+        {
+          uri: 'claude-faf://status',
+          name: 'FAF Status Summary (legacy alias)',
+          description: 'Alias for faf://status — kept for one release, prefer faf://status.',
           mimeType: 'text/plain'
         },
         // Declare file system access for the working directory
@@ -47,10 +66,12 @@ export class FafResourceHandler {
     }
 
     switch (uri) {
+      case 'faf://context':
       case 'claude-faf://context':
-        return await this.getFafContext();
+        return await this.getFafContext(uri);
+      case 'faf://status':
       case 'claude-faf://status':
-        return await this.getFafStatus();
+        return await this.getFafStatus(uri);
       default:
         throw new Error(`Unknown resource: ${uri}`);
     }
@@ -67,7 +88,7 @@ export class FafResourceHandler {
    * PATH-resolution bugs this release fixes. Rewired onto the bundled
    * faf-cli bridge — bundled faf-cli only, never ambient PATH.
    */
-  private async getFafContext() {
+  private async getFafContext(uri: string) {
     const cwd = this.engineAdapter.getWorkingDirectory();
     const { findFafFile: findFaf, readFaf, readFafRaw, scoreFafYaml } = await fafCli;
     const fafPath = findFaf(cwd);
@@ -75,7 +96,7 @@ export class FafResourceHandler {
     if (!fafPath) {
       return {
         contents: [{
-          uri: 'claude-faf://context',
+          uri,
           mimeType: 'application/json',
           text: JSON.stringify({ error: `No .faf found in ${cwd}` }, null, 2)
         }]
@@ -87,7 +108,7 @@ export class FafResourceHandler {
       const score = scoreFafYaml(readFafRaw(fafPath));
       return {
         contents: [{
-          uri: 'claude-faf://context',
+          uri,
           mimeType: 'application/json',
           text: JSON.stringify(
             { path: fafPath, score: score.score, tier: score.tier.name, populated: score.populated, total: score.total, data },
@@ -99,7 +120,7 @@ export class FafResourceHandler {
     } catch (error: any) {
       return {
         contents: [{
-          uri: 'claude-faf://context',
+          uri,
           mimeType: 'application/json',
           text: JSON.stringify({ error: error?.message ?? String(error) }, null, 2)
         }]
@@ -107,7 +128,7 @@ export class FafResourceHandler {
     }
   }
 
-  private async getFafStatus() {
+  private async getFafStatus(uri: string) {
     const cwd = this.engineAdapter.getWorkingDirectory();
     const { findFafFile: findFaf, readFafRaw, scoreFafYaml } = await fafCli;
     const fafPath = findFaf(cwd);
@@ -115,7 +136,7 @@ export class FafResourceHandler {
     if (!fafPath) {
       return {
         contents: [{
-          uri: 'claude-faf://status',
+          uri,
           mimeType: 'text/plain',
           text: `No .faf found in ${cwd}\nRun faf_init to create one.`
         }]
@@ -129,7 +150,7 @@ export class FafResourceHandler {
         `FAF SCORE: ${score.score}/100 (${score.populated}/${score.total} slots populated) — ${score.tier.name}`;
       return {
         contents: [{
-          uri: 'claude-faf://status',
+          uri,
           mimeType: 'text/plain',
           text
         }]
@@ -137,7 +158,7 @@ export class FafResourceHandler {
     } catch (error: any) {
       return {
         contents: [{
-          uri: 'claude-faf://status',
+          uri,
           mimeType: 'text/plain',
           text: `Error: ${error?.message ?? String(error)}`
         }]
