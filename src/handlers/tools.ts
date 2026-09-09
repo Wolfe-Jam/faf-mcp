@@ -1901,7 +1901,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       // they're SOURCED by Turbo-Cat (faf-cli's separate STACK_INTERVIEW if ever
       // needed), never asked of a human. (Decision: single-source the 8-Q 6Ws
       // Interview, wolfejam 2026-06-10 — language is not on the human side.)
-      const { SIX_WS_INTERVIEW } = await fafCli;
+      const { SIX_WS_INTERVIEW, isPlaceholder, scoreFafYaml } = await fafCli;
       const QUESTION_REGISTRY: Record<string, (typeof SIX_WS_INTERVIEW)[number]> =
         Object.fromEntries(SIX_WS_INTERVIEW.map((q) => [q.path, q]));
 
@@ -1950,16 +1950,20 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         current[parts[parts.length - 1]] = value;
       };
 
-      // Check if value is empty/placeholder
-      const isEmpty = (value: any): boolean => {
-        return value === undefined ||
-          value === null ||
-          value === '' ||
-          value === 'Unknown' ||
-          value === 'TBD' ||
-          value === 'None' ||
-          (typeof value === 'string' && value.toLowerCase().includes('placeholder'));
-      };
+      // Empty = what the scorer calls empty. faf-cli's isPlaceholder is the one
+      // rule the kernel scores by; a local list ('TBD', 'Unknown', ...) drifted
+      // from it in both directions and made faf_go's numbers disagree with
+      // faf_score on the same file. slotignored is inactive, never asked.
+      const isEmpty = (value: unknown): boolean => isPlaceholder(value) && value !== 'slotignored';
+
+      // One score function, period: the real scorer on the real bytes.
+      const scoreOf = (raw: string): number => scoreFafYaml(raw).score;
+      const tierLabel = (score: number): string =>
+        score >= 100 ? '✪ Trophy — 100% AI-Readiness' :
+        score >= 99 ? '★ Gold' :
+        score >= 95 ? '◆ Silver' :
+        score >= 85 ? '◇ Bronze — production ready' :
+        score >= 70 ? '● Green — solid foundation' : '📈 Keep going!';
 
       // PHASE 2: Apply answers if provided
       if (args?.answers && typeof args.answers === 'object') {
@@ -1973,17 +1977,10 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
           }
         }
 
-        // Write updated file
+        // Write updated file, then score the bytes that were written.
         fs.writeFileSync(fafResult.path, yaml.stringify(fafData), 'utf-8');
-
-        // Calculate new score (simple count-based)
-        const totalFields = Object.keys(QUESTION_REGISTRY).length;
-        const filledFields = Object.keys(QUESTION_REGISTRY).filter(field => !isEmpty(getNestedValue(fafData, field))).length;
-        const newScore = Math.round((filledFields / totalFields) * 100);
-
-        const celebration = newScore >= 100 ? '🏆 GOLD CODE ACHIEVED!' :
-          newScore >= 85 ? '🥇 Championship grade!' :
-          newScore >= 70 ? '🥈 Great progress!' : '📈 Keep going!';
+        const newScore = scoreOf(fs.readFileSync(fafResult.path, 'utf-8'));
+        const celebration = tierLabel(newScore);
 
         return {
           content: [{
@@ -1996,13 +1993,11 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       // PHASE 1: Analyze and return questions — the canonical 6Ws (SIX_WS_INTERVIEW),
       // scoped to slots that are empty AND active (slotignored is never asked).
       const missingFields: string[] = SIX_WS_INTERVIEW
-        .filter((q) => { const v = getNestedValue(fafData, q.path); return v !== 'slotignored' && isEmpty(v); })
+        .filter((q) => isEmpty(getNestedValue(fafData, q.path)))
         .map((q) => q.path);
 
-      // Calculate current score
-      const totalFields = Object.keys(QUESTION_REGISTRY).length;
-      const filledFields = totalFields - missingFields.length;
-      const currentScore = Math.round((filledFields / totalFields) * 100);
+      // Current score — the same number faf_score reports for this file.
+      const currentScore = scoreOf(fafContent);
 
       // Already at 100%?
       if (currentScore >= 100) {
@@ -2278,8 +2273,25 @@ ${String(mergedData.stack_signature || 'Auto-detected stack')}
 
       // Build journey string
       const birthScore = dna.birthCertificate?.birthDNA || 0;
-      const currentScore = dna.current?.score || 0;
-      const milestones = dna.milestones || [];
+      let currentScore: number = dna.current?.score || 0;
+      const milestones: any[] = dna.milestones || [];
+      dna.milestones = milestones;
+
+      // "Current" is the live score of the file on disk, not whatever was
+      // stored last time. Nothing else records growth into .faf-dna, so this
+      // is where the journey gets its next point.
+      const fafResult = await findFafFile(cwd);
+      if (fafResult) {
+        const { readFafRaw, scoreFafYaml } = await fafCli;
+        const live = scoreFafYaml(readFafRaw(fafResult.path)).score;
+        if (live !== currentScore) {
+          const now = new Date().toISOString();
+          dna.current = { ...(dna.current ?? {}), score: live, lastSync: now };
+          milestones.push({ type: 'sync', score: live, date: now, version: dna.current.version ?? 'v1.0.0' });
+          fs.writeFileSync(dnaPath, JSON.stringify(dna, null, 2));
+          currentScore = live;
+        }
+      }
 
       // Find key milestones
       const _birth = milestones.find((m: any) => m.type === 'birth');
@@ -2328,7 +2340,7 @@ ${String(mergedData.stack_signature || 'Auto-detected stack')}
 
       output += `\n🧬 MILESTONES\n`;
       const milestoneIcons: Record<string, string> = {
-        birth: '🐣', first_save: '💾', doubled: '2️⃣',
+        birth: '🐣', first_save: '💾', doubled: '2️⃣', sync: '🔄',
         championship: '🏆', elite: '⭐', peak: '🏔️', perfect: '💎'
       };
 

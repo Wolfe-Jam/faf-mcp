@@ -12,6 +12,7 @@ import { agentsExportCommand } from './agents.js';
 import { injectFafBlock } from '../inject';
 import { cursorExportCommand } from './cursor.js';
 import { geminiExportCommand } from './gemini.js';
+import { fafCli } from '../../utils/faf-cli-bridge.js';
 
 export interface BiSyncOptions {
   auto?: boolean;
@@ -129,8 +130,16 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
 
     // Read .faf content
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    const fafData = parseYAML(fafContent);
-    const currentScore = fafData.faf_score || '0%';
+    parseYAML(fafContent); // still validates the YAML before anything is written
+    // The score in the message is the real one — faf-cli's scorer on the
+    // bytes read — not a `faf_score` key nothing ever writes.
+    let currentScore = 'unknown';
+    try {
+      const { scoreFafYaml } = await fafCli;
+      currentScore = `${scoreFafYaml(fafContent).score}%`;
+    } catch {
+      /* scorer unavailable — say so rather than invent a number */
+    }
 
     if (!claudeMdExists) {
       // Create CLAUDE.md from project.faf

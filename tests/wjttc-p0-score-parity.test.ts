@@ -101,7 +101,50 @@ describe('🏁 WJTTC — P0 score parity (faf_auto / faf_dna / faf_doctor == faf
       // bootstrap YAML (which only ever wrote project/type/context/version —
       // never a populated `stack` block).
       expect(data.stack?.database).toBe('PostgreSQL');
-      expect(data.commands?.test).toBe('make test');
+      // A real test command flowed (Makefile or package.json — which one wins
+      // is faf-cli's precedence call, not this suite's).
+      expect(fafCli.isPlaceholder(data.commands?.test)).toBe(false);
+    });
+
+    test('hand-authored file: "After" is the score of the bytes WRITTEN, not of the fresh assembly', async () => {
+      // The earlier parity case ran faf_auto on a fresh dir, so the written
+      // file equalled the fresh assembly and a handler that scored the
+      // in-memory fresh object still passed. Seed a file whose hand-authored
+      // values change the score, so the two candidates differ and only the
+      // written-file score is accepted.
+      const seeded = copyFixtureToTmp();
+      try {
+        fs.writeFileSync(path.join(seeded, 'project.faf'), [
+          'project:',
+          '  name: hand-name',
+          '  goal: ""',
+          '  type: backend',
+          'human_context:',
+          '  who: Real hand-written text for who',
+          '  what: Real hand-written text for what',
+          '  why: Real hand-written text for why',
+          '  where: Real hand-written text for where',
+          '  when: Real hand-written text for when',
+          '  how: Real hand-written text for how',
+          'stack:',
+          '  hosting: Fly.io',
+          '',
+        ].join('\n'));
+        const fresh = fafCli.assembleFreshFaf(seeded);
+        const freshScore = fafCli.scoreFafYaml((await import('yaml')).stringify(fresh)).score;
+
+        const res = (await client.callTool({ name: 'faf_auto', arguments: { path: seeded } })) as ToolText;
+        expect(res.isError).toBeFalsy();
+        const after = parseInt(firstText(res).match(/After:\s*(\d{1,3})%/)![1], 10);
+
+        const fafPath = fafCli.findFafFile(seeded);
+        const writtenScore = fafCli.scoreFafYaml(fafCli.readFafRaw(fafPath)).score;
+        expect(writtenScore).not.toBe(freshScore); // the two candidates must differ for this to prove anything
+        expect(after).toBe(writtenScore);
+        expect(fafCli.readFaf(fafPath).human_context.who).toBe('Real hand-written text for who');
+      } finally {
+        fs.rmSync(seeded, { recursive: true, force: true });
+      }
     });
 
     test('faf_auto "After" score equals faf_score on the resulting file (THE parity receipt)', async () => {
