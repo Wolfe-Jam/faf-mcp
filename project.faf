@@ -14,11 +14,11 @@ stack:
   ui_library: slotignored
   state_management: slotignored
   backend: MCP SDK (TS)
-  api_type: MCP (stdio + Streamable HTTP)
+  api_type: MCP (stdio)
   runtime: Node.js >=18
   database: slotignored
   connection: slotignored
-  hosting: npm + Cloudflare edge
+  hosting: npm
   build: TypeScript (tsc)
   cicd: GitHub Actions
   monorepo_tool: slotignored
@@ -48,12 +48,10 @@ surfaces:
     - { type: github,       id: Wolfe-Jam/faf-mcp, source: "package.json#repository" }
     - { type: mcp-registry, id: one.faf/faf-mcp,   state: active, source: "server.json#name" }
   declared:                  # hand-authored: surfaces the manifests don't carry + targets
-    # v3.0: removed a false hosted-endpoint `mcpaas` entry here (the
-    # ide.faf.one MCP subdomain, path /mcp/v1) — verified live, it serves
-    # grok-faf-mcp's tool surface (get_soul, faf_memory, etc.), not this
-    # package's (faf_init/faf_auto/faf_cursor/faf_agents). No real hosted
-    # deployment of faf-mcp's actual tools exists today; revisit for 3.1
-    # if/when one ships.
+    # v3.0: removed a false hosted-endpoint `mcpaas` entry here. The URL it
+    # pointed at serves MCPaaS (mcpaas-cf) — a different product with a
+    # different tool surface — not this package's tools. faf-mcp runs
+    # locally over stdio; no hosted deployment of it exists today.
     - { type: homebrew,     id: faf-mcp, status: live }
     - { type: mcp-registry, id: io.github.Wolfe-Jam/faf-mcp, state: deprecated, superseded_by: one.faf/faf-mcp }
     - { type: pulsemcp,            id: faf-mcp, status: pending }

@@ -2,18 +2,18 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>MCPaaS | MCP as a Service</title>
-  <meta name="description" content="MCPaaS - Model Context Protocol as a Service. The future of MCP is Instant.">
+  <title>faf-mcp — The Interop MCP for Context</title>
+  <meta name="description" content="faf-mcp — the local MCP server that gives Cursor, VS Code and every MCP-compatible IDE persistent project context from project.faf. One source authors AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://faf.one/orange-smiley.svg" type="image/svg+xml">
-  <meta property="og:title" content="MCPaaS — MCP as a Service">
-  <meta property="og:description" content="The future of MCP is Instant. 32 tools, Streamable HTTP transport, any MCP client. Zero config, zero env vars.">
+  <meta property="og:title" content="faf-mcp — The Interop MCP for Context">
+  <meta property="og:description" content="Persistent project context for Cursor, VS Code and every MCP-compatible IDE. Local, stdio, 29 tools. One project.faf authors AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md.">
   <meta property="og:image" content="https://faf.one/orange-smiley.svg">
-  <meta property="og:url" content="https://faf.one">
+  <meta property="og:url" content="https://wolfe-jam.github.io/faf-mcp/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="MCPaaS — MCP as a Service">
-  <meta name="twitter:description" content="The future of MCP is Instant. 32 tools, Streamable HTTP transport, any MCP client.">
+  <meta name="twitter:title" content="faf-mcp — The Interop MCP for Context">
+  <meta name="twitter:description" content="Persistent project context for Cursor, VS Code and every MCP-compatible IDE. Local, stdio, 29 tools.">
   <meta name="twitter:image" content="https://faf.one/orange-smiley.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -280,57 +280,57 @@
   </style>
 </head>
 <body>
-  <a id="versionBadge" href="https://github.com/Wolfe-Jam/faf-mcp" target="_blank" rel="noopener" style="position:fixed;top:14px;left:14px;z-index:9999;text-decoration:none;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);background:rgba(0,0,0,0.6);border:1px solid var(--card-border);border-radius:var(--r-pill);padding:6px 14px;" title="faf-mcp on GitHub">v2.1.2</a>
+  <a id="versionBadge" href="https://github.com/Wolfe-Jam/faf-mcp" target="_blank" rel="noopener" style="position:fixed;top:14px;left:14px;z-index:9999;text-decoration:none;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);background:rgba(0,0,0,0.6);border:1px solid var(--card-border);border-radius:var(--r-pill);padding:6px 14px;" title="faf-mcp on GitHub">v2.3.1</a>
   <div class="accent-line"></div>
 
   <div class="container">
     <div class="hero">
       <div class="hero-left">
-        <div class="so-2025">MCP Servers are <span>so 2025</span></div>
-        <div class="title">MCP<span class="accent">aa</span>S</div>
-        <div class="subtitle">The future of MCP is Instant <span class="gold">&#9889;</span></div>
-        <p class="tagline">Model Context Protocol as a Service</p>
+        <div class="so-2025">The Interop MCP for <span>Context</span></div>
+        <div class="title">faf<span class="accent">-</span>mcp</div>
+        <div class="subtitle">Persistent project context for Cursor, VS Code and every MCP-compatible IDE <span class="gold">&#9889;</span></div>
+        <p class="tagline">One <code>project.faf</code> authors <code>AGENTS.md</code> · <code>.cursorrules</code> · <code>GEMINI.md</code> · <code>CLAUDE.md</code> — detected from your repo, never guessed.</p>
 
         <div class="stats">
           <div class="stat">
-            <div class="stat-value">32</div>
+            <div class="stat-value">29</div>
             <div class="stat-label">MCP Tools</div>
           </div>
           <div class="stat">
-            <div class="stat-value">0</div>
-            <div class="stat-label">Config Required</div>
+            <div class="stat-value">15</div>
+            <div class="stat-label">Shown by default</div>
           </div>
           <div class="stat">
-            <div class="stat-value">33k+</div>
-            <div class="stat-label">Downloads</div>
+            <div class="stat-value">0</div>
+            <div class="stat-label">Env vars required</div>
           </div>
         </div>
 
         <div class="ctas">
-          <a href="https://mcpaas.live" class="btn-primary">mcpaas.live</a>
-          <a href="https://faf.one" class="btn-tertiary">Learn More</a>
+          <a href="https://www.npmjs.com/package/faf-mcp" class="btn-primary">npm · faf-mcp</a>
+          <a href="https://faf.one/mcp" class="btn-tertiary">Learn More</a>
         </div>
       </div>
 
       <div class="hero-right">
         <div class="lightning">&#9889;</div>
-        <div class="hero-badge">ZERO CONFIG DEPLOY</div>
+        <div class="hero-badge">LOCAL &middot; STDIO</div>
         <div class="iana-label">IANA REGISTERED<br><span style="color:var(--grey-3);font-size:10px;letter-spacing:1.5px;">SINCE OCT 2025</span></div>
       </div>
     </div>
 
     <div class="features">
       <div class="feature">
-        <h3>Zero Install</h3>
-        <p>No npm. No pip. Just point your MCP client to a URL and go.</p>
+        <h3>Runs where you code</h3>
+        <p>A local stdio server. <code>npx faf-mcp</code>, add it to your IDE's MCP config, done. Nothing leaves your machine.</p>
       </div>
       <div class="feature">
-        <h3>Universal</h3>
-        <p>Works with Claude, Grok, Gemini, Cursor, Windsurf, any MCP client.</p>
+        <h3>One source, every surface</h3>
+        <p><code>project.faf</code> authors AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md through faf-cli's own renderers. Hand-written content outside the managed block is preserved.</p>
       </div>
       <div class="feature">
-        <h3>Always Live</h3>
-        <p>Edge-deployed on 300+ locations. Sub-ms cold starts via 2.7KB Zig-WASM.</p>
+        <h3>Scored, not guessed</h3>
+        <p>Every tool reads the same scorer as <code>faf_score</code>. Trophy is 100% — every slot sourced from the repo, or from you.</p>
       </div>
     </div>
 
@@ -351,12 +351,12 @@
       <div class="bottom-platforms">
         <span class="copy-cmd" data-cmd="npx claude-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Claude</span><span class="dot">&bull;</span>
         <span class="copy-cmd" data-cmd="npx grok-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Grok</span><span class="dot">&bull;</span>
-        <span class="copy-cmd" data-cmd="pip install gemini-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Gemini</span><span class="dot">&bull;</span>
+        <span class="copy-cmd" data-cmd="uvx gemini-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Gemini</span><span class="dot">&bull;</span>
         <span class="copy-cmd" data-cmd="npx faf-mcp" title="Copy the install command — paste in any terminal or your AI">Cursor</span><span class="dot">&bull;</span>
         <span class="copy-cmd" data-cmd="npx faf-mcp" title="Copy the install command — paste in any terminal or your AI">Any MCP</span>
       </div>
     </div>
-    <div class="bottom-version">One format. Any MCP client. Self-deploy or local.</div>
+    <div class="bottom-version">One format. Any MCP client. Local, in your IDE.</div>
   </div>
   <script>
     document.querySelectorAll('.copy-cmd').forEach(el => {

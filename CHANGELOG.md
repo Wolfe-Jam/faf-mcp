@@ -10,6 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Every number, file and claim this package makes is now true — and every tool composes faf-cli instead of carrying its own copy.
+
+### Fixed
+- **One score function.** `faf_auto`, `faf_dna`, `faf_doctor`, `faf_go` and `faf_bi_sync` all report faf-cli's `scoreFafYaml` on the bytes on disk. The local `calculateSimpleScore` heuristic (29 points off `faf_score` on the same file), `faf_go`'s 8-field ratio, `faf_bi_sync`'s "FAF Score: 0%" and `faf_dna`'s frozen birth score are gone.
+- **No more shelling out.** `faf_trust`, `faf_clear` and both resources no longer fall through to whatever `faf` is on PATH. The startup `which faf` detector, the exec fallback and the "install faf-cli FIRST" banner are removed; nothing under `src/` imports `child_process`. A machine with an unrelated `faf` binary on PATH is no longer a problem.
+- **Managed-block injector** matches markers as whole lines at column 0 (fenced examples skipped, an unbalanced fence inside the block cannot hide the end marker, CRLF and BOM preserved). A file written by faf-cli 7.11.0 no longer stacks on re-export; a block that lost its end marker is prefixed, never overwritten.
+- **Tool contracts match their handlers.** `faf_sync` says what it does (reconcile `project.faf` with package.json/git, dry-run, `apply:true` writes); `faf_bi_sync` drops the never-read `auto`/`watch`/`force` flags and states its direction; `faf_clear` offers only the store that exists; `faf_debug` reports the bundled faf-cli version; `faf_auto` drops an unread `force`; seven references to the retired `faf_enhance` are gone. Failed bundled commands now carry their reason instead of "❌ undefined".
+- **Docs tell the truth.** The "Hosted MCP endpoint" claim, the "Deploy to Vercel" door, the MCPaaS landing copy, the `faf_cloud_*` tool table, "Streamable HTTP" and "Cloudflare edge" in `project.faf`/`CLAUDE.md` are removed. faf-mcp runs locally over stdio; that is what every surface now says.
+- `tests/wjttc-v200` no longer writes AGENTS.md / .cursorrules / GEMINI.md into the repo root on every run.
+
+### Changed
+- **Composes faf-cli 7.12.0 (The Open Renderers Edition).** AGENTS.md, GEMINI.md, .cursorrules and CLAUDE.md are written by faf-cli's own renderers, repo enrichment and injector — the same bytes `faf export` and `faf sync` write. `faf_auto` runs faf-cli's `updateExistingFaf` on an existing file and `writeFaf` for the bytes (no runtime `_meta` block; docker-compose facts flow instead of arriving as `slotignored`). The hand-ported renderers, the pre-v3 CLAUDE.md template and faf-mcp's own injector are deleted.
+- Resource URIs are `faf://context` and `faf://status`; `claude-faf://` stays readable as an alias for this release.
+- `faf-cli` dependency `^6.10.1` → `^7.12.0`; hono override floor `>=4.13.5`.
+
+### Removed
+- 44 unreachable source modules (~15,900 lines): the Mk3 bundled engine (13 vendored commands, `championship-tools.ts`, `cloud-handler.ts`, the shadow tool-visibility registry, the bundled compiler, `faf-dna.ts` and helpers). Tarball 256 → 126 files. `prebuild` now clears `dist/` — tsc never did, so deleted modules had kept shipping.
+- `scripts/postinstall.js` (told users to global-install a dependency this package bundles), `start-http.js` (retired transport), the stale `skill/SKILL.md`.
+
+### Added
+- Regression suites: score parity with a hand-authored seed that kills the pre-merge mutant, tool-schema truth (every declared property is read by its handler; every `faf_*` name in output exists), score truth, engine-adapter (no `child_process`, unknown command is an error), line-anchored injector, compose-faf-cli (byte-identical to faf-cli's writers), no-false-hosted-claim over every shipped surface.
+
 ## [2.3.1] - 2026-06-30
 
 ### Fixed

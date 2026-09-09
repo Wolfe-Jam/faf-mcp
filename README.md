@@ -101,38 +101,11 @@ faf-mcp runs locally over stdio. Point your IDE at one of these commands.
 # Sync to all formats at once
 faf bi-sync --all
 
-# Generate .faf from any GitHub repo
+# Author .faf from any GitHub repo
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · with CLI fallback · **9 test suites** · **7 bundled parsers**
-
----
-
-## Cloud Sync
-
-Share your FAF context globally via [mcpaas.live](https://mcpaas.live):
-
-| Tool | Purpose |
-|------|---------|
-| `faf_cloud_publish` | Upload to cloud, get shareable URL |
-| `faf_cloud_fetch` | Pull context from cloud |
-| `faf_cloud_list` | List available souls |
-| `faf_cloud_search` | Search across souls |
-| `faf_cloud_share` | Generate share links |
-
-**Example Workflow:**
-```bash
-# Upload your project.faf
-faf_cloud_publish { soul_name: "my-project" }
-→ https://mcpaas.live/souls/my-project
-
-# Anyone can fetch it
-faf_cloud_fetch { soul_name: "my-project" }
-→ Context merged into local project.faf
-```
-
-**Zero-install sharing** - Recipients need no MCP setup. Served from 300+ Cloudflare edges with <1ms cold starts via 2.7KB Zig-WASM engine.
+**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **9 test suites** · **7 bundled parsers**
 
 ---
 
@@ -202,18 +175,8 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_gemini` | Import/export/sync GEMINI.md |
 | `faf_conductor` | Import/export directory structure |
 | `faf_git` | Author .faf from GitHub repo URL |
-| **Cloud Tools** | |
-| `faf_cloud_publish` | Upload to mcpaas.live |
-| `faf_cloud_fetch` | Pull from cloud |
-| `faf_cloud_list` | List souls |
-| `faf_cloud_search` | Search souls |
-| `faf_cloud_share` | Generate share links |
 
-**Plus CLI fallback** (via faf-cli):
-- `faf readme` - Extract 6 Ws from README (+25-35% boost)
-- `faf human-add` - Non-interactive YAML merge (6Ws Builder)
-- `faf git` - GitHub repo analysis without cloning
-- And 40+ more commands...
+**Built on faf-cli.** Every tool composes the bundled [faf-cli](https://www.npmjs.com/package/faf-cli) in-process — the same scorer, the same renderers, the same block injector the CLI uses. Nothing shells out to a `faf` on your PATH.
 
 ---
 
@@ -222,7 +185,7 @@ Works on all platforms — stops web search, forces tool usage.
 - **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (33 tools)
 - **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
-- **[faf-wasm-gen](https://www.npmjs.com/package/faf-wasm-gen)** — Rust→WASM `project.faf` generator, browser/edge (faf-wasm's generate sibling)
+- **[faf-wasm-gen](https://www.npmjs.com/package/faf-wasm-gen)** — Rust→WASM `project.faf` authoring engine, browser/edge (faf-wasm's authoring sibling)
 - **[faf-trinity](https://github.com/Wolfe-Jam/faf-trinity)** — reference MCP server exposing all three IANA FAF formats (context/memory/agent) together
 - **[faf.one](https://faf.one)** — Official website
 - **[docs/SKILLS-OVER-MCP.md](./docs/SKILLS-OVER-MCP.md)** — J1 Agent Skill `faf-ide` (stdio · skills/list · digests)
