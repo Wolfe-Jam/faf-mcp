@@ -103,7 +103,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
-    "faf-cli": "^6.10.1",
+    "faf-cli": "^7.11.0",
     "faf-scoring-kernel": "^2.0.3",
     "yaml": "^2.4.1"
   },
