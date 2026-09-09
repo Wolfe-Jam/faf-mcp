@@ -36,4 +36,16 @@ describe('🏁 WJTTC — P0 no false hosted-endpoint claim', () => {
     const content = fs.readFileSync(path.join(ROOT, 'docs/index.html'), 'utf-8');
     expect(content).not.toContain('One URL. Any AI. Zero install.');
   });
+
+  // vercel.json is a permanent redirect to GitHub Pages with the GitHub
+  // integration disabled, and the http-sse transport was retired (0759cc4).
+  // A "Deploy to Vercel · your own instance" button cannot produce an MCP
+  // instance — it is a hosted claim wearing a different hat.
+  for (const rel of ['README.md', 'docs/index.html']) {
+    test(`${rel} does not advertise a Vercel self-deploy door`, () => {
+      const content = fs.readFileSync(path.join(ROOT, rel), 'utf-8');
+      expect(content).not.toContain('vercel.com/new');
+      expect(content).not.toContain('Two Ways to Deploy');
+    });
+  }
 });

@@ -76,25 +76,14 @@ Add to your MCP config:
 
 ---
 
-## Two Ways to Deploy
+## Run It
 
-| Door | Method | Best For |
-|------|--------|----------|
-| **Self-Deploy** | [Deploy to Vercel](https://vercel.com/new?repository-url=https://github.com/Wolfe-Jam/faf-mcp) | Your own instance, full control |
-| **Local** | `bunx faf-mcp` | IDE integration via stdio transport |
+faf-mcp runs locally over stdio. Point your IDE at one of these commands.
 
-### Self-Deploy (Vercel)
-
-Deploy your own MCP server on Vercel in one click. Once deployed, your server exposes:
-- `/health` — Health check
-- `/info` — Server metadata + tool list
-- `/mcp/v1` — MCP Streamable HTTP transport
-
-### Local (npm)
-
-```bash
-npx faf-mcp
-```
+| Method | Command |
+|--------|---------|
+| **npm** | `npx faf-mcp` |
+| **Bun** | `bunx faf-mcp` |
 
 ---
 
