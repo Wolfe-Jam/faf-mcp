@@ -998,28 +998,68 @@ package_manager: ${projectData.package_manager}` : ''}
     }
   }
 
+  /**
+   * v3.0: was `this.engineAdapter.callEngine('trust')` — no bundled 'trust'
+   * branch exists in engine-adapter.ts, so this fell straight through to
+   * the ambient-PATH shell-out fallback (`which faf`, then execAsync).
+   * faf-cli itself has no `trust` subcommand at all — on any host where an
+   * unrelated `faf`-named binary sits first on PATH (verified live on this
+   * machine: Rust "FAFb"), this either hard-errors on an "unrecognized
+   * subcommand" or, worse, silently "succeeds" with that tool's own output.
+   * Rewired onto the bundled faf-cli bridge — bundled faf-cli only, never
+   * ambient PATH — composing `validateFaf` (structural integrity) +
+   * `scoreFafYaml` (trust metrics) directly, matching the tool's own
+   * description ("structural integrity and field consistency... trust
+   * metrics"). No CLI subcommand to shell out to even exists for this.
+   */
   private async handleFafTrust(_args: any): Promise<CallToolResult> {  // ✅ FIXED: Prefixed unused args
-    const result = await this.engineAdapter.callEngine('trust');
+    const cwd = this.getProjectPath();
+    const { findFafFile: findFaf, readFaf, readFafRaw, validateFaf, scoreFafYaml } = await fafCli;
 
-    if (!result.success) {
+    const fafPath = findFaf(cwd);
+    if (!fafPath) {
       return {
         content: [{
           type: 'text',
-          text: `🔒 Claude FAF Trust Validation:\n\nFailed to check trust: ${result.error}`
+          text: `🔒 Claude FAF Trust Validation:\n\n❌ No .faf found in ${cwd}\n💡 Run faf_init to create one — then faf_trust reports real trust metrics.`
+        }]
+      };
+    }
+
+    let raw: string;
+    let data: unknown;
+    try {
+      raw = readFafRaw(fafPath);
+      data = readFaf(fafPath);
+    } catch (error: any) {
+      return {
+        content: [{
+          type: 'text',
+          text: `🔒 Claude FAF Trust Validation:\n\n❌ Could not read ${fafPath}: ${error?.message ?? String(error)}`
         }],
         isError: true
       };
     }
 
-    const output = typeof result.data === 'string'
-      ? result.data
-      : result.data?.output || JSON.stringify(result.data, null, 2);
+    const validation = validateFaf(data);
+    let output = validation.valid
+      ? `✅ Structurally sound — no malformed, missing, or contradictory fields found.`
+      : `❌ ${validation.errors.length} issue${validation.errors.length === 1 ? '' : 's'} found:\n` +
+        validation.errors.map((e) => `   • ${e}`).join('\n');
+
+    try {
+      const score = scoreFafYaml(raw);
+      output += `\n\n📊 ${score.score}/100 (${score.populated}/${score.total} slots populated) — ${score.tier.name}`;
+    } catch {
+      // Score is a bonus signal here; a validation-only result is still honest.
+    }
 
     return {
       content: [{
         type: 'text',
         text: `🔒 Claude FAF Trust Validation:\n\n${output}`
-      }]
+      }],
+      isError: !validation.valid
     };
   }
 
@@ -1094,42 +1134,55 @@ package_manager: ${projectData.package_manager}` : ''}
     };
   }
 
+  /**
+   * v3.0: was `this.engineAdapter.callEngine('clear', clearArgs)` — no
+   * bundled 'clear' branch exists in engine-adapter.ts, so this fell
+   * straight through to the ambient-PATH shell-out fallback. Worse: even
+   * when a real faf-cli WAS first on PATH, its actual `clear` subcommand
+   * only clears `faf-git-*` temp directories from the OS tmpdir (see
+   * ~/FAF/cli/src/commands/clear.ts) — entirely unrelated to this tool's
+   * own cache/todos/backups semantics. There was never a correct backing
+   * implementation for this tool's contract, on any PATH.
+   *
+   * Rewired as a genuinely local operation — no CLI dependency, bundled or
+   * ambient, at all. `cache` clears the one real cache path this codebase
+   * writes (~/.faf-cli-cache, faf-core/utils/technical-credit.ts). `todos`
+   * and `backups` are reported honestly as nothing-to-clear: no persisted
+   * todo list or backup-file store exists anywhere in faf-mcp today —
+   * fabricating a fake "cleared" message for a store that doesn't exist
+   * would be exactly the kind of false claim this release is fixing.
+   */
   private async handleFafClear(args: any): Promise<CallToolResult> {
-    const clearArgs: string[] = [];
-    
-    if (args?.cache) {
-      clearArgs.push('--cache');
-    }
-    if (args?.todos) {
-      clearArgs.push('--todos');
-    }
-    if (args?.backups) {
-      clearArgs.push('--backups');
-    }
-    if (args?.all || (!args?.cache && !args?.todos && !args?.backups)) {
-      clearArgs.push('--all');
+    const wantCache = !!args?.cache;
+    const wantTodos = !!args?.todos;
+    const wantBackups = !!args?.backups;
+    const wantAll = !!args?.all || (!wantCache && !wantTodos && !wantBackups);
+
+    const lines: string[] = [];
+
+    if (wantCache || wantAll) {
+      const cacheDir = pathModule.join(os.homedir(), '.faf-cli-cache');
+      const creditCache = pathModule.join(cacheDir, 'technical-credit.json');
+      if (fs.existsSync(creditCache)) {
+        fs.rmSync(creditCache, { force: true });
+        lines.push(`✅ cache: cleared ${creditCache}`);
+      } else {
+        lines.push('✅ cache: nothing to clear');
+      }
     }
 
-    const result = await this.engineAdapter.callEngine('clear', clearArgs);
-
-    if (!result.success) {
-      return {
-        content: [{
-          type: 'text',
-          text: `🧹 Claude FAF Clear:\n\nFailed to clear: ${result.error}`
-        }],
-        isError: true
-      };
+    if (wantTodos || wantAll) {
+      lines.push('ℹ️ todos: no persisted todo store in this version — nothing to clear');
     }
 
-    const output = typeof result.data === 'string'
-      ? result.data
-      : result.data?.output || JSON.stringify(result.data, null, 2);
+    if (wantBackups || wantAll) {
+      lines.push('ℹ️ backups: no persisted backup store in this version — nothing to clear');
+    }
 
     return {
       content: [{
         type: 'text',
-        text: `🧹 Claude FAF Clear:\n\n${output}`
+        text: `🧹 Claude FAF Clear:\n\n${lines.join('\n')}`
       }]
     };
   }

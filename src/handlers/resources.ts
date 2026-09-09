@@ -1,5 +1,6 @@
 import type { Resource } from '@modelcontextprotocol/sdk/types.js';
 import { FafEngineAdapter } from './engine-adapter';
+import { fafCli } from '../utils/faf-cli-bridge.js';
 
 export class FafResourceHandler {
   constructor(private engineAdapter: FafEngineAdapter) {}
@@ -55,27 +56,92 @@ export class FafResourceHandler {
     }
   }
 
+  /**
+   * v3.0: both resources were `this.engineAdapter.callEngine('status', ...)`
+   * — no bundled 'status' branch exists in engine-adapter.ts, so this fell
+   * straight through to the ambient-PATH shell-out fallback (`which faf`,
+   * then execAsync). Reproduced live on this machine: PATH resolves to an
+   * unrelated Rust tool also named `faf`, and this resource "succeeded"
+   * with THAT tool's own banner/score/slot-count as if it were faf-mcp's
+   * real output — wrong data, no error signal, the worse of the two
+   * PATH-resolution bugs this release fixes. Rewired onto the bundled
+   * faf-cli bridge — bundled faf-cli only, never ambient PATH.
+   */
   private async getFafContext() {
-    const result = await this.engineAdapter.callEngine('status', ['--json']);
-    
-    return {
-      contents: [{
-        uri: 'claude-faf://context',
-        mimeType: 'application/json',
-        text: JSON.stringify(result.success ? result.data : { error: result.error }, null, 2)
-      }]
-    };
+    const cwd = this.engineAdapter.getWorkingDirectory();
+    const { findFafFile: findFaf, readFaf, readFafRaw, scoreFafYaml } = await fafCli;
+    const fafPath = findFaf(cwd);
+
+    if (!fafPath) {
+      return {
+        contents: [{
+          uri: 'claude-faf://context',
+          mimeType: 'application/json',
+          text: JSON.stringify({ error: `No .faf found in ${cwd}` }, null, 2)
+        }]
+      };
+    }
+
+    try {
+      const data = readFaf(fafPath);
+      const score = scoreFafYaml(readFafRaw(fafPath));
+      return {
+        contents: [{
+          uri: 'claude-faf://context',
+          mimeType: 'application/json',
+          text: JSON.stringify(
+            { path: fafPath, score: score.score, tier: score.tier.name, populated: score.populated, total: score.total, data },
+            null,
+            2,
+          )
+        }]
+      };
+    } catch (error: any) {
+      return {
+        contents: [{
+          uri: 'claude-faf://context',
+          mimeType: 'application/json',
+          text: JSON.stringify({ error: error?.message ?? String(error) }, null, 2)
+        }]
+      };
+    }
   }
 
   private async getFafStatus() {
-    const result = await this.engineAdapter.callEngine('status');
-    
-    return {
-      contents: [{
-        uri: 'claude-faf://status',
-        mimeType: 'text/plain',
-        text: result.success ? (result.data?.output ?? String(result.data)) : `Error: ${result.error ?? 'Unknown error'}`
-      }]
-    };
+    const cwd = this.engineAdapter.getWorkingDirectory();
+    const { findFafFile: findFaf, readFafRaw, scoreFafYaml } = await fafCli;
+    const fafPath = findFaf(cwd);
+
+    if (!fafPath) {
+      return {
+        contents: [{
+          uri: 'claude-faf://status',
+          mimeType: 'text/plain',
+          text: `No .faf found in ${cwd}\nRun faf_init to create one.`
+        }]
+      };
+    }
+
+    try {
+      const score = scoreFafYaml(readFafRaw(fafPath));
+      const text =
+        `${fafPath}\n` +
+        `FAF SCORE: ${score.score}/100 (${score.populated}/${score.total} slots populated) — ${score.tier.name}`;
+      return {
+        contents: [{
+          uri: 'claude-faf://status',
+          mimeType: 'text/plain',
+          text
+        }]
+      };
+    } catch (error: any) {
+      return {
+        contents: [{
+          uri: 'claude-faf://status',
+          mimeType: 'text/plain',
+          text: `Error: ${error?.message ?? String(error)}`
+        }]
+      };
+    }
   }
 }
