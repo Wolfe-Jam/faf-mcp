@@ -4,7 +4,6 @@ import { fileHandlers } from './fileHandler';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as pathModule from 'path';
-import { FuzzyDetector, applyIntelFriday } from '../utils/fuzzy-detector';
 import { findFafFile } from '../utils/faf-file-finder.js';
 import { confinePath, PathConfinementError } from '../utils/safe-path';
 import { VERSION } from '../version';
@@ -892,14 +891,20 @@ export class FafToolHandler {
   }
 
   private async handleFafInit(args: any): Promise<CallToolResult> {
-    // Native implementation - creates project.faf with Pomelli-simple path resolution!
+    // faf_init is `faf init`: the same exported faf-cli steps the CLI command
+    // runs (assembleFreshFaf detects the folder → writeFaf → readFafRaw →
+    // scoreFafYaml), on the folder the path resolves to. Until 3.0.1 this
+    // wrote its own legacy template (no format version, `project:` as a
+    // plain string) that scored 0% whatever the folder held, failed faf_trust and
+    // crashed faf_go. Two steps of `faf init` are not exported by faf-cli
+    // 7.12 and are not repeated here: the home/root refusal and the
+    // .faf-dna birth record (faf_dna writes that on its first call).
     try {
-      // Use smart path resolution (supports "my-app", "~/Projects/my-app", "/full/path")
+      // Path resolution unchanged (supports "my-app", "~/Projects/my-app", "/full/path")
       const userInput = args?.path;
       const resolution = resolveProjectPath(userInput);
 
       const targetDir = resolution.projectPath;
-      const projectName = resolution.projectName;
       const fafPath = resolution.fafFilePath;
 
       // Ensure project directory exists
@@ -918,58 +923,13 @@ export class FafToolHandler {
         };
       }
 
-      // Check project type with fuzzy detection (Friday Feature!)
-      const projectDescription = args?.description || '';
+      const { assembleFreshFaf, writeFaf, readFafRaw, scoreFafYaml } = await fafCli;
+      writeFaf(fafPath, assembleFreshFaf(targetDir) as any);
+      const score = scoreFafYaml(readFafRaw(fafPath));
 
-      // Detect Chrome Extension with fuzzy matching
-      const chromeDetection = FuzzyDetector.detectChromeExtension(projectDescription);
-      const projectType = FuzzyDetector.detectProjectType(projectDescription);
-
-      // Build project data with Intel-Friday auto-fill!
-      let projectData: any = {
-        project: projectName,
-        project_type: projectType,
-        description: projectDescription,
-        generated: new Date().toISOString(),
-        version: VERSION
-      };
-
-      // Apply Intel-Friday: Auto-fill Chrome Extension slots for 90%+ score!
-      if (chromeDetection.detected) {
-        projectData = applyIntelFriday(projectData);
-      }
-
-      // Create enhanced .faf content
-      const fafContent = `# FAF - Foundational AI Context
-project: ${projectData.project}
-type: ${projectData.project_type}${chromeDetection.detected ? ' 🎯' : ''}
-context: I⚡🍊
-generated: ${projectData.generated}
-version: ${projectData.version}
-${chromeDetection.corrected ? `# Auto-corrected: "${args?.description}" → "${chromeDetection.corrected}"` : ''}
-
-# The Formula
-human_input: Your project files
-multiplier: FAF Context
-output: Championship Performance
-
-# Quick Context
-working_directory: ${targetDir}
-initialized_by: faf-mcp${projectData._friday_feature ? `\nfriday_feature: ${projectData._friday_feature}` : ''}
-vitamin_context: true
-faffless: true
-
-${chromeDetection.detected ? `# Chrome Extension Auto-Fill (90%+ Score!)
-runtime: ${projectData.runtime}
-hosting: ${projectData.hosting}
-api_type: ${projectData.api_type}
-backend: ${projectData.backend}
-database: ${projectData.database}
-build: ${projectData.build}
-package_manager: ${projectData.package_manager}` : ''}
-`;
-
-      fs.writeFileSync(fafPath, fafContent);
+      // Like `cd` + `faf init`: the new project becomes the current one, so the
+      // next steps printed below (faf_score, faf_claude, faf_go) act on it.
+      this.engineAdapter.setWorkingDirectory(targetDir);
 
       // Pomelli-style success confirmation with path resolution info
       const pathConfirmation = formatPathConfirmation(resolution);
@@ -980,11 +940,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🚀 FAF Initialization:\n\n✅ Created project.faf\n\n${pathConfirmation}${sourceExplanation}\n\n🍊 Vitamin Context activated!\n⚡ FAFFLESS AI ready!${
-            chromeDetection.detected ? '\n\n🎯 Friday Feature: Chrome Extension detected!\n📈 Auto-filled 7 slots for 90%+ score!' : ''
-          }${
-            chromeDetection.corrected ? `\n📝 Auto-corrected: "${args?.description}" → "${chromeDetection.corrected}"` : ''
-          }\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_claude to write CLAUDE.md\n  • Run faf_go to fill the gaps`
+          text: `🚀 FAF Initialization:\n\n✅ Created project.faf\n📊 ${score.score}/100 (${score.populated}/${score.active} slots populated) — ${score.tier.name}\n\n${pathConfirmation}${sourceExplanation}\n\n🍊 Vitamin Context activated!\n⚡ FAFFLESS AI ready!\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_claude to write CLAUDE.md\n  • Run faf_go to fill the gaps`
         }]
       };
     } catch (error: any) {

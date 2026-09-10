@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README "Eternal Sync" tells the direction truthfully: CLAUDE.md is written from `project.faf`; the other three formats can also import.
 
 ### Fixed
+- **`faf_init` writes what `faf init` writes.** It runs faf-cli's own init steps on the folder, so the file is valid and scored from what the folder holds, and it reports that starting score. Before, it wrote a legacy template that scored 0% on any folder, failed `faf_trust` and crashed `faf_go`. The new project also becomes the current one, so the next steps it suggests act on it. Path handling is unchanged.
 - **The docs page no longer strikes through its own keyword.** The hero line rendered "Context" in red strikethrough, a style left over from an older slogan.
 - README: the all-formats example is the MCP call that works (`faf bi-sync --all` is rejected by faf-cli 7.12); 25 test suites, not 9; the Trophy badge and tier table use ✪.
 - The server status banner reports 29 tools, 15 by default, and reads the version from the package instead of a hardcoded "33+".

@@ -32,6 +32,7 @@
 **Every name now says what the code does: `faf_bi_sync` is `faf_claude`, the one-way CLAUDE.md writer it always was, and every listing, doc and tool string matches 3.0.**
 
 - **`faf_bi_sync` is now `faf_claude`.** It writes CLAUDE.md from `project.faf`, one direction, which is all it ever did. The old name still answers, so existing configs keep working.
+- **`faf_init` writes what `faf init` writes.** It runs faf-cli's own init on the folder: a valid file, scored from what is there, and the new project becomes the current one.
 - **The interop tools say what `sync` does.** `faf_agents`, `faf_cursor` and `faf_gemini` re-write their file from `project.faf`; `import` with `merge: true` brings a file back in.
 - **Every surface matches the code.** Tool output, listings, docs, the registry receipt and the birth certificate were checked against 3.0 and corrected.
 

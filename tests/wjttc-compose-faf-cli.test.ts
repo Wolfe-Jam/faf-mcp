@@ -106,6 +106,31 @@ describe('🏁 WJTTC — compose faf-cli', () => {
     expect(got).not.toContain('instant_context');
   });
 
+  test('faf_init writes exactly what `faf init` writes, reports its real score, and the next tools accept it', async () => {
+    // `faf init` = assembleFreshFaf → writeFaf → scoreFafYaml (faf-cli src/commands/init.ts).
+    // faf_init used to write its own template: no faf_version, `project:` as a
+    // string, 0% on any folder, rejected by faf_trust, crashed faf_go.
+    const mine = copyFixture(); const theirs = copyFixture(); dirs.push(mine, theirs);
+    const res = (await client.callTool({ name: 'faf_init', arguments: { path: mine } })) as ToolText;
+    expect(res.isError).toBeFalsy();
+    cli.writeFaf(path.join(theirs, 'project.faf'), cli.assembleFreshFaf(theirs));
+    const got = fs.readFileSync(path.join(mine, 'project.faf'), 'utf-8');
+    expect(stripTs(got)).toBe(stripTs(fs.readFileSync(path.join(theirs, 'project.faf'), 'utf-8')));
+    expect(got).toContain('faf_version');
+    expect(got).not.toContain('The Formula');
+    const real = cli.scoreFafYaml(got);
+    expect(real.score).toBeGreaterThan(0); // the fixture has facts; the old template scored 0 on it
+    expect(res.content[0].text).toContain(`${real.score}/100`);
+
+    // faf_trust takes no path: it checks the current project, which faf_init just set.
+    const trust = (await client.callTool({ name: 'faf_trust', arguments: {} })) as ToolText;
+    expect(trust.isError).toBeFalsy();
+    expect(trust.content[0].text).toContain(`${real.score}/100`);
+    const go = (await client.callTool({ name: 'faf_go', arguments: { path: mine, answers: { 'human_context.why': 'Parity test' } } })) as ToolText;
+    expect(go.isError).toBeFalsy();
+    expect(fs.readFileSync(path.join(mine, 'project.faf'), 'utf-8')).toContain('Parity test');
+  });
+
   test('faf_auto on an existing file is faf-cli\'s own update chain: hand values win, docker-compose facts flow, no _meta', async () => {
     const mine = copyFixture(); const theirs = copyFixture(); dirs.push(mine, theirs);
     for (const d of [mine, theirs]) fs.writeFileSync(path.join(d, 'project.faf'), SEED);
