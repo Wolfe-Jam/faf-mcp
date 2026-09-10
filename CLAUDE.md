@@ -35,4 +35,4 @@ The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for
 
 ## Working here
 
-Build, test, layout and the load-bearing conventions live in AGENTS.md under "Working in this repo". Refresh the managed block above with `faf sync` (CLI); it keeps this section.
+Build, test, layout and the load-bearing conventions live in AGENTS.md under "Working in this repo". Refresh the managed block above with `faf sync` (CLI) or the `faf_claude` tool (MCP); both keep this section.

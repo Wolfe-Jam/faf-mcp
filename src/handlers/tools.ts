@@ -36,8 +36,8 @@ import { turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
  * the 40%-MIN rule means one weak tool on the surface caps the whole server.
  *
  * Spine mirrors claude-faf-mcp's proven-A Core; the interop quad
- * (faf_bi_sync + faf_agents/faf_cursor/faf_gemini) is this edition's identity —
- * the Cursor / IDE multi-format sync — where CFM carries memory tools instead.
+ * (faf_claude + faf_agents/faf_cursor/faf_gemini) is this edition's identity —
+ * the Cursor / IDE multi-format write — where CFM carries memory tools instead.
  * See PLANET-FAF/strategy/claude-faf-mcp-core-tier-glama-a-2026-06-17.md.
  */
 const CORE_TOOLS = new Set<string>([
@@ -45,7 +45,7 @@ const CORE_TOOLS = new Set<string>([
   'faf_init', 'faf_auto', 'faf_go', 'faf_score', 'faf_doctor',
   'faf_sync', 'faf_context', 'faf_trust', 'faf_about',
   // IDE-edition interop — the differentiator
-  'faf_bi_sync', 'faf_agents', 'faf_cursor', 'faf_gemini',
+  'faf_claude', 'faf_agents', 'faf_cursor', 'faf_gemini',
   // Craft-grade utility
   'faf_check', 'faf_git',
 ]);
@@ -179,7 +179,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_sync',
-          description: 'Reconcile project.faf with what the repo manifests say now (package.json name, description, framework dependencies). Dry-run by default: reports the fields that would change. Pass apply:true to write them into project.faf. Does not touch CLAUDE.md — use faf_bi_sync for CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md.',
+          description: 'Reconcile project.faf with what the repo manifests say now (package.json name, description, framework dependencies). Dry-run by default: reports the fields that would change. Pass apply:true to write them into project.faf. Does not touch CLAUDE.md — use faf_claude for CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md.',
           annotations: {
             title: 'Reconcile .faf with repo manifests',
             readOnlyHint: false,
@@ -196,10 +196,10 @@ export class FafToolHandler {
           }
         },
         {
-          name: 'faf_bi_sync',
-          description: 'Write CLAUDE.md from project.faf (one direction: .faf → CLAUDE.md) and, with the format flags or all, also AGENTS.md, .cursorrules and GEMINI.md. Content outside the faf-managed block is preserved. Returns the files written. Use this to keep every AI tool\'s context file current from one source.',
+          name: 'faf_claude',
+          description: 'Write CLAUDE.md from project.faf (one direction: .faf → CLAUDE.md) and, with the format flags or all, also AGENTS.md, .cursorrules and GEMINI.md. Content outside the faf-managed block is preserved. Returns the files written. Use this to keep every AI tool\'s context file current from one source. (Named faf_bi_sync before 3.0.1; that name still works.)',
           annotations: {
-            title: 'Sync .faf to CLAUDE.md and IDE formats',
+            title: 'Write CLAUDE.md and IDE formats from .faf',
             readOnlyHint: false,
             destructiveHint: false,
             openWorldHint: false
@@ -207,10 +207,10 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              agents: { type: 'boolean', description: 'Also sync to AGENTS.md (OpenAI/Codex format)' },
-              cursor: { type: 'boolean', description: 'Also sync to .cursorrules (Cursor IDE format)' },
-              gemini: { type: 'boolean', description: 'Also sync to GEMINI.md (Google Gemini format)' },
-              all: { type: 'boolean', description: 'Sync to ALL formats: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md' },
+              agents: { type: 'boolean', description: 'Also write AGENTS.md (OpenAI/Codex format)' },
+              cursor: { type: 'boolean', description: 'Also write .cursorrules (Cursor IDE format)' },
+              gemini: { type: 'boolean', description: 'Also write GEMINI.md (Google Gemini format)' },
+              all: { type: 'boolean', description: 'Write ALL formats: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             additionalProperties: false
@@ -445,7 +445,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_auto',
-          description: 'Run the full setup pipeline in one call — init, stack detection, sync, bi-sync, and score — taking a project from no context to a complete project.faf. Returns the final AI-readiness score and what was created. Use this as the fast path on a fresh project; use the individual tools when you need finer control.',
+          description: 'Run the full setup pipeline in one call — init, stack detection, sync, CLAUDE.md, and score — taking a project from no context to a complete project.faf. Returns the final AI-readiness score and what was created. Use this as the fast path on a fresh project; use the individual tools when you need finer control.',
           annotations: {
             title: 'Auto-detect Context',
             readOnlyHint: false,
@@ -665,8 +665,9 @@ export class FafToolHandler {
         return await this.handleFafTrust(args);
       case 'faf_sync':
         return await this.handleFafSync(args);
-      case 'faf_bi_sync':
-        return await this.handleFafBiSync(args);
+      case 'faf_bi_sync': // pre-3.0.1 name: still callable, never listed
+      case 'faf_claude':
+        return await this.handleFafClaude(args);
       case 'faf_clear':
         return await this.handleFafClear(args);
       case 'faf_debug':
@@ -983,7 +984,7 @@ package_manager: ${projectData.package_manager}` : ''}
             chromeDetection.detected ? '\n\n🎯 Friday Feature: Chrome Extension detected!\n📈 Auto-filled 7 slots for 90%+ score!' : ''
           }${
             chromeDetection.corrected ? `\n📝 Auto-corrected: "${args?.description}" → "${chromeDetection.corrected}"` : ''
-          }\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_bi_sync to create CLAUDE.md\n  • Run faf_go to fill the gaps`
+          }\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_claude to write CLAUDE.md\n  • Run faf_go to fill the gaps`
         }]
       };
     } catch (error: any) {
@@ -1093,39 +1094,39 @@ package_manager: ${projectData.package_manager}` : ''}
     };
   }
 
-  private async handleFafBiSync(args: any): Promise<CallToolResult> {
+  private async handleFafClaude(args: any): Promise<CallToolResult> {
     // Set project context if path provided
     if (args?.path) {
       this.getProjectPath(args.path);
     }
 
     // auto / watch / force used to be declared here too; none of them was
-    // ever read by syncBiDirectional, so the schema no longer promises them.
-    const biSyncArgs: string[] = [];
+    // ever read by the command, so the schema no longer promises them.
+    const claudeArgs: string[] = [];
 
     // v3.0 fix: the tool's own schema advertises agents/cursor/gemini/all,
-    // but they were never forwarded to engine-adapter's bi-sync dispatch —
-    // faf_bi_sync silently ignored them and only ever wrote CLAUDE.md.
+    // but before 3.0 they were never forwarded to the engine adapter —
+    // the tool silently ignored them and only ever wrote CLAUDE.md.
     if (args?.agents) {
-      biSyncArgs.push('--agents');
+      claudeArgs.push('--agents');
     }
     if (args?.cursor) {
-      biSyncArgs.push('--cursor');
+      claudeArgs.push('--cursor');
     }
     if (args?.gemini) {
-      biSyncArgs.push('--gemini');
+      claudeArgs.push('--gemini');
     }
     if (args?.all) {
-      biSyncArgs.push('--all');
+      claudeArgs.push('--all');
     }
 
-    const result = await this.engineAdapter.callEngine('bi-sync', biSyncArgs);
+    const result = await this.engineAdapter.callEngine('claude', claudeArgs);
 
     if (!result.success) {
       return {
         content: [{
           type: 'text',
-          text: `🔗 FAF Bi-Sync:\n\nFailed to bi-sync: ${result.error}`
+          text: `🔗 FAF → CLAUDE.md:\n\nCould not write CLAUDE.md: ${result.error}`
         }],
         isError: true
       };
@@ -1138,7 +1139,7 @@ package_manager: ${projectData.package_manager}` : ''}
     return {
       content: [{
         type: 'text',
-        text: `🔗 FAF Bi-Sync:\n\n${output}`
+        text: `🔗 FAF → CLAUDE.md:\n\n${output}`
       }]
     };
   }
@@ -1226,7 +1227,7 @@ Just like JPEG makes images universal,
 HOW IT WORKS:
 1. Drop a file or paste the path
 2. Create .faf (Foundational AI-context Format)
-3. Ask your AI to bi-sync it
+3. Ask your AI to run faf_claude
 4. You're done⚡
 
 🩵 You just made your AI happy
@@ -2171,7 +2172,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         output += `🚀 Good start! Run faf_go for guided improvement.\n`;
       }
 
-      output += `\n💡 Next: faf_score | faf_go | faf_bi_sync`;
+      output += `\n💡 Next: faf_score | faf_go | faf_claude`;
 
       return { content: [{ type: 'text', text: output }] };
 
@@ -2670,12 +2671,12 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
         results.push({
           status: 'warning',
           message: 'No CLAUDE.md file',
-          fix: 'Run: faf_auto or faf_bi_sync to create bi-directional sync'
+          fix: 'Run: faf_auto or faf_claude to write CLAUDE.md'
         });
       } else {
         results.push({
           status: 'ok',
-          message: 'CLAUDE.md found (bi-sync ready)'
+          message: 'CLAUDE.md found'
         });
       }
 

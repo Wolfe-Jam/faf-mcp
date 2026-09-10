@@ -82,7 +82,7 @@ describe('🏁 WJTTC — engine adapter', () => {
 
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-adapter-empty-'));
     try {
-      const res = (await client.callTool({ name: 'faf_bi_sync', arguments: { path: empty } })) as ToolText;
+      const res = (await client.callTool({ name: 'faf_claude', arguments: { path: empty } })) as ToolText;
       expect(res.isError).toBe(true);
       expect(firstText(res)).toContain('No project.faf file found');
       expect(firstText(res)).not.toContain('undefined');

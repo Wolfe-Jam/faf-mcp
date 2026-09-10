@@ -1,7 +1,12 @@
 /**
- * 🔗 Bi-Sync Engine - Mk3 Bundled Edition
- * Revolutionary project.faf ↔ CLAUDE.md Synchronization
- * Interop flags (agents/cursor/gemini/all): faf-mcp 2.0.0, ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0
+ * Claude Command — writes CLAUDE.md from project.faf, one direction.
+ *
+ * CLAUDE.md is faf-cli's render of project.faf (the same bytes `faf sync`
+ * pushes), injected with faf-cli's injector, so content outside the managed
+ * block survives. With agents / cursor / gemini / all it also writes
+ * AGENTS.md, .cursorrules and GEMINI.md. Nothing here reads CLAUDE.md back
+ * into project.faf. Backs the `faf_claude` tool, named `faf_bi_sync` before
+ * 3.0.1; the old name claimed a two-way sync this code never did.
  */
 
 import { parse as parseYAML } from '../fix-once/yaml';
@@ -13,10 +18,7 @@ import { cursorExportCommand } from './cursor.js';
 import { geminiExportCommand } from './gemini.js';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
 
-export interface BiSyncOptions {
-  auto?: boolean;
-  watch?: boolean;
-  force?: boolean;
+export interface ClaudeExportOptions {
   json?: boolean;
   agents?: boolean;
   cursor?: boolean;
@@ -24,9 +26,9 @@ export interface BiSyncOptions {
   all?: boolean;
 }
 
-export interface BiSyncResult {
+export interface ClaudeExportResult {
   success: boolean;
-  direction: 'faf-to-claude' | 'claude-to-faf' | 'bidirectional' | 'none';
+  direction: 'faf-to-claude' | 'none';
   filesChanged: string[];
   conflicts: string[];
   duration: number;
@@ -36,11 +38,11 @@ export interface BiSyncResult {
 /**
 
 /**
- * 🔗 Main Bi-Sync function
+ * Write CLAUDE.md (and any requested IDE formats) from project.faf.
  */
-export async function syncBiDirectional(projectPath?: string, _options: BiSyncOptions = {}): Promise<BiSyncResult> {
+export async function claudeExportCommand(projectPath?: string, _options: ClaudeExportOptions = {}): Promise<ClaudeExportResult> {
   const startTime = Date.now();
-  const result: BiSyncResult = {
+  const result: ClaudeExportResult = {
     success: false,
     direction: 'none',
     filesChanged: [],
@@ -87,7 +89,7 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
       result.success = true;
       result.direction = 'faf-to-claude';
       result.filesChanged.push('CLAUDE.md');
-      result.message = `CLAUDE.md created! Bi-sync now active! FAF Score: ${currentScore}`;
+      result.message = `CLAUDE.md written from project.faf. FAF Score: ${currentScore}`;
 
     } else {
       // CLAUDE.md is faf-cli's render of project.faf — the same bytes
@@ -98,7 +100,7 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
       result.success = true;
       result.direction = 'faf-to-claude';
       result.filesChanged.push('CLAUDE.md');
-      result.message = `Files synchronized! Perfect harmony achieved! FAF Score: ${currentScore}`;
+      result.message = `CLAUDE.md refreshed from project.faf. FAF Score: ${currentScore}`;
     }
 
     // v4.5.0: Chain additional format exports if requested
@@ -113,7 +115,7 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
           result.filesChanged.push('AGENTS.md');
         }
       } catch {
-        // Non-fatal — CLAUDE.md sync already succeeded
+        // Non-fatal — the CLAUDE.md write already succeeded
       }
     }
 
@@ -140,7 +142,7 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
     }
 
     if (result.filesChanged.length > 1) {
-      result.message += ` | Also synced: ${result.filesChanged.filter(f => f !== 'CLAUDE.md').join(', ')}`;
+      result.message += ` | Also wrote: ${result.filesChanged.filter(f => f !== 'CLAUDE.md').join(', ')}`;
     }
 
     result.duration = Date.now() - startTime;
@@ -148,7 +150,7 @@ export async function syncBiDirectional(projectPath?: string, _options: BiSyncOp
 
   } catch (error) {
     result.duration = Date.now() - startTime;
-    result.message = error instanceof Error ? error.message : 'Sync failed';
+    result.message = error instanceof Error ? error.message : 'CLAUDE.md write failed';
     return result;
   }
 }

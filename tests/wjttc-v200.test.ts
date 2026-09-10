@@ -26,7 +26,7 @@ import { agentsImportCommand, agentsExportCommand } from '../src/faf-core/comman
 import { cursorImportCommand, cursorExportCommand } from '../src/faf-core/commands/cursor';
 import { geminiImportCommand, geminiExportCommand } from '../src/faf-core/commands/gemini';
 import { conductorImportCommand, conductorExportCommand } from '../src/faf-core/commands/conductor';
-import { syncBiDirectional } from '../src/faf-core/commands/bi-sync';
+import { claudeExportCommand } from '../src/faf-core/commands/claude';
 
 // Engine & Tools
 import { FafEngineAdapter } from '../src/handlers/engine-adapter';
@@ -287,26 +287,26 @@ describe('ENGINE: Bi-Sync with Interop Flags', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('bi-sync with --agents creates AGENTS.md', async () => {
-    const result = await syncBiDirectional(tmpDir, { agents: true });
+  it('claude with --agents also writes AGENTS.md', async () => {
+    const result = await claudeExportCommand(tmpDir, { agents: true });
     expect(result.success).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'AGENTS.md'))).toBe(true);
   });
 
-  it('bi-sync with --cursor creates .cursorrules', async () => {
-    const result = await syncBiDirectional(tmpDir, { cursor: true });
+  it('claude with --cursor also writes .cursorrules', async () => {
+    const result = await claudeExportCommand(tmpDir, { cursor: true });
     expect(result.success).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, '.cursorrules'))).toBe(true);
   });
 
-  it('bi-sync with --gemini creates GEMINI.md', async () => {
-    const result = await syncBiDirectional(tmpDir, { gemini: true });
+  it('claude with --gemini also writes GEMINI.md', async () => {
+    const result = await claudeExportCommand(tmpDir, { gemini: true });
     expect(result.success).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'GEMINI.md'))).toBe(true);
   });
 
-  it('bi-sync with --all creates all format files', async () => {
-    const result = await syncBiDirectional(tmpDir, { all: true });
+  it('claude with --all writes all format files', async () => {
+    const result = await claudeExportCommand(tmpDir, { all: true });
     expect(result.success).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'CLAUDE.md'))).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'AGENTS.md'))).toBe(true);
@@ -314,8 +314,8 @@ describe('ENGINE: Bi-Sync with Interop Flags', () => {
     expect(fs.existsSync(path.join(tmpDir, 'GEMINI.md'))).toBe(true);
   });
 
-  it('bi-sync without flags still creates CLAUDE.md (backward compat)', async () => {
-    const result = await syncBiDirectional(tmpDir, {});
+  it('claude without flags writes CLAUDE.md only', async () => {
+    const result = await claudeExportCommand(tmpDir, {});
     expect(result.success).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'CLAUDE.md'))).toBe(true);
   });
@@ -446,7 +446,13 @@ describe('ENGINE: Engine Adapter Routes Interop', () => {
     expect(result.success).toBe(true);
   });
 
-  it('bi-sync --all routes through adapter', async () => {
+  it('claude --all routes through adapter', async () => {
+    const result = await adapter.callEngine('claude', [tmpDir, '--all']);
+    expect(result).toBeDefined();
+    expect(result.success).toBe(true);
+  });
+
+  it('the pre-3.0.1 bi-sync engine command still routes to the same write', async () => {
     const result = await adapter.callEngine('bi-sync', [tmpDir, '--all']);
     expect(result).toBeDefined();
     expect(result.success).toBe(true);
@@ -610,7 +616,7 @@ describe('AERO: Cross-Format Sync Integrity', () => {
   });
 
   it('--all sync produces 4 files that all reference the project name', async () => {
-    await syncBiDirectional(tmpDir, { all: true });
+    await claudeExportCommand(tmpDir, { all: true });
 
     const claude = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf-8');
     const agents = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf-8');
@@ -624,11 +630,11 @@ describe('AERO: Cross-Format Sync Integrity', () => {
   });
 
   it('--all sync is idempotent (running twice produces same output)', async () => {
-    await syncBiDirectional(tmpDir, { all: true });
+    await claudeExportCommand(tmpDir, { all: true });
     const agents1 = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf-8');
     const cursor1 = fs.readFileSync(path.join(tmpDir, '.cursorrules'), 'utf-8');
 
-    await syncBiDirectional(tmpDir, { all: true });
+    await claudeExportCommand(tmpDir, { all: true });
     const agents2 = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf-8');
     const cursor2 = fs.readFileSync(path.join(tmpDir, '.cursorrules'), 'utf-8');
 

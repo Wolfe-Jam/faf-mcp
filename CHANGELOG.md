@@ -8,6 +8,13 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`faf_bi_sync` is now `faf_claude`.** The tool only ever wrote CLAUDE.md from `project.faf`, one direction; nothing read CLAUDE.md back. The old name, its "Bi-sync now active!" message and its header claimed a two-way sync it never did. `faf_claude` sits beside `faf_agents`, `faf_cursor` and `faf_gemini`, keeps the `agents` / `cursor` / `gemini` / `all` flags, and stays in the Core tier. Tool count unchanged: 29, 15 by default.
+- `faf_bi_sync` still answers as an unlisted alias, so existing prompts and configs keep working. Its removal will be announced here first.
+- README "Eternal Sync" tells the direction truthfully: CLAUDE.md is written from `project.faf`; the other three formats can also import back.
+
 ## [3.0.0] - 2026-09-09 — The Compose Edition
 
 **Compose, don't port: faf-mcp 3.0 runs on faf-cli 7.12 in-process — one scorer, one set of renderers, one injector — and every number, file and claim this package makes is true. Local stdio, 29 tools, Node 22+.**

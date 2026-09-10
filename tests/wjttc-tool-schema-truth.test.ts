@@ -5,7 +5,7 @@
  * the handler that serves it, and every description must describe what the
  * handler does. The 3.0 audit found four contracts that lied:
  *
- *   faf_bi_sync  — advertised auto / watch / force; none was ever read
+ *   faf_bi_sync  — (now faf_claude) advertised auto / watch / force; none was ever read
  *   faf_clear    — advertised todos / backups; no such stores exist
  *   faf_sync     — said it syncs CLAUDE.md; it reconciles project.faf with
  *                  package.json/git and never touches CLAUDE.md
@@ -116,13 +116,14 @@ describe('🏁 WJTTC — tool schema truth', () => {
       + fs.readFileSync(path.join(__dirname, '..', 'src', 'handlers', 'fileHandler.ts'), 'utf-8');
     const registered = new Set(tools.map(x => x.name));
     // faf_chat: dispatched for back-compat but deliberately not advertised.
-    const allow = new Set(['faf_chat']);
+    // faf_bi_sync: faf_claude's pre-3.0.1 name, still callable, never listed.
+    const allow = new Set(['faf_chat', 'faf_bi_sync']);
     const unknown = [...new Set(src.match(/\bfaf_[a-z_]+\b/g) ?? [])].filter(n => !registered.has(n) && !allow.has(n));
     expect(unknown).toEqual([]);
   });
 
-  test('faf_bi_sync no longer promises auto / watch / force, and says which direction it writes', () => {
-    const t = tools.find(x => x.name === 'faf_bi_sync')!;
+  test('faf_claude no longer promises auto / watch / force, and says which direction it writes', () => {
+    const t = tools.find(x => x.name === 'faf_claude')!;
     const props = Object.keys(t.inputSchema.properties ?? {});
     expect(props).not.toContain('auto');
     expect(props).not.toContain('watch');
@@ -172,5 +173,28 @@ describe('🏁 WJTTC — tool schema truth', () => {
     expect(text).not.toContain('FAF CLI Path');
     const names = new Set(tools.map(x => x.name));
     for (const mentioned of text.match(/faf_[a-z_]+/g) ?? []) expect(names.has(mentioned)).toBe(true);
+  });
+
+  test('faf_claude is listed; its pre-3.0.1 name faf_bi_sync still answers but is never listed', async () => {
+    // The tool only ever wrote CLAUDE.md from project.faf; the old name
+    // claimed a two-way sync it never did. Renamed in 3.0.1; the alias
+    // stays so existing prompts and configs keep working.
+    expect(tools.some(x => x.name === 'faf_claude')).toBe(true);
+    expect(tools.some(x => x.name === 'faf_bi_sync')).toBe(false);
+    const core = fs.readFileSync(path.join(__dirname, '..', 'src', 'handlers', 'tools.ts'), 'utf-8')
+      .match(/const CORE_TOOLS = new Set<string>\(\[([\s\S]*?)\]\)/)?.[1] ?? '';
+    expect(core).toContain("'faf_claude'");
+    expect(core).not.toContain("'faf_bi_sync'");
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-claude-alias-'));
+    try {
+      fs.writeFileSync(path.join(dir, 'project.faf'), SAMPLE_FAF);
+      const res = (await client.callTool({ name: 'faf_bi_sync', arguments: { path: dir } })) as ToolText;
+      expect(res.isError).toBeFalsy();
+      expect(fs.existsSync(path.join(dir, 'CLAUDE.md'))).toBe(true);
+      expect(firstText(res)).not.toMatch(/bi-?sync/i);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

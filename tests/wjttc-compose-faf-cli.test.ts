@@ -93,10 +93,10 @@ describe('🏁 WJTTC — compose faf-cli', () => {
     expect(parsed.projectName).toBe('round-trip-name'); // was "Package Manager: npm"
   });
 
-  test('faf_bi_sync writes faf-cli\'s CLAUDE.md (Stack + human context present, not the pre-v3 template)', async () => {
+  test('faf_claude writes faf-cli\'s CLAUDE.md (Stack + human context present, not the pre-v3 template)', async () => {
     const mine = copyFixture(); const theirs = copyFixture(); dirs.push(mine, theirs);
     for (const d of [mine, theirs]) fs.writeFileSync(path.join(d, 'project.faf'), SEED);
-    const res = (await client.callTool({ name: 'faf_bi_sync', arguments: { path: mine } })) as ToolText;
+    const res = (await client.callTool({ name: 'faf_claude', arguments: { path: mine } })) as ToolText;
     expect(res.isError).toBeFalsy();
     cli.writeClaudeMd(theirs, cli.renderClaudeMd(cli.readFaf(path.join(theirs, 'project.faf'))));
     const got = fs.readFileSync(path.join(mine, 'CLAUDE.md'), 'utf-8');
