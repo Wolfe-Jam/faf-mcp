@@ -18,7 +18,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { isError } from '../utils/type-guards.js';
 import { syncFafFile } from '../faf-core/commands/sync.js';
-import { syncBiDirectional } from '../faf-core/commands/bi-sync.js';
+import { claudeExportCommand } from '../faf-core/commands/claude.js';
 import { agentsImportCommand, agentsExportCommand, agentsSyncCommand } from '../faf-core/commands/agents.js';
 import { cursorImportCommand, cursorExportCommand, cursorSyncCommand } from '../faf-core/commands/cursor.js';
 import { geminiImportCommand, geminiExportCommand, geminiSyncCommand } from '../faf-core/commands/gemini.js';
@@ -155,16 +155,17 @@ export class FafEngineAdapter {
           return this.outcome(result, 'Sync command failed', startTime);
         }
 
-        case 'bi-sync':
+        case 'claude':
+        case 'bi-sync': // pre-3.0.1 name, kept as an alias
         case 'bisync': {
-          const result = await syncBiDirectional(projectPath, {
+          const result = await claudeExportCommand(projectPath, {
             json: true,
             agents: args.includes('--agents'),
             cursor: args.includes('--cursor'),
             gemini: args.includes('--gemini'),
             all: args.includes('--all'),
           });
-          return this.outcome(result, 'Bi-sync command failed', startTime);
+          return this.outcome(result, 'Claude command failed', startTime);
         }
 
         case 'agents': {

@@ -7,7 +7,7 @@
  *
  *   faf_go       an 8-field filled/total ratio with its own emptiness list
  *                (50% where faf_score said 65% on the same file)
- *   faf_bi_sync  "FAF Score: 0%" from a `faf_score` key nothing writes
+ *   faf_bi_sync  (now faf_claude) "FAF Score: 0%" from a `faf_score` key nothing writes
  *   faf_dna      the score stored in .faf-dna at birth, forever ("5% — you
  *                are here" after faf_auto had taken the file to 65%)
  *
@@ -94,10 +94,10 @@ describe('🏁 WJTTC — score truth', () => {
     expect(again.questions.map((q: { field: string }) => q.field)).toContain('human_context.where');
   });
 
-  test('faf_bi_sync prints the real score, never "0%" from a key nothing writes', async () => {
+  test('faf_claude prints the real score, never "0%" from a key nothing writes', async () => {
     const dir = mk();
     fs.writeFileSync(path.join(dir, 'project.faf'), WEAK_FAF);
-    const res = (await client.callTool({ name: 'faf_bi_sync', arguments: { path: dir } })) as ToolText;
+    const res = (await client.callTool({ name: 'faf_claude', arguments: { path: dir } })) as ToolText;
     expect(res.isError).toBeFalsy();
     const text = firstText(res);
     expect(text).toContain(`FAF Score: ${realScore(dir)}%`);

@@ -10,7 +10,7 @@
 </div>
 
 [![npm](https://img.shields.io/npm/v/faf-mcp?color=008B8B)](https://www.npmjs.com/package/faf-mcp)[![downloads](https://img.shields.io/npm/dm/faf-mcp?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-mcp)
-[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
+[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%E2%9C%AA%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Agents paper](https://img.shields.io/badge/DOI-Agents%20paper-FF6B35)](https://doi.org/10.5281/zenodo.21951641)
@@ -27,12 +27,21 @@
 
 ---
 
-## What's New in 3.0.0 — The Compose Edition
+## What's New in 3.0.1 — The Compose Edition
+
+**Names that match the code: `faf_bi_sync` is now `faf_claude`, `faf_init` writes what `faf init` writes, and the listings lead with .FAF Context.**
+
+- **`faf_bi_sync` is now `faf_claude`.** It writes CLAUDE.md from `project.faf`, one direction, which is all it ever did. The old name still answers, so existing configs keep working.
+- **`faf_init` writes what `faf init` writes.** It runs faf-cli's own init on the folder: a valid file, scored from what is there, and the new project becomes the current one.
+- **The interop tools say what `sync` does.** `faf_agents`, `faf_cursor` and `faf_gemini` re-write their file from `project.faf`; `import` with `merge: true` brings a file back in.
+- **Surfaces corrected.** The docs page hero, the npm, MCP Registry, Glama and Smithery descriptions, the registry receipt, the birth certificate and dozens of tool strings now match 3.0.
+
+## The Compose Edition (3.0)
 
 **Compose, don't port: faf-mcp 3.0 runs on faf-cli 7.12 in-process — one scorer, one set of renderers, one injector — and every number, file and claim this package makes is true. Local stdio, 29 tools, Node 22+.**
 
 - **Composes faf-cli 7.12.** AGENTS.md, GEMINI.md, .cursorrules and CLAUDE.md are written by faf-cli's own renderers, repo enrichment and block injector — the same bytes `faf export` and `faf sync` write. `faf_auto` runs faf-cli's own update chain. The hand-ported renderers, the pre-v3 CLAUDE.md template and the local injector are gone.
-- **One score function.** `faf_auto`, `faf_go`, `faf_dna`, `faf_doctor` and `faf_bi_sync` all report faf-cli's scorer on the bytes on disk — no local heuristics, no frozen birth score, no "0%".
+- **One score function.** `faf_auto`, `faf_go`, `faf_dna`, `faf_doctor` and `faf_claude` all report faf-cli's scorer on the bytes on disk — no local heuristics, no frozen birth score, no "0%".
 - **Nothing shells out.** The `which faf` detector, the exec fallback and the "install faf-cli first" banner are gone; nothing under `src/` imports `child_process`. A machine with an unrelated `faf` on PATH is no longer a problem.
 - **Every tool contract matches its handler.** Descriptions say what the tools do, schemas declare only flags that are read, failures carry their reason.
 - **The Mk3 engine is deleted.** 44 unreachable modules, ~15,900 lines; the tarball halves. `prebuild` clears `dist/` so nothing deleted ever ships again.
@@ -107,8 +116,8 @@ faf-mcp runs locally over stdio. Point your IDE at one of these commands.
 
 ```text
 # MCP tool calls — ask your IDE's AI
-# Sync to all formats at once
-faf_bi_sync { all: true }
+# Write all four formats from project.faf
+faf_claude { all: true }
 
 # Author .faf from any GitHub repo
 faf_git { url: "https://github.com/facebook/react" }
@@ -118,21 +127,21 @@ faf_git { url: "https://github.com/facebook/react" }
 
 ---
 
-## Eternal Bi-Sync
+## Eternal Sync
 
-Your `.faf` file and your platform context files stay synchronized in milliseconds.
+`project.faf` is the source. faf-mcp writes every tool's context file from it in milliseconds.
 
 ```
-project.faf  ←── 8ms ──→  .cursorrules / AGENTS.md / CLAUDE.md / GEMINI.md
+project.faf  ──── 8ms ───→  CLAUDE.md / AGENTS.md / .cursorrules / GEMINI.md
                     Single source of truth
 ```
 
-- Update either side → both stay aligned
-- `faf_bi_sync { all: true }` syncs to all four formats at once
-- Zero manual maintenance
+- `faf_claude { all: true }` writes all four formats at once
+- `faf_agents`, `faf_cursor` and `faf_gemini` can also import an existing file: `merge: true` merges it into `project.faf`
+- Content outside the faf-managed block is preserved, byte for byte
 - Works across teams, branches, sessions
 
-AI assistants forget. They drift. Every new session, AI starts guessing again. Bi-sync means **context never goes stale**.
+AI assistants forget. They drift. Every new session, AI starts guessing again. One source means **context never goes stale**.
 
 ---
 
@@ -175,7 +184,7 @@ Works on all platforms — stops web search, forces tool usage.
 | `faf_init` | Initialize project.faf |
 | `faf_score` | Check AI-readiness (0-100%) |
 | `faf_sync` | Reconcile project.faf with package.json / git (dry-run; `apply:true` writes) |
-| `faf_bi_sync` | Write CLAUDE.md (+ AGENTS.md, .cursorrules, GEMINI.md) from project.faf |
+| `faf_claude` | Write CLAUDE.md (+ AGENTS.md, .cursorrules, GEMINI.md) from project.faf |
 | `faf_read` | Parse and validate FAF files |
 | `faf_write` | Create/update FAF with validation |
 | **Interop Tools** | |

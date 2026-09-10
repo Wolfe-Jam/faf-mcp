@@ -1,7 +1,7 @@
 /**
  * 🏁 WJTTC — P0 interop freshness (faf-mcp 3.0)
  *
- * faf_agents / faf_cursor / faf_gemini / faf_bi_sync were vendored copies
+ * faf_agents / faf_cursor / faf_gemini / faf_bi_sync (now faf_claude) were vendored copies
  * frozen at faf-cli's "v4.5.0 Interop Edition" (Feb 2026) — missing
  * Guardrails (3-tier Always/Ask-first/Never), Definition of Done, When
  * Stuck, Security & secrets, branch-aware Commit & PR, a Where-things-live
@@ -163,9 +163,9 @@ describe('🏁 WJTTC — P0 interop freshness (current faf-cli shape, not frozen
     expect(content).not.toContain('## Preferences');
   });
 
-  test('faf_bi_sync with all:true fans out to the current-shape AGENTS.md/.cursorrules/GEMINI.md', async () => {
+  test('faf_claude with all:true fans out to the current-shape AGENTS.md/.cursorrules/GEMINI.md', async () => {
     const res = (await client.callTool({
-      name: 'faf_bi_sync',
+      name: 'faf_claude',
       arguments: { path: tmpDir, all: true, force: true },
     })) as ToolText;
     expect(res.isError).toBeFalsy();

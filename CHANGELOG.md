@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v3.0.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v3.0.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,28 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.1] - 2026-09-10 — The Compose Edition
+
+**Names that match the code: `faf_bi_sync` is now `faf_claude`, `faf_init` writes what `faf init` writes, and the listings lead with .FAF Context.**
+
+### Changed
+- **`faf_bi_sync` is now `faf_claude`.** The tool only ever wrote CLAUDE.md from `project.faf`, one direction; nothing read CLAUDE.md back. The old name, its "Bi-sync now active!" message and its header claimed a two-way sync it never did. `faf_claude` sits beside `faf_agents`, `faf_cursor` and `faf_gemini`, keeps the `agents` / `cursor` / `gemini` / `all` flags, and stays in the Core tier. Tool count unchanged: 29, 15 by default.
+- `faf_bi_sync` still answers as an unlisted alias, so existing prompts and configs keep working. Its removal will be announced here first.
+- `faf_agents`, `faf_cursor` and `faf_gemini` no longer call their `sync` action "bidirectional": it re-writes the file from `project.faf` (export with force). `import` reads the file; `merge: true` writes it into `project.faf`.
+- README "Eternal Sync" tells the direction truthfully: CLAUDE.md is written from `project.faf`; the other three formats can also import.
+
+### Fixed
+- **`faf_init` writes what `faf init` writes.** It runs faf-cli's own init steps on the folder, so the file is valid and scored from what the folder holds, and it reports that starting score. Before, it wrote a legacy template that scored 0% on any folder, failed `faf_trust` and crashed `faf_go`. The new project also becomes the current one, so the next steps it suggests act on it. Path handling is unchanged.
+- **The docs page no longer strikes through its own keyword.** The hero line rendered "Context" in red strikethrough, a style left over from an older slogan.
+- README: the all-formats example is the MCP call that works (`faf bi-sync --all` is rejected by faf-cli 7.12); 25 test suites, not 9; the Trophy badge and tier table use ✪.
+- The server status banner reports 29 tools, 15 by default, and reads the version from the package instead of a hardcoded "33+".
+- Tool output: headers say FAF, not "Claude FAF"; the readiness target is 100%, not 99%; tier lines use ✪ ★ ◆ ◇ ●; tools say they author and rewrite files.
+- `faf_git` writes `faf_version: "3.0"` and the package version into the files it authors (it wrote 2.5.0 and 4.5.0), with the spec URL at faf.one.
+- Listings lead with the product name: the npm, MCP Registry, Glama and Smithery descriptions say **.FAF Context**, and `project.faf` marks PulseMCP and Glama live.
+- The registry receipt in `server.json` is refreshed, and the `.faf-dna` birth certificate is re-grounded at 100% with its 2025 birth record kept.
+- Docs: the two essays keep their dated figures with broken links, paths and the missing image fixed; the style source mirrors the live page.
+- Source comments that labelled faf-cli 7.12 code as v4.5.0, faf-cli 7.11.0 or Node 18 now say what the code does; ported parsers keep their provenance line.
 
 ## [3.0.0] - 2026-09-09 — The Compose Edition
 

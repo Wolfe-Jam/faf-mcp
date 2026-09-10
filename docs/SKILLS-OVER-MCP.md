@@ -40,7 +40,7 @@ skills/faf-ide/SKILL.md
 ```
 
 - URI: `skill://faf-ide/SKILL.md`
-- Guides core tools: `faf_auto`, `faf_init`, `faf_score`, `faf_context`, `faf_sync`, `faf_bi_sync`, `faf_cursor`, `faf_agents`, `faf_gemini`, `faf_about`
+- Guides core tools: `faf_auto`, `faf_init`, `faf_score`, `faf_context`, `faf_sync`, `faf_claude`, `faf_cursor`, `faf_agents`, `faf_gemini`, `faf_about`
 - Shipped in the npm package (`package.json` `files` includes `skills/**`)
 
 ## Tools

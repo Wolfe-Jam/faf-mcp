@@ -29,23 +29,31 @@
       "approved": false,
       "growth": 42,
       "growthRate": 42
+    },
+    {
+      "version": "v1.0.2",
+      "timestamp": "2026-09-10T17:36:19.042Z",
+      "score": 100,
+      "changes": [
+        "refresh — re-grounded"
+      ],
+      "growth": 100
     }
   ],
   "current": {
-    "version": "v1.0.1",
-    "score": 42,
-    "approved": false,
-    "lastSync": "2025-11-13T15:38:50.198Z"
+    "version": "v1.0.2",
+    "score": 100,
+    "lastSync": "2026-09-10T17:36:19.042Z"
   },
   "recovery": {
-    "claudeMD": "/Users/wolfejam/FAF/faf-mcp-monorepo/CLAUDE.md",
+    "claudeMD": "/Users/wolfejam/FAF/faf-mcp/CLAUDE.md",
     "lastBackup": "2025-11-13T15:38:50.149Z",
     "syncStatus": "active",
     "autoRecover": true
   },
   "growth": {
-    "totalGrowth": 42,
-    "daysActive": 0,
+    "totalGrowth": 100,
+    "daysActive": 301,
     "averageDailyGrowth": 42,
     "bestDay": {
       "date": "2025-11-13T15:38:50.198Z",
@@ -74,22 +82,22 @@
       },
       {
         "type": "peak",
-        "score": 42,
-        "date": "2025-11-13T15:38:50.198Z",
-        "version": "v1.0.1",
+        "score": 100,
+        "date": "2026-09-10T17:36:19.042Z",
+        "version": "v1.0.2",
         "label": "Peak",
         "emoji": "🏔️"
       },
       {
         "type": "current",
-        "score": 42,
-        "date": "2025-11-13T15:38:50.198Z",
-        "version": "v1.0.1",
+        "score": 100,
+        "date": "2026-09-10T17:36:19.042Z",
+        "version": "v1.0.2",
         "label": "Current",
         "emoji": "📍"
       }
     ]
   },
-  "lastModified": "2025-11-13T15:38:50.198Z",
+  "lastModified": "2026-09-10T17:36:19.045Z",
   "format": "faf-dna-v1"
 }
