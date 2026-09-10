@@ -27,14 +27,16 @@
 
 ---
 
-## What's New in 3.0.1 — The Compose Edition
+## What's New in 3.0.2 — The Compose Edition
 
-**Names that match the code: `faf_bi_sync` is now `faf_claude`, `faf_init` writes what `faf init` writes, and the listings lead with .FAF Context.**
+**Tools that say what they do: `faf_git` scores with faf-cli and asks before overwriting, `faf_sync` previews each change, and imports say when nothing was written.**
 
-- **`faf_bi_sync` is now `faf_claude`.** It writes CLAUDE.md from `project.faf`, one direction, which is all it ever did. The old name still answers, so existing configs keep working.
-- **`faf_init` writes what `faf init` writes.** It runs faf-cli's own init on the folder: a valid file, scored from what is there, and the new project becomes the current one.
-- **The interop tools say what `sync` does.** `faf_agents`, `faf_cursor` and `faf_gemini` re-write their file from `project.faf`; `import` with `merge: true` brings a file back in.
-- **Surfaces corrected.** The docs page hero, the npm, MCP Registry, Glama and Smithery descriptions, the registry receipt, the birth certificate and dozens of tool strings now match 3.0.
+- **`faf_git` has one scorer.** It reports faf-cli's score of the file it authored, writes the slots faf-cli scores, and asks before replacing an existing `project.faf`.
+- **`faf_sync` previews each change.** The dry run lists every field it would update and names `apply: true`.
+- **Imports say when nothing was written,** and `merge: true` with no `project.faf` fails clearly.
+- **Descriptions, annotations and errors match the code.** No CLI commands or terminal colour codes in tool output.
+
+3.0.1 renamed `faf_bi_sync` to `faf_claude` and made `faf_init` write what `faf init` writes. The full history is in the [CHANGELOG](CHANGELOG.md).
 
 ## The Compose Edition (3.0)
 
