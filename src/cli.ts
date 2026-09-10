@@ -12,7 +12,8 @@ async function main() {
 
   await server.start();
 
-  console.log('FAF MCP Server started in stdio mode');
+  // stderr: stdout is the JSON-RPC stream in stdio mode.
+  console.error('FAF MCP Server started in stdio mode');
 }
 
 main().catch((error) => {

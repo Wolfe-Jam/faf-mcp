@@ -30,7 +30,6 @@ export interface ClaudeExportResult {
   success: boolean;
   direction: 'faf-to-claude' | 'none';
   filesChanged: string[];
-  conflicts: string[];
   duration: number;
   message: string;
 }
@@ -46,7 +45,6 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
     success: false,
     direction: 'none',
     filesChanged: [],
-    conflicts: [],
     duration: 0,
     message: ''
   };
@@ -56,7 +54,7 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
     const fafPath = projectPath ? path.join(projectPath, 'project.faf') : await findFafFile();
 
     if (!fafPath || !await fileExists(fafPath)) {
-      result.message = 'No project.faf file found. Run faf init first.';
+      result.message = 'No project.faf file found. Run faf_init first.';
       result.duration = Date.now() - startTime;
       return result;
     }

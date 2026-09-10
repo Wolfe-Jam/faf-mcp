@@ -201,12 +201,14 @@ export class FafEngineAdapter {
         }
 
         case 'git': {
-          const url = args[0];
-          const outputPath = args[1]; // optional
+          // url and the optional output dir come from pathArgs (flags
+          // excluded), so a trailing '--force' is never read as the output
+          // directory.
+          const [url, outputPath] = pathArgs;
           if (!url) {
             return { success: false, error: 'URL is required', duration: Date.now() - startTime };
           }
-          const result = await gitContextCommand(url, outputPath);
+          const result = await gitContextCommand(url, outputPath, { force });
           return this.outcome(result, 'Git command failed', startTime);
         }
 

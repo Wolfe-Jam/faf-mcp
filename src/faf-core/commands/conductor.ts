@@ -95,16 +95,30 @@ export async function conductorImportCommand(
           data: { filesProcessed: result.filesProcessed, merged: true },
           warnings: result.warnings,
         };
-      } catch {
-        // Fall through
+      } catch (error) {
+        return {
+          success: false,
+          action: 'import',
+          message: `Could not merge conductor/ into project.faf: ${error instanceof Error ? error.message : String(error)}`,
+          warnings: result.warnings,
+        };
       }
     }
+    // merge was asked for and there is nothing to merge into: say so rather
+    // than report a no-op as an import.
+    return {
+      success: false,
+      action: 'import',
+      message: 'No project.faf to merge into — run faf_init first',
+      warnings: result.warnings,
+    };
   }
 
+  // Without merge nothing is written: say exactly that.
   return {
     success: true,
     action: 'import',
-    message: `Imported conductor/ (${result.filesProcessed.length} files processed)`,
+    message: `Parsed conductor/ (${result.filesProcessed.length} files) — nothing written; pass merge: true to write it into project.faf`,
     data: { faf: result.faf, filesProcessed: result.filesProcessed },
     warnings: result.warnings,
   };
@@ -122,7 +136,7 @@ export async function conductorExportCommand(
     return {
       success: false,
       action: 'export',
-      message: 'No .faf file found. Run faf init first.',
+      message: 'No .faf file found. Run faf_init first.',
     };
   }
 
@@ -147,18 +161,46 @@ export async function conductorExportCommand(
   const fafContent = await fs.readFile(fafPath, 'utf-8');
   const fafData = parseYAML(fafContent);
 
-  // Build the conductor-compatible structure
+  // Build the conductor-compatible structure. Read the spec fields a
+  // project.faf actually carries (project.main_language / goal, stack.*);
+  // the list-shaped fields (stack.languages, project.goals, …) that a
+  // conductor merge writes stay as a fallback.
+  const specValues = (...values: unknown[]): string[] =>
+    values.filter((v): v is string => typeof v === 'string' && v !== '' && v !== 'slotignored');
+  const firstNonEmpty = (...lists: unknown[]): string[] => {
+    for (const list of lists) {
+      if (Array.isArray(list) && list.length > 0) return list;
+    }
+    return [];
+  };
+
   const conductorFaf: FafFromConductor = {
     project: {
       name: fafData.project?.name || 'Unknown',
       description: fafData.project?.description || fafData.project?.goal || '',
       type: fafData.project?.type || 'application',
-      goals: fafData.project?.goals || [],
+      goals: firstNonEmpty(specValues(fafData.project?.goal), fafData.project?.goals),
       stack: {
-        languages: fafData.stack?.languages || fafData.project?.stack?.languages || [],
-        frameworks: fafData.stack?.frameworks || fafData.project?.stack?.frameworks || [],
-        databases: fafData.stack?.databases || fafData.project?.stack?.databases || [],
-        infrastructure: fafData.stack?.infrastructure || fafData.project?.stack?.infrastructure || [],
+        languages: firstNonEmpty(
+          specValues(fafData.project?.main_language),
+          fafData.stack?.languages,
+          fafData.project?.stack?.languages,
+        ),
+        frameworks: firstNonEmpty(
+          specValues(fafData.stack?.frontend, fafData.stack?.backend),
+          fafData.stack?.frameworks,
+          fafData.project?.stack?.frameworks,
+        ),
+        databases: firstNonEmpty(
+          specValues(fafData.stack?.database),
+          fafData.stack?.databases,
+          fafData.project?.stack?.databases,
+        ),
+        infrastructure: firstNonEmpty(
+          specValues(fafData.stack?.hosting, fafData.stack?.cicd),
+          fafData.stack?.infrastructure,
+          fafData.project?.stack?.infrastructure,
+        ),
       },
       rules: fafData.project?.rules || [],
       guidelines: fafData.project?.guidelines || [],

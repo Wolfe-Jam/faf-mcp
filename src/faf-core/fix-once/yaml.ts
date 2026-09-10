@@ -16,7 +16,6 @@
  */
 
 import * as yaml from 'yaml';
-import { chalk } from './colors';
 
 /**
  * Safe YAML parse - handles ALL edge cases
@@ -28,7 +27,7 @@ export function parse(content: string | null | undefined, options?: { filepath?:
   // Edge case 1: Null/undefined (CHECK FIRST before any operations)
   if (content === null || content === undefined) {
     throw new Error(
-      `${chalk.red('Empty content passed to YAML parser')}\n` +
+      'Empty content passed to YAML parser\n' +
       `File: ${filepath}\n` +
       `Fix: Ensure file exists and has content before parsing`
     );
@@ -37,7 +36,7 @@ export function parse(content: string | null | undefined, options?: { filepath?:
   // Edge case 2: Not a string (CHECK BEFORE calling string methods)
   if (typeof content !== 'string') {
     throw new Error(
-      `${chalk.red('Invalid content type passed to YAML parser')}\n` +
+      'Invalid content type passed to YAML parser\n' +
       `Expected: string\n` +
       `Got: ${typeof content}\n` +
       `File: ${filepath}`
@@ -47,9 +46,9 @@ export function parse(content: string | null | undefined, options?: { filepath?:
   // Edge case 3: Empty string or whitespace only
   if (content.trim() === '') {
     throw new Error(
-      `${chalk.red('Empty .faf file detected')}\n` +
+      'Empty .faf file detected\n' +
       `File: ${filepath}\n` +
-      `Fix: Run ${chalk.cyan('faf init')} to recreate the file`
+      'Fix: run faf_init with force: true to recreate the file'
     );
   }
 
@@ -60,10 +59,10 @@ export function parse(content: string | null | undefined, options?: { filepath?:
   } catch (error: any) {
     // Wrap yaml parsing errors with helpful context
     throw new Error(
-      `${chalk.red('Invalid YAML syntax')}\n` +
+      'Invalid YAML syntax\n' +
       `File: ${filepath}\n` +
       `Error: ${error.message}\n` +
-      `Fix: Check file syntax or run ${chalk.cyan('faf init --force')} to recreate`
+      'Fix: correct the YAML syntax, or recreate the file with faf_init (force: true)'
     );
   }
 
@@ -71,9 +70,9 @@ export function parse(content: string | null | undefined, options?: { filepath?:
   // (valid YAML like "null" or "~" or empty documents)
   if (result === null || result === undefined) {
     throw new Error(
-      `${chalk.red('YAML file parsed but contains no data')}\n` +
+      'YAML file parsed but contains no data\n' +
       `File: ${filepath}\n` +
-      `Fix: Ensure file has valid YAML content or run ${chalk.cyan('faf init')}`
+      'Fix: ensure the file has valid YAML content, or recreate it with faf_init (force: true)'
     );
   }
 
@@ -81,7 +80,7 @@ export function parse(content: string | null | undefined, options?: { filepath?:
   // .faf files must be YAML objects, not scalars
   if (typeof result !== 'object' || Array.isArray(result)) {
     throw new Error(
-      `${chalk.red('Invalid .faf structure - must be a YAML object')}\n` +
+      'Invalid .faf structure - must be a YAML object\n' +
       `File: ${filepath}\n` +
       `Got: ${Array.isArray(result) ? 'array' : typeof result}\n` +
       `Fix: .faf files must contain key-value pairs, not ${Array.isArray(result) ? 'lists' : 'simple values'}`
@@ -99,7 +98,7 @@ export function stringify(data: any, options?: any): string {
   // Edge case 1: Null/undefined data
   if (data === null || data === undefined) {
     throw new Error(
-      `${chalk.red('Cannot stringify null/undefined data to YAML')}\n` +
+      'Cannot stringify null/undefined data to YAML\n' +
       `Fix: Provide valid data object`
     );
   }
@@ -107,7 +106,7 @@ export function stringify(data: any, options?: any): string {
   // Edge case 2: Not an object (primitives should not be stringified for .faf)
   if (typeof data !== 'object' || Array.isArray(data)) {
     throw new Error(
-      `${chalk.red('Invalid data for .faf stringify')}\n` +
+      'Invalid data for .faf stringify\n' +
       `Expected: object\n` +
       `Got: ${Array.isArray(data) ? 'array' : typeof data}\n` +
       `Fix: .faf files must be objects with key-value pairs`
@@ -126,7 +125,7 @@ export function stringify(data: any, options?: any): string {
     return result;
   } catch (error: any) {
     throw new Error(
-      `${chalk.red('Failed to convert data to YAML')}\n` +
+      'Failed to convert data to YAML\n' +
       `Error: ${error.message}`
     );
   }

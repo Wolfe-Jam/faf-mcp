@@ -27,14 +27,16 @@
 
 ---
 
-## What's New in 3.0.1 — The Compose Edition
+## What's New in 3.0.2 — The Compose Edition
 
-**Names that match the code: `faf_bi_sync` is now `faf_claude`, `faf_init` writes what `faf init` writes, and the listings lead with .FAF Context.**
+**Tools that say what they do: `faf_git` scores with faf-cli and asks before overwriting, `faf_sync` previews each change, and imports say when nothing was written.**
 
-- **`faf_bi_sync` is now `faf_claude`.** It writes CLAUDE.md from `project.faf`, one direction, which is all it ever did. The old name still answers, so existing configs keep working.
-- **`faf_init` writes what `faf init` writes.** It runs faf-cli's own init on the folder: a valid file, scored from what is there, and the new project becomes the current one.
-- **The interop tools say what `sync` does.** `faf_agents`, `faf_cursor` and `faf_gemini` re-write their file from `project.faf`; `import` with `merge: true` brings a file back in.
-- **Surfaces corrected.** The docs page hero, the npm, MCP Registry, Glama and Smithery descriptions, the registry receipt, the birth certificate and dozens of tool strings now match 3.0.
+- **`faf_git` has one scorer.** It reports faf-cli's score of the file it authored, writes the slots faf-cli scores, and asks before replacing an existing `project.faf`.
+- **`faf_sync` previews each change.** The dry run lists every field it would update and names `apply: true`.
+- **Imports say when nothing was written,** and `merge: true` with no `project.faf` fails clearly.
+- **Descriptions, annotations and errors match the code.** No CLI commands or terminal colour codes in tool output.
+
+3.0.1 renamed `faf_bi_sync` to `faf_claude` and made `faf_init` write what `faf init` writes. The full history is in the [CHANGELOG](CHANGELOG.md).
 
 ## The Compose Edition (3.0)
 
@@ -179,20 +181,28 @@ Works on all platforms — stops web search, forces tool usage.
 
 ## 29 MCP Tools
 
+The 15 Core tools, shown by default:
+
 | Tool | Purpose |
 |------|---------|
-| `faf_init` | Initialize project.faf |
-| `faf_score` | Check AI-readiness (0-100%) |
-| `faf_sync` | Reconcile project.faf with package.json / git (dry-run; `apply:true` writes) |
-| `faf_claude` | Write CLAUDE.md (+ AGENTS.md, .cursorrules, GEMINI.md) from project.faf |
-| `faf_read` | Parse and validate FAF files |
-| `faf_write` | Create/update FAF with validation |
+| `faf_init` | Create a new `project.faf` (use `faf_auto` to enhance an existing one) |
+| `faf_auto` | One-call setup: init or merge, stack detection, CLAUDE.md, score |
+| `faf_go` | Guided interview that fills the missing human-context and goal fields toward 100% |
+| `faf_score` | AI-readiness score (0-100%) and tier; `details:true` adds a slot-by-slot breakdown |
+| `faf_doctor` | Diagnose a low score: missing files, slot counts, config issues, each with a fix |
+| `faf_check` | Rate each `human_context` field empty / generic / good |
+| `faf_trust` | Validate the required fields and `about.*` block with faf-cli's validator |
+| `faf_sync` | Reconcile `project.faf` with package.json (dry-run; `apply:true` writes) |
+| `faf_context` | Set or show the active project path |
+| `faf_about` | What the IANA-registered `.faf` format is, in plain language |
 | **Interop Tools** | |
-| `faf_agents` | Import/export/sync AGENTS.md |
-| `faf_cursor` | Import/export/sync .cursorrules |
-| `faf_gemini` | Import/export/sync GEMINI.md |
-| `faf_conductor` | Import/export directory structure |
-| `faf_git` | Author .faf from GitHub repo URL |
+| `faf_claude` | Write CLAUDE.md from `project.faf` (`all:true` also writes AGENTS.md, .cursorrules, GEMINI.md) |
+| `faf_agents` | Import AGENTS.md into `project.faf`, or write it from `project.faf` |
+| `faf_cursor` | Import .cursorrules into `project.faf`, or write it from `project.faf` |
+| `faf_gemini` | Import GEMINI.md into `project.faf`, or write it from `project.faf` |
+| `faf_git` | Author a `project.faf` from a public GitHub repo URL |
+
+**+14 more with `FAF_TOOLS=all`:** `faf_status` · `faf_what` · `faf_guide` · `faf_debug` · `faf_clear` · `faf_list` · `faf_read` (read a file within the allowed roots: cwd, the OS temp dir, or `FAF_ALLOWED_ROOTS`) · `faf_write` (write a file within the same roots) · `faf_readme` · `faf_human_add` · `faf_quick` · `faf_formats` · `faf_dna` · `faf_conductor`
 
 **Built on faf-cli.** Every tool composes the bundled [faf-cli](https://www.npmjs.com/package/faf-cli) in-process — the same scorer, the same renderers, the same block injector the CLI uses. Nothing shells out to a `faf` on your PATH.
 

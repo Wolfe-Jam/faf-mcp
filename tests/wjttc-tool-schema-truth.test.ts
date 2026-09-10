@@ -117,7 +117,8 @@ describe('🏁 WJTTC — tool schema truth', () => {
     const registered = new Set(tools.map(x => x.name));
     // faf_chat: dispatched for back-compat but deliberately not advertised.
     // faf_bi_sync: faf_claude's pre-3.0.1 name, still callable, never listed.
-    const allow = new Set(['faf_chat', 'faf_bi_sync']);
+    // faf_version: the required .faf field (faf_trust, faf_quick), not a tool.
+    const allow = new Set(['faf_chat', 'faf_bi_sync', 'faf_version']);
     const unknown = [...new Set(src.match(/\bfaf_[a-z_]+\b/g) ?? [])].filter(n => !registered.has(n) && !allow.has(n));
     expect(unknown).toEqual([]);
   });

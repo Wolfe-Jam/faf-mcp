@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v3.0.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v3.0.2 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,19 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.2] - 2026-09-10 — The Compose Edition
+
+**Tools that say what they do: `faf_git` scores with faf-cli and asks before overwriting, `faf_sync` previews each change, and imports say when nothing was written.**
+
+### Fixed
+- **`faf_git` has one scorer.** It reported its own slot count (100% Trophy on files faf-cli scores 5–14%); it now reports faf-cli's score of the bytes it authored. It writes the .faf slots faf-cli scores (`project.goal`, `project.main_language`, `human_context`), so the score reflects what it found, and it refuses to replace an existing `project.faf` unless you pass `force: true`.
+- **`faf_sync` previews each change.** The dry run lists every field it would update, once, with the value `apply: true` will write. It used to give a count and suggest a CLI flag the tool does not take.
+- **Imports say when nothing was written.** `faf_agents`, `faf_cursor`, `faf_gemini` and `faf_conductor` import without `merge` now say so; `merge: true` with no `project.faf` fails with a clear message. `faf_conductor` export fills its sections from the .faf fields.
+- **Errors speak MCP.** YAML parse errors no longer carry terminal colour codes or a CLI command, and the `faf_score` headline no longer carries stray control bytes.
+- **Descriptions and annotations match the handlers.** `faf_dna` is marked as writing; `faf_write`, `faf_conductor` and `faf_git` as able to overwrite; `faf_check` protect is described as advisory; `faf_trust`, `faf_doctor`, `faf_formats`, `faf_clear`, `faf_context`, `faf_auto` and `faf_quick` say what they do. `faf_debug` checks write access without writing a file, `faf_guide` teaches the MCP tools, and `faf_quick` writes a format version and no default language.
+- Repo: `ABOUT.md` (a false "Anthropic stewardship" line and a monorepo layout that no longer exists) and `demo-server.js` (an HTTP demo with retired tools) are archived under git tags and removed; `SECURITY.md` supports 3.x; `CONTRIBUTING.md` lists Node 22 and Bun.
+- A version bump now re-stamps the project's release line and re-renders CLAUDE.md and the Copilot file from it.
 
 ## [3.0.1] - 2026-09-10 — The Compose Edition
 
