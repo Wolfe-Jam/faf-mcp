@@ -54,10 +54,26 @@ jobs:
             echo "✓ server.json v$MANIFEST_VERSION matches release tag v$TAG"
           fi
 
+      - name: Skip publish if the registry already serves this version (idempotent backfills)
+        id: served
+        run: |
+          NAME=$(jq -r '.name' server.json)
+          VER=$(jq -r '.version' server.json)
+          ENC=$(jq -rn --arg n "$NAME" '$n|@uri')
+          GOT=$(curl -s "https://registry.modelcontextprotocol.io/v0.1/servers/${ENC}/versions/${VER}" | jq -r '.server.version // empty')
+          if [ "$GOT" = "$VER" ]; then
+            echo "::notice::registry already serves $NAME@$VER — nothing to publish (the registry rejects duplicate versions)"
+            echo "already=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Login via DNS (one.faf namespace)
+        if: steps.served.outputs.already != 'true'
         run: ./mcp-publisher login dns --domain faf.one --private-key "${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}"
 
       - name: Publish to MCP Registry (with retry on 5xx / timeout)
+        if: steps.served.outputs.already != 'true'
         run: |
           set +e
           MAX_ATTEMPTS=5
