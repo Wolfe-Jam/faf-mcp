@@ -1,23 +1,35 @@
-name: 📡 MCP Registry Publish
+name: 📡 MCP Registry Publish (DNS)
+
+# DNS-authenticated registry publish for the one.faf/* namespace. GitHub-OIDC
+# only authorises io.github.<owner>/* — DNS auth proves ownership of faf.one →
+# authorises one.faf/*. Fires on every release so the registry stays current
+# automatically; no manual `mcp-publisher login dns` step in /pubpro.
+#
+# Requires repo secret FAF_ONE_MCP_PRIVATE_KEY = the ed25519 private key (64-hex)
+# whose public key is the `v=MCPv1; k=ed25519; p=...` TXT record at the faf.one apex.
+# Same pattern as claude-faf-mcp; faf-mcp ships one npm package and no mcpb.
 
 on:
-  # release: trigger DISABLED for the one.faf migration — the `login github-oidc` step
-  # below authorises io.github.* ONLY, so a release-triggered publish 400s on one.faf/*.
-  # Registry publish is now the manual DNS step in /pubpro (mcp-publisher login dns).
-  # Restore CI auto-publish via the DNS-ready workflow (faf-mcp-rig reference) +
-  # the FAF_ONE_MCP_PRIVATE_KEY repo secret, switching the login step to `login dns`.
-  workflow_dispatch:  # manual trigger for backfills / retries
+  release:
+    types: [published]
+  workflow_dispatch: {}  # manual trigger for backfills / retries
 
 jobs:
   publish:
     name: Publish to MCP Registry
     runs-on: ubuntu-latest
     permissions:
-      id-token: write   # required for OIDC
       contents: read
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Require the DNS key secret
+        env:
+          KEY: ${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}
+        run: |
+          [ -n "$KEY" ] || { echo "::error::FAF_ONE_MCP_PRIVATE_KEY is not set in this repo — one.faf/* cannot be published without it."; exit 1; }
+          echo "✓ FAF_ONE_MCP_PRIVATE_KEY present (${#KEY} chars)"
 
       - name: Install mcp-publisher
         run: |
@@ -28,18 +40,22 @@ jobs:
           chmod +x ./mcp-publisher
           ./mcp-publisher --version
 
-      - name: Login via GitHub OIDC
-        run: ./mcp-publisher login github-oidc
-
-      - name: Verify server.json version matches release tag
+      - name: Verify server.json is one.faf/* and its version matches the release tag
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          MANIFEST_VERSION=$(jq -r '.version' server.json)
-          if [ "$TAG" != "$MANIFEST_VERSION" ]; then
-            echo "::error::server.json version ($MANIFEST_VERSION) does not match release tag ($TAG). Bump server.json before tagging."
-            exit 1
+          NAME=$(jq -r '.name' server.json)
+          case "$NAME" in one.faf/*) ;; *) echo "::error::server.json name '$NAME' is not one.faf/* — the DNS key cannot publish it"; exit 1;; esac
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${GITHUB_REF_NAME#v}"
+            MANIFEST_VERSION=$(jq -r '.version' server.json)
+            if [ "$TAG" != "$MANIFEST_VERSION" ]; then
+              echo "::error::server.json version ($MANIFEST_VERSION) does not match release tag ($TAG). Bump server.json before tagging."
+              exit 1
+            fi
+            echo "✓ server.json v$MANIFEST_VERSION matches release tag v$TAG"
           fi
-          echo "✓ server.json v$MANIFEST_VERSION matches release tag v$TAG"
+
+      - name: Login via DNS (one.faf namespace)
+        run: ./mcp-publisher login dns --domain faf.one --private-key "${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}"
 
       - name: Publish to MCP Registry (with retry on 5xx / timeout)
         run: |
@@ -60,8 +76,8 @@ jobs:
               SLEEP=$((attempt * attempt * 10))  # 10s, 40s, 90s, 160s, 250s — gives MCP Registry time to recover
               echo "Transient failure (attempt $attempt). Sleeping ${SLEEP}s then retrying..."
               sleep $SLEEP
-              # Refresh OIDC token in case it aged out during the wait
-              ./mcp-publisher login github-oidc
+              # Refresh the registry token in case it aged out during the wait
+              ./mcp-publisher login dns --domain faf.one --private-key "${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}"
               continue
             fi
             echo "::error::Non-transient publish failure on attempt $attempt — aborting."
@@ -69,3 +85,20 @@ jobs:
           done
           echo "::error::Publish failed after $MAX_ATTEMPTS attempts"
           exit 1
+
+      - name: Round-trip verify (registry serves this version)
+        run: |
+          NAME=$(jq -r '.name' server.json)
+          VER=$(jq -r '.version' server.json)
+          ENC=$(jq -rn --arg n "$NAME" '$n|@uri')
+          for i in $(seq 1 10); do
+            BODY=$(curl -s "https://registry.modelcontextprotocol.io/v0.1/servers/${ENC}/versions/${VER}")
+            GOT=$(echo "$BODY" | jq -r '.server.version // empty')
+            if [ "$GOT" = "$VER" ]; then
+              echo "✓ registry serves $NAME@$VER"
+              echo "$BODY" | jq -r '.server._meta["io.modelcontextprotocol.registry/publisher-provided"]["one.faf/context"] // "no one.faf/context _meta"' | head -20
+              exit 0
+            fi
+            echo "⏳ registry not serving $VER yet (attempt $i/10)"; sleep 6
+          done
+          echo "::error::registry never served $NAME@$VER"; exit 1
