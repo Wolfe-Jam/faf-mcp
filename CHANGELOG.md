@@ -23,7 +23,8 @@ Every number, file and claim this package makes is now true — and every tool c
 ### Changed
 - **Composes faf-cli 7.12.0 (The Open Renderers Edition).** AGENTS.md, GEMINI.md, .cursorrules and CLAUDE.md are written by faf-cli's own renderers, repo enrichment and injector — the same bytes `faf export` and `faf sync` write. `faf_auto` runs faf-cli's `updateExistingFaf` on an existing file and `writeFaf` for the bytes (no runtime `_meta` block; docker-compose facts flow instead of arriving as `slotignored`). The hand-ported renderers, the pre-v3 CLAUDE.md template and faf-mcp's own injector are deleted.
 - Resource URIs are `faf://context` and `faf://status`; `claude-faf://` stays readable as an alias for this release.
-- `faf-cli` dependency `^6.10.1` → `^7.12.0`; hono override floor `>=4.13.5`.
+- `faf-cli` dependency `^6.10.1` → `^7.12.0`; `@modelcontextprotocol/sdk` `^1.27.1` → `^1.30.0` (its own range now admits `@hono/node-server` 2.x, so the forced-major override for it is gone); hono override floor `>=4.13.5`.
+- **Node 22 or newer.** The floor was 18, which reached end of life in April 2025 (20 followed in April 2026), and six production dependencies already required 20+. `engines.node` is now `>=22.0.0`, the CI smoke matrix runs 22 and 24, and `scripts/check-engines.mjs` refuses a floor that CI does not exercise.
 
 ### Removed
 - 44 unreachable source modules (~15,900 lines): the Mk3 bundled engine (13 vendored commands, `championship-tools.ts`, `cloud-handler.ts`, the shadow tool-visibility registry, the bundled compiler, `faf-dna.ts` and helpers). Tarball 256 → 126 files. `prebuild` now clears `dist/` — tsc never did, so deleted modules had kept shipping.

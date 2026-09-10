@@ -89,3 +89,21 @@ describe('🏁 WJTTC — P0 resource URI rename (faf:// primary, claude-faf:// a
     expect(alias.contents?.[0]?.uri).toBe('claude-faf://context');
   });
 });
+
+describe('🏁 WJTTC — unknown resource is MCP resource-not-found (-32002)', () => {
+  test('faf://nope rejects with code -32002, not a generic internal error', async () => {
+    const srv = new FafMcpServer({ transport: 'stdio', fafEnginePath: 'native' });
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    await srv.getServer().connect(st);
+    const c = new Client({ name: 'wjttc-404', version: '1.0.0' }, { capabilities: {} });
+    await c.connect(ct);
+    try {
+      let code: number | undefined;
+      try { await c.readResource({ uri: 'faf://nope' }); } catch (e: any) { code = e?.code; }
+      expect(code).toBe(-32002);
+    } finally {
+      await c.close();
+      await srv.getServer().close();
+    }
+  });
+});

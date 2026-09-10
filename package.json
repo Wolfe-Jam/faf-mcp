@@ -22,10 +22,11 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "type-check": "tsc --noEmit",
     "check:stylesheet": "node scripts/check-stylesheet-drift.mjs",
+    "check:engines": "node scripts/check-engines.mjs",
     "prepare": "npm run build",
     "sync-version": "node scripts/sync-version.js",
-    "version": "npm run sync-version && git add project.faf",
-    "prepublishOnly": "npm run build",
+    "version": "npm run sync-version && git add project.faf server.json CHANGELOG.md docs/index.html AGENTS.md",
+    "prepublishOnly": "npm run build && npm run check:engines",
     "debug": "node --inspect-brk=0.0.0.0:9229 -r ts-node/register src/cli.ts"
   },
   "keywords": [
@@ -78,7 +79,7 @@
   },
   "homepage": "https://faf.one",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "files": [
     "dist/**/*",
@@ -96,7 +97,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "faf-cli": "^7.12.0",
     "faf-scoring-kernel": "^2.0.3",
     "yaml": "^2.4.1"
@@ -111,7 +112,6 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "@hono/node-server": ">=2.0.5",
     "hono": ">=4.13.5",
     "fast-uri": ">=4.1.2",
     "ip-address": ">=10.3.1",

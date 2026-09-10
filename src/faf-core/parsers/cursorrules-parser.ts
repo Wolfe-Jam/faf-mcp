@@ -74,6 +74,8 @@ export function parseCursorRules(content: string): CursorRulesFile {
   const normalized = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const lines = normalized.split('\n');
   let projectName = 'Unknown Project';
+  let nameLocked = false; // first name wins; later `# …` lines never overwrite it
+  let inFafBlock = false;
   const sections: CursorRulesSection[] = [];
   let currentSection: CursorRulesSection | null = null;
   const rawLines: string[] = [];
@@ -81,8 +83,9 @@ export function parseCursorRules(content: string): CursorRulesFile {
   for (const line of lines) {
     rawLines.push(line);
 
-    // Skip faf's own block markers — they are not headings or content.
-    if (line.trim() === '# faf:start' || line.trim() === '# faf:end') continue;
+    // faf's own block markers — track the block, never treat them as content.
+    if (line.trim() === '# faf:start') { inFafBlock = true; continue; }
+    if (line.trim() === '# faf:end') { inFafBlock = false; continue; }
 
     // faf-cli's current .cursorrules shape (v3.0) has no project-name H1 at
     // all — just `# .cursorrules` then a comment line naming the project.
@@ -91,14 +94,21 @@ export function parseCursorRules(content: string): CursorRulesFile {
     const authoredMatch = line.match(/^#\s+Authored from project\.faf\s+—\s+(.+)$/);
     if (authoredMatch) {
       projectName = authoredMatch[1].trim();
+      nameLocked = true;
       continue;
     }
     if (line.trim() === '# .cursorrules') continue;
 
-    // H1 = Project name (legacy/hand-written .cursorrules fallback)
+    // Inside the managed block every other `# …` line is faf's own comment —
+    // `# Stack`, `# Backend: Express`, `# Package Manager: npm` — never a
+    // project name. (Pre-3.0 the last of those won and the import returned
+    // "Package Manager: npm" as the project.)
+    if (inFafBlock && line.startsWith('#')) continue;
+
+    // H1 = Project name (legacy/hand-written .cursorrules fallback). First one wins.
     const h1Match = line.match(/^#\s+(?:Project:\s*)?(.+)$/);
     if (h1Match) {
-      projectName = h1Match[1].trim();
+      if (!nameLocked) { projectName = h1Match[1].trim(); nameLocked = true; }
       continue;
     }
 

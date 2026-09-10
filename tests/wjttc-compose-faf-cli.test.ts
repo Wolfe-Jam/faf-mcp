@@ -85,6 +85,14 @@ describe('🏁 WJTTC — compose faf-cli', () => {
     expect(fs.readFileSync(path.join(mine, 'AGENTS.md'), 'utf-8')).toContain('## Setup & build');
   });
 
+  test('.cursorrules round-trip: the project name survives faf-cli\'s `# Stack` comment lines', async () => {
+    const { parseCursorRules } = await import('../src/faf-core/parsers/cursorrules-parser');
+    const rendered = cli.renderCursorrules({ project: { name: 'round-trip-name', main_language: 'TypeScript' }, stack: { backend: 'Express', package_manager: 'npm' } });
+    const wrapped = `# faf:start\n${rendered.trim()}\n# faf:end\n\n# Team rules\n- keep it simple\n`;
+    const parsed = parseCursorRules(wrapped);
+    expect(parsed.projectName).toBe('round-trip-name'); // was "Package Manager: npm"
+  });
+
   test('faf_bi_sync writes faf-cli\'s CLAUDE.md (Stack + human context present, not the pre-v3 template)', async () => {
     const mine = copyFixture(); const theirs = copyFixture(); dirs.push(mine, theirs);
     for (const d of [mine, theirs]) fs.writeFileSync(path.join(d, 'project.faf'), SEED);

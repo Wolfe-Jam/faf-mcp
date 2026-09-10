@@ -50,6 +50,9 @@ MARKETPLACE-*.md
 # Path-traversal security-test artifacts (1024-byte 'x' files left by some tests)
 test-*.txt
 
+# Local review notes — 'do not commit' by their own header
+REVIEW-*.md
+
 # Process/tracker docs (kept local)
 MCP-REGISTRY-TRACKER.md
 WJTTC-TEST-REPORT.md

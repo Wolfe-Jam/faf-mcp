@@ -14,7 +14,7 @@ on:
     types: [ created ]
 
 env:
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
 
 jobs:
   # 🔒 Security Check
@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node: [18.x, 20.x]
+        node: [22.x, 24.x]
 
     steps:
       - uses: actions/checkout@v7
@@ -145,6 +145,9 @@ jobs:
 
       - name: 🎨 Style-sheet drift gate
         run: npm run check:stylesheet  # HARD gate — surfaces must derive from docs/style-sheet.html
+
+      - name: 🧱 Engine floor gate
+        run: npm run check:engines  # HARD gate — engines.node floor == lowest Node in the smoke matrix
 
       - name: Lint
         run: npm run lint

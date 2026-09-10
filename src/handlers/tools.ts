@@ -855,7 +855,7 @@ export class FafToolHandler {
     let output =
       `FAF SCORE: ${score}/100 (${score}%)  ${tierDisplay}\n` +
       `${progressBar} ${score}%\n` +
-      `${result.populated}/${result.total} slots populated` +
+      `${result.populated}/${result.active} slots populated` +
       (nextTierDisplay ? `  ·  next: ${nextTierDisplay}` : '  ·  top tier') +
       `\n\n` +
       `Scored by faf-cli — the same context your AI reads.`;
@@ -1048,7 +1048,7 @@ package_manager: ${projectData.package_manager}` : ''}
 
     try {
       const score = scoreFafYaml(raw);
-      output += `\n\n📊 ${score.score}/100 (${score.populated}/${score.total} slots populated) — ${score.tier.name}`;
+      output += `\n\n📊 ${score.score}/100 (${score.populated}/${score.active} slots populated) — ${score.tier.name}`;
     } catch {
       // Score is a bonus signal here; a validation-only result is still honest.
     }
@@ -1167,7 +1167,11 @@ package_manager: ${projectData.package_manager}` : ''}
     const lines: string[] = [];
 
     if (wantCache || wantAll) {
-      const cacheDir = pathModule.join(os.homedir(), '.faf-cli-cache');
+      // HOME/USERPROFILE first (Node's own os.homedir() precedence; Bun's ignores a
+      // runtime override) so a test can redirect the home dir instead of
+      // deleting from the developer's real one.
+      const home = process.env.HOME || process.env.USERPROFILE || os.homedir();
+      const cacheDir = pathModule.join(home, '.faf-cli-cache');
       const creditCache = pathModule.join(cacheDir, 'technical-credit.json');
       if (fs.existsSync(creditCache)) {
         fs.rmSync(creditCache, { force: true });
@@ -2626,7 +2630,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
             const { scoreFafYaml } = await fafCli;
             const scoreResult = scoreFafYaml(content);
             const score = scoreResult.score;
-            const slotSummary = `${scoreResult.populated}/${scoreResult.total} slots populated`;
+            const slotSummary = `${scoreResult.populated}/${scoreResult.active} slots populated`;
 
             if (score < 30) {
               results.push({

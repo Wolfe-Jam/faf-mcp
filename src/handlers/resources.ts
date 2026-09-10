@@ -1,4 +1,8 @@
 import type { Resource } from '@modelcontextprotocol/sdk/types.js';
+import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+
+/** MCP's resource-not-found code — not in the SDK's ErrorCode enum, so spelled out. */
+const RESOURCE_NOT_FOUND = -32002 as ErrorCode;
 import { FafEngineAdapter } from './engine-adapter';
 import { fafCli } from '../utils/faf-cli-bridge.js';
 
@@ -73,7 +77,7 @@ export class FafResourceHandler {
       case 'claude-faf://status':
         return await this.getFafStatus(uri);
       default:
-        throw new Error(`Unknown resource: ${uri}`);
+        throw new McpError(RESOURCE_NOT_FOUND, `Resource not found: ${uri}`);
     }
   }
 
@@ -147,7 +151,7 @@ export class FafResourceHandler {
       const score = scoreFafYaml(readFafRaw(fafPath));
       const text =
         `${fafPath}\n` +
-        `FAF SCORE: ${score.score}/100 (${score.populated}/${score.total} slots populated) — ${score.tier.name}`;
+        `FAF SCORE: ${score.score}/100 (${score.populated}/${score.active} slots populated) — ${score.tier.name}`;
       return {
         contents: [{
           uri,

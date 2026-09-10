@@ -23,6 +23,7 @@ const MARK = '## HAND-WRITTEN — MUST SURVIVE';
 // writes mentions the token in prose any more; a stray substring would be a
 // user's own text and must not count as a block.
 const blocks = (s: string) => (s.match(/^(?:<!-- faf:start -->|# faf:start)$/gm) || []).length;
+const endBlocks = (s: string) => (s.match(/^(?:<!-- faf:end -->|# faf:end)$/gm) || []).length;
 function tmp(): string { return mkdtempSync(join(tmpdir(), 'faf-mcp-nd-')); }
 // faf-mcp composes faf-cli's injector (no local copy since 3.0).
 const injectFafBlock = async (p: string, block: string): Promise<void> => { (await fafCli).injectFafBlock(p, block); };
@@ -70,6 +71,7 @@ describe('export parsers — enhance, never replace', () => {
       out = await fs.readFile(p, 'utf-8');
       expect(out).toContain(MARK);
       expect(blocks(out)).toBe(1);
+      expect(endBlocks(out)).toBe(1); // the old bug left a second end marker in a stale tail
     });
   }
 });

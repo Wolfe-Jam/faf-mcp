@@ -84,12 +84,32 @@ describe('🏁 WJTTC — P0 PATH-resolution (faf_trust / faf_clear / resources n
     let client: Client;
     let server: FafMcpServer;
     let tmpDir: string;
+    let fakeHome: string;
+    let canaryLog: string;
+    const savedEnv: Record<string, string | undefined> = {};
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let fafCli: any;
 
     beforeAll(async () => {
       tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-p0-path-'));
       fs.writeFileSync(path.join(tmpDir, 'project.faf'), SAMPLE_FAF);
+
+      // Never touch the developer's real home: faf_clear removes
+      // ~/.faf-cli-cache, so point HOME at a throwaway dir for this suite.
+      fakeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-p0-home-'));
+      fs.mkdirSync(path.join(fakeHome, '.faf-cli-cache'));
+      fs.writeFileSync(path.join(fakeHome, '.faf-cli-cache', 'technical-credit.json'), '{}');
+
+      // A poisoned PATH that exists on EVERY machine, not just this one: a
+      // canary `faf` first on PATH that logs any invocation. After the live
+      // tests the log must not exist — proof nothing spawned a `faf`.
+      const canaryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-p0-canary-'));
+      canaryLog = path.join(canaryDir, 'invocations.log');
+      fs.writeFileSync(path.join(canaryDir, 'faf'), `#!/bin/sh\necho "$@" >> "${canaryLog}"\necho "CANARY-FOREIGN-FAF 0.0.0"\n`, { mode: 0o755 });
+      for (const k of ['HOME', 'USERPROFILE', 'PATH']) savedEnv[k] = process.env[k];
+      process.env.HOME = fakeHome;
+      process.env.USERPROFILE = fakeHome;
+      process.env.PATH = `${canaryDir}${path.delimiter}${process.env.PATH ?? ''}`;
 
       server = new FafMcpServer({ transport: 'stdio', fafEnginePath: 'native' });
       const [clientT, serverT] = InMemoryTransport.createLinkedPair();
@@ -102,7 +122,9 @@ describe('🏁 WJTTC — P0 PATH-resolution (faf_trust / faf_clear / resources n
     afterAll(async () => {
       await client.close();
       await server.getServer().close();
+      for (const k of Object.keys(savedEnv)) { if (savedEnv[k] === undefined) delete process.env[k]; else process.env[k] = savedEnv[k]; }
       fs.rmSync(tmpDir, { recursive: true, force: true });
+      fs.rmSync(fakeHome, { recursive: true, force: true });
     });
 
     test('faf_trust returns real validation/score data, not a shelled-out foreign tool\'s output', async () => {
@@ -128,7 +150,7 @@ describe('🏁 WJTTC — P0 PATH-resolution (faf_trust / faf_clear / resources n
 
       const raw = fs.readFileSync(path.join(tmpDir, 'project.faf'), 'utf-8');
       const expected = fafCli.scoreFafYaml(raw);
-      expect(text).toContain(`${expected.populated}/${expected.total} slots populated`);
+      expect(text).toContain(`${expected.populated}/${expected.active} slots populated`);
     });
 
     test('faf_clear never depends on any CLI — always returns a well-formed local result', async () => {
@@ -174,6 +196,15 @@ describe('🏁 WJTTC — P0 PATH-resolution (faf_trust / faf_clear / resources n
       const raw = fs.readFileSync(path.join(tmpDir, 'project.faf'), 'utf-8');
       const expected = fafCli.scoreFafYaml(raw);
       expect(parsed.score).toBe(expected.score);
+    });
+
+    test('faf_clear cleared the FAKE home, and the real one was never touched', () => {
+      expect(fs.existsSync(path.join(fakeHome, '.faf-cli-cache', 'technical-credit.json'))).toBe(false);
+      expect(process.env.HOME).toBe(fakeHome); // still redirected while the suite runs
+    });
+
+    test('no tool or resource spawned the `faf` on PATH (canary log never written)', () => {
+      expect(fs.existsSync(canaryLog)).toBe(false);
     });
   });
 });
