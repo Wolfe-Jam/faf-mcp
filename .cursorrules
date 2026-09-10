@@ -1,0 +1,18 @@
+# faf:start
+<!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
+<!-- faf: claim=project.faf | family=FAF -->
+
+# .cursorrules
+# Authored from project.faf — faf-mcp
+
+language: TypeScript
+
+# Stack
+# Backend: MCP SDK (TS)
+# API: MCP (stdio)
+# Runtime: Node.js >=22
+# Hosting: npm
+# Build: TypeScript (tsc)
+# CI/CD: GitHub Actions
+# Package Manager: npm
+# faf:end
