@@ -10,7 +10,7 @@
 </div>
 
 [![npm](https://img.shields.io/npm/v/faf-mcp?color=008B8B)](https://www.npmjs.com/package/faf-mcp)[![downloads](https://img.shields.io/npm/dm/faf-mcp?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-mcp)
-[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
+[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%E2%9C%AA%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Agents paper](https://img.shields.io/badge/DOI-Agents%20paper-FF6B35)](https://doi.org/10.5281/zenodo.21951641)
@@ -27,7 +27,15 @@
 
 ---
 
-## What's New in 3.0.0 — The Compose Edition
+## What's New in 3.0.1 — The Compose Edition
+
+**Every name now says what the code does: `faf_bi_sync` is `faf_claude`, the one-way CLAUDE.md writer it always was, and every listing, doc and tool string matches 3.0.**
+
+- **`faf_bi_sync` is now `faf_claude`.** It writes CLAUDE.md from `project.faf`, one direction, which is all it ever did. The old name still answers, so existing configs keep working.
+- **The interop tools say what `sync` does.** `faf_agents`, `faf_cursor` and `faf_gemini` re-write their file from `project.faf`; `import` with `merge: true` brings a file back in.
+- **Every surface matches the code.** Tool output, listings, docs, the registry receipt and the birth certificate were checked against 3.0 and corrected.
+
+## The Compose Edition (3.0)
 
 **Compose, don't port: faf-mcp 3.0 runs on faf-cli 7.12 in-process — one scorer, one set of renderers, one injector — and every number, file and claim this package makes is true. Local stdio, 29 tools, Node 22+.**
 
@@ -128,7 +136,7 @@ project.faf  ──── 8ms ───→  CLAUDE.md / AGENTS.md / .cursorrules
 ```
 
 - `faf_claude { all: true }` writes all four formats at once
-- `faf_agents`, `faf_cursor` and `faf_gemini` also import an existing file back into `project.faf`
+- `faf_agents`, `faf_cursor` and `faf_gemini` can also import an existing file: `merge: true` merges it into `project.faf`
 - Content outside the faf-managed block is preserved, byte for byte
 - Works across teams, branches, sessions
 

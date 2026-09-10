@@ -537,7 +537,7 @@ export class FafToolHandler {
         // ============================================================================
         {
           name: 'faf_agents',
-          description: 'Import, export, or sync context between AGENTS.md (the OpenAI/Codex convention) and project.faf. Returns the merged or written result for the chosen action. Use this to keep a Codex/OpenAI-style AGENTS.md and your .faf in agreement from one source.',
+          description: 'Import AGENTS.md (the OpenAI/Codex convention) into project.faf, or write it from project.faf. Returns the merged or written result for the chosen action. Use this to keep a Codex/OpenAI-style AGENTS.md and your .faf in agreement from one source.',
           annotations: {
             title: 'Sync AGENTS.md',
             readOnlyHint: false,
@@ -547,7 +547,7 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (AGENTS.md -> .faf), export (.faf -> AGENTS.md), sync (bidirectional)' },
+              action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (AGENTS.md -> .faf; merge:true writes it into project.faf), export (.faf -> AGENTS.md), sync (re-writes AGENTS.md from .faf; export with force)' },
               force: { type: 'boolean', description: 'Force overwrite existing files' },
               merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
@@ -558,7 +558,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_cursor',
-          description: 'Import, export, or sync context between .cursorrules (the Cursor IDE convention) and project.faf. Returns the merged or written result for the chosen action. Use this to keep Cursor rules and your .faf in agreement from one source.',
+          description: 'Import .cursorrules (the Cursor IDE convention) into project.faf, or write it from project.faf. Returns the merged or written result for the chosen action. Use this to keep Cursor rules and your .faf in agreement from one source.',
           annotations: {
             title: 'Sync .cursorrules',
             readOnlyHint: false,
@@ -568,7 +568,7 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (.cursorrules -> .faf), export (.faf -> .cursorrules), sync (bidirectional)' },
+              action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (.cursorrules -> .faf; merge:true writes it into project.faf), export (.faf -> .cursorrules), sync (re-writes .cursorrules from .faf; export with force)' },
               force: { type: 'boolean', description: 'Force overwrite existing files' },
               merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
@@ -579,7 +579,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_gemini',
-          description: 'Import, export, or sync context between GEMINI.md (the Google Gemini CLI convention) and project.faf. Returns the merged or written result for the chosen action. Use this to keep a Gemini context file and your .faf in agreement from one source.',
+          description: 'Import GEMINI.md (the Google Gemini CLI convention) into project.faf, or write it from project.faf. Returns the merged or written result for the chosen action. Use this to keep a Gemini context file and your .faf in agreement from one source.',
           annotations: {
             title: 'Sync GEMINI.md',
             readOnlyHint: false,
@@ -589,7 +589,7 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (GEMINI.md -> .faf), export (.faf -> GEMINI.md), sync (bidirectional)' },
+              action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (GEMINI.md -> .faf; merge:true writes it into project.faf), export (.faf -> GEMINI.md), sync (re-writes GEMINI.md from .faf; export with force)' },
               force: { type: 'boolean', description: 'Force overwrite existing files' },
               merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }

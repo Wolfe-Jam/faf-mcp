@@ -2,7 +2,7 @@
 # https://smithery.ai/docs/build/project-config/smithery-yaml
 
 name: faf-mcp
-description: "Universal MCP server for .faf format. Works with Cursor, Windsurf, Cline, VS Code, and all platforms."
+description: ".FAF Context — persistent project context for Cursor, VS Code and every MCP-compatible IDE. IANA-registered .faf format."
 icon: https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/assets/icons/faf-icon-256.png
 
 startCommand:

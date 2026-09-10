@@ -3,7 +3,6 @@
   "name": "one.faf/faf-mcp",
   "title": ".FAF Context",
   "description": "Dedicated IDE Edition. Persistent project context for Cursor, Windsurf, Cline, VS Code.",
-  "websiteUrl": "https://faf.one",
   "icons": [
     {
       "src": "https://raw.githubusercontent.com/Wolfe-Jam/faf-mcp/main/assets/icons/faf-icon-48.png",
@@ -34,11 +33,12 @@
       ]
     }
   ],
+  "version": "3.0.0",
   "repository": {
     "url": "https://github.com/Wolfe-Jam/faf-mcp",
     "source": "github"
   },
-  "version": "3.0.0",
+  "websiteUrl": "https://faf.one",
   "packages": [
     {
       "registryType": "npm",
@@ -57,7 +57,7 @@
         "mediaType": "application/vnd.faf+yaml",
         "iana": "https://www.iana.org/assignments/media-types/application/vnd.faf+yaml",
         "deterministic": true,
-        "generated": "2026-06-16T03:32:22.146Z"
+        "generated": "2026-09-10T17:36:40.000Z"
       }
     }
   }
