@@ -17,7 +17,7 @@
 
 **Home:** [wolfe-jam.github.io/faf-mcp](https://wolfe-jam.github.io/faf-mcp/)
 
-**.FAF Context** is the MCP server for the IDE side of FAF. One `project.faf` in your repo, and every AI tool's context file is authored from it — AGENTS.md, .cursorrules, GEMINI.md, CLAUDE.md — and scored, so you know exactly where to focus. It runs locally over stdio on the same faf-cli the terminal uses. The FAF ecosystem it belongs to has passed 100k downloads across npm and PyPI ([live count](https://faf.one/downloads)).
+**.FAF Context** is the MCP server for the IDE side of FAF. One `project.faf` in your repo, and every AI tool's context file is authored from it — AGENTS.md, .cursorrules, GEMINI.md, CLAUDE.md — and scored, so you know exactly where to focus. It runs locally over stdio on the same faf-cli the terminal uses. The FAF ecosystem it belongs to has comfortably passed 100k downloads across npm and PyPI ([live count](https://faf.one/downloads)).
 
 ⭐ Bookmarks it for you, helps other devs find it too.
 
