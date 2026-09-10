@@ -14,11 +14,20 @@ export interface SyncOptions {
   json?: boolean;
 }
 
+/** One field a dry run would change. */
+export interface SyncChange {
+  path: string;
+  oldValue: unknown;
+  newValue: unknown;
+}
+
 export interface SyncResult {
   success: boolean;
   changesDetected: number;
   changesApplied: number;
   message: string;
+  /** Dry run only: the fields that would change, so the caller can list them. */
+  changes?: SyncChange[];
 }
 
 interface ProjectChange {
@@ -38,7 +47,7 @@ export async function syncFafFile(projectPath?: string, options: SyncOptions = {
         success: false,
         changesDetected: 0,
         changesApplied: 0,
-        message: 'No project.faf file found. Run faf init first.'
+        message: 'No project.faf file found. Run faf_init first.'
       };
     }
 
@@ -58,40 +67,36 @@ export async function syncFafFile(projectPath?: string, options: SyncOptions = {
       };
     }
 
-    if (options.dryRun) {
+    // Dry run (the default): report the fields that would change and write
+    // nothing. `apply` is the MCP parameter that maps to `auto`.
+    if (options.dryRun || !options.auto) {
+      // One line per field, last detected value wins — exactly what apply writes.
+      const unique = [...new Map(changes.map((c) => [c.path, c])).values()];
       return {
         success: true,
-        changesDetected: changes.length,
+        changesDetected: unique.length,
         changesApplied: 0,
-        message: `Found ${changes.length} potential updates (dry run - no changes applied)`
+        changes: unique.map(({ path: fieldPath, oldValue, newValue }) => ({ path: fieldPath, oldValue, newValue })),
+        message: `Would update ${unique.length} field(s). Pass apply: true to write them.`
       };
     }
 
-    // Apply changes if auto mode
-    if (options.auto) {
-      applyChanges(fafData, changes);
+    // Apply changes (auto mode)
+    applyChanges(fafData, changes);
 
-      // Update generated timestamp
-      if (!fafData.meta) fafData.meta = {};
-      fafData.meta.last_sync = new Date().toISOString();
+    // Record when the sync ran
+    if (!fafData.meta) fafData.meta = {};
+    fafData.meta.last_sync = new Date().toISOString();
 
-      // Write updated .faf file
-      const updatedContent = stringifyYAML(fafData);
-      await fs.writeFile(fafPath, updatedContent, 'utf-8');
-
-      return {
-        success: true,
-        changesDetected: changes.length,
-        changesApplied: changes.length,
-        message: `Applied ${changes.length} changes to project.faf`
-      };
-    }
+    // Write updated .faf file
+    const updatedContent = stringifyYAML(fafData);
+    await fs.writeFile(fafPath, updatedContent, 'utf-8');
 
     return {
       success: true,
       changesDetected: changes.length,
-      changesApplied: 0,
-      message: `Found ${changes.length} potential updates. Run with --auto to apply.`
+      changesApplied: changes.length,
+      message: `Applied ${changes.length} changes to project.faf`
     };
 
   } catch (error: unknown) {

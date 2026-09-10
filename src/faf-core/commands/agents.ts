@@ -89,16 +89,30 @@ export async function agentsImportCommand(
           data: { sectionsFound: result.sectionsFound, merged: true },
           warnings: result.warnings,
         };
-      } catch {
-        // Fall through to create new
+      } catch (error) {
+        return {
+          success: false,
+          action: 'import',
+          message: `Could not merge AGENTS.md into project.faf: ${error instanceof Error ? error.message : String(error)}`,
+          warnings: result.warnings,
+        };
       }
     }
+    // merge was asked for and there is nothing to merge into: say so rather
+    // than report a no-op as an import.
+    return {
+      success: false,
+      action: 'import',
+      message: 'No project.faf to merge into — run faf_init first',
+      warnings: result.warnings,
+    };
   }
 
+  // Without merge nothing is written: say exactly that.
   return {
     success: true,
     action: 'import',
-    message: `Imported AGENTS.md (${result.sectionsFound.length} sections found)`,
+    message: `Parsed AGENTS.md (${result.sectionsFound.length} sections) — nothing written; pass merge: true to write it into project.faf`,
     data: { faf: result.faf, sectionsFound: result.sectionsFound },
     warnings: result.warnings,
   };
@@ -117,7 +131,7 @@ export async function agentsExportCommand(
     return {
       success: false,
       action: 'export',
-      message: 'No .faf file found. Run faf init first.',
+      message: 'No .faf file found. Run faf_init first.',
     };
   }
 
@@ -129,7 +143,7 @@ export async function agentsExportCommand(
       return {
         success: false,
         action: 'export',
-        message: 'AGENTS.md already exists. Use force: true to overwrite.',
+        message: 'AGENTS.md already exists. Pass force: true to update its faf-managed block (content outside it is kept).',
       };
     } catch {
       // File doesn't exist, proceed

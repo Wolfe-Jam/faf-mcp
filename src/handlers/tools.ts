@@ -164,7 +164,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_trust',
-          description: 'Validate a project.faf for structural integrity and field consistency. Returns trust metrics flagging malformed, missing, or contradictory data. Use this to confirm the context is sound before relying on it or syncing it to other formats.',
+          description: 'Validate a project.faf\'s required fields (faf_version, project.name) and about.* block with faf-cli\'s validator, and report its real score.',
           annotations: {
             title: 'Trust Score',
             readOnlyHint: true,
@@ -217,7 +217,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_clear',
-          description: 'Remove the ~/.faf-cli-cache directory left by older faf-mcp versions. This version persists nothing outside your project files.',
+          description: 'Remove ~/.faf-cli-cache/technical-credit.json, the cache file left by faf-mcp versions before 3.0. Other files in ~/.faf-cli-cache are left in place.',
           annotations: {
             title: 'Clear .faf Data',
             readOnlyHint: false,
@@ -227,8 +227,8 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              cache: { type: 'boolean', description: 'Remove ~/.faf-cli-cache (written by faf-mcp < 3.0)' },
-              all: { type: 'boolean', description: 'Remove everything older versions persisted (default; today that is the cache)' }
+              cache: { type: 'boolean', description: 'Remove ~/.faf-cli-cache/technical-credit.json (written by faf-mcp < 3.0)' },
+              all: { type: 'boolean', description: 'Remove everything older versions left behind (default; today that is technical-credit.json)' }
             },
             additionalProperties: false
           }
@@ -249,9 +249,9 @@ export class FafToolHandler {
         },
         {
           name: 'faf_read',
-          description: 'Read a file within the project root (cwd / FAF_ALLOWED_ROOTS). Paths that escape the project are refused.',
+          description: 'Read a file within the allowed roots (cwd, the OS temp dir, or FAF_ALLOWED_ROOTS). Paths outside them are refused.',
           annotations: {
-            title: 'Read .faf File',
+            title: 'Read Project File',
             readOnlyHint: true,
             openWorldHint: false
           },
@@ -269,11 +269,11 @@ export class FafToolHandler {
         },
         {
           name: 'faf_write',
-          description: 'Write a file within the project root (cwd / FAF_ALLOWED_ROOTS). Paths that escape the project are refused.',
+          description: 'Write a file within the allowed roots (cwd, the OS temp dir, or FAF_ALLOWED_ROOTS). Paths outside them are refused.',
           annotations: {
-            title: 'Write .faf File',
+            title: 'Write Project File',
             readOnlyHint: false,
-            destructiveHint: false,
+            destructiveHint: true,
             openWorldHint: false
           },
           inputSchema: {
@@ -296,7 +296,7 @@ export class FafToolHandler {
           name: 'faf_list',
           description: 'List directories and discover projects with project.faf files - Essential for FAF discovery workflow',
           annotations: {
-            title: 'List .faf Files',
+            title: 'List Directories',
             readOnlyHint: true,
             openWorldHint: false
           },
@@ -387,7 +387,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_check',
-          description: 'Inspect the human_context fields and rate each empty/generic/good/excellent. Returns the ratings; with protect it locks good/excellent fields from being overwritten, with unlock it releases them. Use this to gauge context quality and guard your best answers.',
+          description: 'Inspect the human_context fields and rate each empty/generic/good. Returns the ratings; with protect it records the good fields in _protected_fields as an advisory list (other tools do not enforce it), with unlock it clears that list. Use this to gauge context quality.',
           annotations: {
             title: 'Check .faf Health',
             readOnlyHint: false,
@@ -397,8 +397,8 @@ export class FafToolHandler {
           inputSchema: {
             type: 'object',
             properties: {
-              protect: { type: 'boolean', description: 'Lock good/excellent fields from being overwritten' },
-              unlock: { type: 'boolean', description: 'Remove all field protections' },
+              protect: { type: 'boolean', description: 'Record good fields in _protected_fields (advisory; other tools do not enforce it)' },
+              unlock: { type: 'boolean', description: 'Clear the _protected_fields list' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             additionalProperties: false
@@ -406,7 +406,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_context',
-          description: 'Set or show the active project path that later faf_ calls resolve against. Returns the current context path. Call this once at the start of a session so the other tools target the right project.',
+          description: 'Set or show the active project path that later faf_ project tools resolve against (faf_read and faf_write resolve relative paths against the server\'s working directory instead). Returns the current context path. Call this once at the start of a session so the project tools target the right project.',
           annotations: {
             title: 'View Context',
             readOnlyHint: true,
@@ -444,7 +444,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_auto',
-          description: 'Run the full setup pipeline in one call — init, stack detection, sync, CLAUDE.md, and score — taking a project from no context to a complete project.faf. Returns the final AI-readiness score and what was created. Use this as the fast path on a fresh project; use the individual tools when you need finer control.',
+          description: 'Run the setup pipeline in one call — init or merge, stack detection, CLAUDE.md, and score — taking a project from no context to a scored project.faf plus CLAUDE.md; faf_go closes the human slots. Returns the final AI-readiness score and what was created. Use this as the fast path on a fresh project; use the individual tools when you need finer control.',
           annotations: {
             title: 'Auto-detect Context',
             readOnlyHint: false,
@@ -464,10 +464,11 @@ export class FafToolHandler {
         },
         {
           name: 'faf_dna',
-          description: 'Show your FAF DNA journey — the score evolution of this project.faf from birth to today (e.g. 22% → 85% → 100%)',
+          description: 'Show and record your FAF DNA journey — the score evolution of this project.faf from birth to today (e.g. 22% → 85% → 100%). Creates .faf-dna on the first call and appends a milestone when the score changes.',
           annotations: {
             title: 'View Project DNA',
-            readOnlyHint: true,
+            readOnlyHint: false,
+            destructiveHint: false,
             openWorldHint: false
           },
           inputSchema: {
@@ -480,7 +481,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_formats',
-          description: 'Scan the project for tech-stack signals across 150+ manifest types (package.json, Cargo.toml, pyproject.toml, go.mod, and more) and surface which project.faf stack slots to fill. Returns the detected formats and slot-fill recommendations. Use this to populate the technical context.',
+          description: 'Scan the project for tech-stack signals across 150+ manifest types (package.json, Cargo.toml, pyproject.toml, go.mod, and more). Returns the detected formats, the stack signature and faf-cli\'s slot-fill hints. Use this to see what stack detection finds.',
           annotations: {
             title: 'List Formats',
             readOnlyHint: true,
@@ -517,7 +518,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_doctor',
-          description: 'Diagnose a project.faf setup — report missing files, empty or weak slots, and common configuration issues, each with how to fix it. Returns a prioritized checklist. Use this when your score is low and you need to know why.',
+          description: 'Diagnose a project.faf setup — report missing files, the real score with populated/active slot counts, and common configuration issues, each with a fix. Returns a checklist. Use this when your score is low and you need to know why.',
           annotations: {
             title: 'Diagnose Issues',
             readOnlyHint: true,
@@ -547,8 +548,8 @@ export class FafToolHandler {
             type: 'object',
             properties: {
               action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (AGENTS.md -> .faf; merge:true writes it into project.faf), export (.faf -> AGENTS.md), sync (re-writes AGENTS.md from .faf; export with force)' },
-              force: { type: 'boolean', description: 'Force overwrite existing files' },
-              merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
+              force: { type: 'boolean', description: 'Update the faf-managed block in an existing file (content outside it is preserved)' },
+              merge: { type: 'boolean', description: 'Write the imported data into project.faf (without it, import only reports the section count and writes nothing)' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             required: ['action'],
@@ -568,8 +569,8 @@ export class FafToolHandler {
             type: 'object',
             properties: {
               action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (.cursorrules -> .faf; merge:true writes it into project.faf), export (.faf -> .cursorrules), sync (re-writes .cursorrules from .faf; export with force)' },
-              force: { type: 'boolean', description: 'Force overwrite existing files' },
-              merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
+              force: { type: 'boolean', description: 'Update the faf-managed block in an existing file (content outside it is preserved)' },
+              merge: { type: 'boolean', description: 'Write the imported data into project.faf (without it, import only reports the section count and writes nothing)' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             required: ['action'],
@@ -589,8 +590,8 @@ export class FafToolHandler {
             type: 'object',
             properties: {
               action: { type: 'string', enum: ['import', 'export', 'sync'], description: 'Action: import (GEMINI.md -> .faf; merge:true writes it into project.faf), export (.faf -> GEMINI.md), sync (re-writes GEMINI.md from .faf; export with force)' },
-              force: { type: 'boolean', description: 'Force overwrite existing files' },
-              merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
+              force: { type: 'boolean', description: 'Update the faf-managed block in an existing file (content outside it is preserved)' },
+              merge: { type: 'boolean', description: 'Write the imported data into project.faf (without it, import only reports the section count and writes nothing)' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             required: ['action'],
@@ -603,7 +604,7 @@ export class FafToolHandler {
           annotations: {
             title: 'Sync Conductor',
             readOnlyHint: false,
-            destructiveHint: false,
+            destructiveHint: true,
             openWorldHint: false
           },
           inputSchema: {
@@ -611,7 +612,7 @@ export class FafToolHandler {
             properties: {
               action: { type: 'string', enum: ['import', 'export'], description: 'Action: import (conductor/ -> .faf), export (.faf -> conductor/)' },
               force: { type: 'boolean', description: 'Force overwrite existing files' },
-              merge: { type: 'boolean', description: 'Merge imported data with existing .faf instead of replacing' },
+              merge: { type: 'boolean', description: 'Write the imported data into project.faf (without it, import only reports the section count and writes nothing)' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             required: ['action'],
@@ -624,14 +625,15 @@ export class FafToolHandler {
           annotations: {
             title: 'Extract from GitHub',
             readOnlyHint: false,
-            destructiveHint: false,
+            destructiveHint: true,
             openWorldHint: true
           },
           inputSchema: {
             type: 'object',
             properties: {
               url: { type: 'string', description: 'GitHub repository URL (e.g., https://github.com/owner/repo or owner/repo)' },
-              path: { type: 'string', description: 'Output directory for the authored project.faf. If omitted, returns content without writing.' }
+              path: { type: 'string', description: 'Output directory for the authored project.faf. If omitted, returns content without writing.' },
+              force: { type: 'boolean', description: 'Overwrite an existing project.faf at path (without it, faf_git refuses)' }
             },
             required: ['url'],
             additionalProperties: false
@@ -800,7 +802,7 @@ export class FafToolHandler {
 
     // Strip ANSI from tier indicator (faf-cli emits colored glyphs).
     // eslint-disable-next-line no-control-regex
-    const strip = (s: string): string => s.replace(/\[[0-9;]*m/g, '').trim();
+    const strip = (s: string): string => s.replace(/\x1b\[[0-9;]*m/g, '').trim();
 
     let raw: string;
     try {
@@ -876,7 +878,7 @@ export class FafToolHandler {
       output += `Empty (${emptySlots.length}): ${emptySlots.join(', ') || '(none)'}\n`;
       output += `Ignored (${ignoredSlots.length}): ${ignoredSlots.join(', ') || '(none)'}`;
       if (score < 100 && emptySlots.length > 0) {
-        output += `\n\nTip: fill empty slots or mark them \`slotignored\` to climb tiers. Slot-by-slot detail: \`faf score\` (CLI).`;
+        output += `\n\nTip: fill empty slots or mark them \`slotignored\` to climb tiers.`;
       }
     }
 
@@ -999,7 +1001,7 @@ export class FafToolHandler {
 
     const validation = validateFaf(data);
     let output = validation.valid
-      ? `✅ Structurally sound — no malformed, missing, or contradictory fields found.`
+      ? `✅ Required fields present (faf_version, project.name) — no validation errors.`
       : `❌ ${validation.errors.length} issue${validation.errors.length === 1 ? '' : 's'} found:\n` +
         validation.errors.map((e) => `   • ${e}`).join('\n');
 
@@ -1038,9 +1040,18 @@ export class FafToolHandler {
       };
     }
 
-    const output = typeof result.data === 'string'
-      ? result.data
-      : result.data?.output || JSON.stringify(result.data, null, 2);
+    // A dry run carries the fields it would change: list them by name, so the
+    // agent sees what `apply: true` would write instead of a bare count.
+    const changes = result.data?.changes;
+    const shown = (v: unknown): string =>
+      v === undefined || v === null || v === '' ? '(empty)' : typeof v === 'string' ? v : JSON.stringify(v);
+    const output = Array.isArray(changes) && changes.length > 0
+      ? `${result.data.message}\n` +
+        changes.map((c: { path: string; oldValue: unknown; newValue: unknown }) =>
+          `• ${c.path}: ${shown(c.oldValue)} → ${shown(c.newValue)}`).join('\n')
+      : typeof result.data === 'string'
+        ? result.data
+        : result.data?.output || JSON.stringify(result.data, null, 2);
 
     return {
       content: [{
@@ -1088,9 +1099,13 @@ export class FafToolHandler {
       };
     }
 
+    // The command's message (it carries "FAF Score: N%") plus the files it
+    // wrote, one per line — not the raw result object.
+    const filesChanged: string[] = Array.isArray(result.data?.filesChanged) ? result.data.filesChanged : [];
     const output = typeof result.data === 'string'
       ? result.data
-      : result.data?.output || JSON.stringify(result.data, null, 2);
+      : `${result.data?.message ?? ''}` +
+        (filesChanged.length > 0 ? `\n\nFiles written:\n${filesChanged.map((f) => `• ${f}`).join('\n')}` : '');
 
     return {
       content: [{
@@ -1177,7 +1192,7 @@ SPEEDY AI you can TRUST!
 
 Version ${packageInfo.version}
 
-Just like JPEG makes images universal,
+Just like JPEG makes images portable,
 .faf makes projects AI-readable.
 
 HOW IT WORKS:
@@ -1206,7 +1221,7 @@ WHAT: .faf = Foundational AI-context Format
 WHY:  Just like JPEG makes images viewable everywhere,
       .faf makes projects understandable by AI.
 
-HOW:  Run 'faf' on any project to create one.
+HOW:  Run faf_init or faf_auto on any project to create one.
       Run 'faf_score' to check AI-readiness (target: 100%).
 
 REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
@@ -1224,7 +1239,6 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
   private async handleFafDebug(_args: any): Promise<CallToolResult> {  // ✅ FIXED: Prefixed unused args
     try {
       const fs = await import('fs');
-      const path = await import('path');
 
       const cwd = this.engineAdapter.getWorkingDirectory();
       const debugInfo = {
@@ -1237,11 +1251,10 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
         enginePath: this.engineAdapter.getEnginePath(),
       };
       
-      // Check write permissions
+      // Check write permissions — an access check, never a probe file in the
+      // user's workspace.
       try {
-        const testFile = path.join(cwd, '.claude-faf-test');
-        fs.writeFileSync(testFile, 'test');
-        fs.unlinkSync(testFile);
+        fs.accessSync(cwd, fs.constants.W_OK);
         debugInfo.canWrite = true;
       } catch (error) {
         debugInfo.permissions.writeError = error instanceof Error ? error.message : String(error);
@@ -1254,7 +1267,7 @@ REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
       const debugOutput = `🔍 faf-mcp Debug Information:
 
 📂 Working Directory: ${debugInfo.workingDirectory}
-✏️ Write Permissions: ${debugInfo.canWrite ? '✅ Yes' : '❌ No'}
+✏️ Write Permissions: ${debugInfo.canWrite ? '✅ writable' : '❌ not writable'}
 ${debugInfo.permissions.writeError ? `   Error: ${debugInfo.permissions.writeError}\n` : ''}🤖 FAF Engine Path: ${debugInfo.enginePath}
 📋 faf-cli (bundled): ${debugInfo.fafVersion ? `v${debugInfo.fafVersion}` : '❌ not found in node_modules — reinstall faf-mcp'}
 📄 FAF File: ${hasFaf ? `✅ ${fafResult.filename} exists` : '❌ Not found (run faf_init)'}
@@ -1313,22 +1326,18 @@ ${debugInfo.permissions.writeError ? `   Error: ${debugInfo.permissions.writeErr
 - Confirm: "Creating at ~/Projects/heritage-club-dubai/"
 
 ## Real Filesystem Only
-- ✅ \`/Users/wolfejam/Projects/my-app/\`
+- ✅ \`~/Projects/my-app/\`
 - ❌ \`/mnt/user-data/\` (container paths)
 - ❌ \`/home/claude/\` (container paths)
 
 ## Commands
-All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
-
-**Core:**
-- \`faf init\` - create FAF (infer path from context)
-- \`faf score\` - show AI-readiness
-- \`faf sync\` - synchronize files
-- \`faf quick\` - rapid FAF creation
-
-**Extensions:**
-- \`new\` - force overwrite existing
-- \`full\` - detailed output
+Call these MCP tools:
+- \`faf_init\` (path) - create project.faf (infer path from context)
+- \`faf_auto\` - init or merge, stack detection, CLAUDE.md, and score in one call
+- \`faf_score\` - show AI-readiness
+- \`faf_go\` - guided questions for the human slots, to 100%
+- \`faf_sync\` - reconcile project.faf with package.json (dry-run; \`apply: true\` writes)
+- \`faf_claude\` - write CLAUDE.md from project.faf (\`all: true\` also writes AGENTS.md, .cursorrules, GEMINI.md)
 
 ## UX Rules
 1. **Don't offer option menus** - just solve it
@@ -1715,7 +1724,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         return {
           content: [{
             type: 'text',
-            text: `🔓 FAF Check:\n\n✅ All fields unlocked\n📁 Updated: ${fafResult.filename}`
+            text: `🔓 FAF Check:\n\n✅ Cleared _protected_fields\n📁 Updated: ${fafResult.filename}`
           }]
         };
       }
@@ -1733,16 +1742,15 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         qualities[field] = assessField(humanContext[field]);
       }
 
-      // Handle --protect
+      // Handle --protect. _protected_fields is an advisory list: it is
+      // recorded here and nothing else in faf-mcp reads it.
       if (args?.protect) {
-        const toProtect = fields.filter(f =>
-          qualities[f] === 'good' || qualities[f] === 'excellent'
-        );
+        const toProtect = fields.filter(f => qualities[f] === 'good');
         if (toProtect.length === 0) {
           return {
             content: [{
               type: 'text',
-              text: `🔒 FAF Check:\n\n⚠️ No fields qualify for protection (need good or excellent quality)`
+              text: `🔒 FAF Check:\n\n⚠️ No fields rated good — nothing recorded in _protected_fields`
             }]
           };
         }
@@ -1751,14 +1759,14 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         return {
           content: [{
             type: 'text',
-            text: `🔒 FAF Check:\n\n✅ Protected ${toProtect.length} field(s): ${toProtect.join(', ')}\n📁 Updated: ${fafResult.filename}`
+            text: `🔒 FAF Check:\n\n✅ Recorded ${toProtect.length} field(s) in _protected_fields: ${toProtect.join(', ')}\nℹ️ Advisory only — other tools do not enforce it.\n📁 Updated: ${fafResult.filename}`
           }]
         };
       }
 
       // Default: show quality report
       const icons: Record<string, string> = {
-        empty: '⬜', generic: '◻️', good: '◼️', excellent: '💎'
+        empty: '⬜', generic: '◻️', good: '◼️'
       };
 
       let output = `🔍 FAF Human Context Quality\n\n`;
@@ -1770,12 +1778,12 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         output += `${icons[q]} ${locked} ${field.toUpperCase().padEnd(6)} ${displayValue}\n`;
       }
 
-      const goodCount = fields.filter(f => qualities[f] === 'good' || qualities[f] === 'excellent').length;
+      const goodCount = fields.filter(f => qualities[f] === 'good').length;
       const emptyCount = fields.filter(f => qualities[f] === 'empty').length;
 
       output += `\n📊 Quality: ${Math.round((goodCount / fields.length) * 100)}%\n`;
       if (protectedFields.length > 0) {
-        output += `🔒 Protected: ${protectedFields.join(', ')}\n`;
+        output += `🔒 _protected_fields (advisory, not enforced): ${protectedFields.join(', ')}\n`;
       }
       if (emptyCount > 0) {
         output += `\n💡 Use faf_readme or faf_human_add to fill empty slots`;
@@ -1800,7 +1808,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         return {
           content: [{
             type: 'text',
-            text: `📂 FAF Context Set:\n\n✅ Active project: ${newPath}\n${fafResult ? `✅ project.faf found: ${fafResult.filename}` : '⚠️ No project.faf in this directory'}\n\n💡 Subsequent faf_* calls will use this context`
+            text: `📂 FAF Context Set:\n\n✅ Active project: ${newPath}\n${fafResult ? `✅ project.faf found: ${fafResult.filename}` : '⚠️ No project.faf in this directory'}\n\n💡 Later faf_ project tools use this context (faf_read / faf_write resolve relative paths against the server's working directory)`
           }]
         };
       } else {
@@ -2021,7 +2029,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
             targetScore: 100,
             questionsRemaining: questions.length,
             questions,
-            instructions: 'Use AskUserQuestion to ask these questions, then call faf_go again with the answers parameter to apply them.'
+            instructions: 'Ask the user these questions, then call faf_go again with the answers parameter.'
           }, null, 2)
         }]
       };
@@ -2105,7 +2113,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       // Format output
       const deltaDisplay = scoreDelta > 0 ? `(+${scoreDelta}%)` : scoreDelta < 0 ? `(${scoreDelta}%)` : '(no change)';
 
-      let output = `🏎️⚡️ FAF AUTO - CHAMPIONSHIP MODE!\n`;
+      let output = `⚡️ FAF AUTO\n`;
       output += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
       output += steps.join('\n') + '\n\n';
       output += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -2133,7 +2141,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 
     } catch (error: any) {
       return {
-        content: [{ type: 'text', text: `🏎️ FAF Auto:\n\n❌ Error: ${error.message}` }],
+        content: [{ type: 'text', text: `⚡️ FAF Auto:\n\n❌ Error: ${error.message}` }],
         isError: true
       };
     }
@@ -2317,10 +2325,13 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       const elapsed = Date.now() - startTime;
 
       if (args?.json) {
+        // The sum of format priorities is not a FAF score; name it for what
+        // it is so no second "score" reaches clients next to faf_score's.
+        const { totalIntelligenceScore, ...rest } = analysis;
         return {
           content: [{
             type: 'text',
-            text: JSON.stringify(analysis, null, 2)
+            text: JSON.stringify({ ...rest, formatPriorityTotal: totalIntelligenceScore }, null, 2)
           }]
         };
       }
@@ -2336,8 +2347,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
         output += `  ✅ ${format.fileName}\n`;
       }
 
-      output += `\n💡 Stack Signature: ${analysis.stackSignature}\n`;
-      output += `🧠 Intelligence Score: ${analysis.totalIntelligenceScore}\n\n`;
+      output += `\n💡 Stack Signature: ${analysis.stackSignature}\n\n`;
 
       if (Object.keys(analysis.slotFillRecommendations).length > 0) {
         output += `📊 Recommended Slot Fills:\n`;
@@ -2388,7 +2398,7 @@ Examples:
   "api-service, REST API for mobile app, python, fastapi, aws"
   "cli-tool, developer productivity tool, go"
 
-Minimum: name and description. Rest is auto-detected!`
+Minimum: name and description. Rest is optional.`
           }]
         };
       }
@@ -2412,7 +2422,8 @@ Example: "my-app, e-commerce platform"`
 
       const projectName = parts[0] || 'my-project';
       const projectGoal = parts[1] || 'Build amazing software';
-      const mainLanguage = parts[2] || 'TypeScript';
+      // Only what the user gave: no language is written unless they named one.
+      const mainLanguage: string | undefined = parts[2] || undefined;
       const framework = parts[3] || 'none';
       const hosting = parts[4] || 'cloud';
 
@@ -2432,17 +2443,17 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
       }
 
       // Detect project type from inputs
-      const projectType = this.detectProjectTypeFromQuick(projectGoal, framework, mainLanguage);
+      const projectType = this.detectProjectTypeFromQuick(projectGoal, framework, mainLanguage ?? '');
 
       // Build .faf content
       const fafData: any = {
+        faf_version: '3.0',
         project: {
           name: projectName,
           goal: projectGoal,
-          main_language: mainLanguage
+          ...(mainLanguage ? { main_language: mainLanguage } : {})
         },
         type: projectType,
-        generated: new Date().toISOString(),
         version: VERSION,
         initialized_by: 'faf-mcp-quick'
       };
@@ -2464,7 +2475,8 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
       let output = `⚡ FAF Quick - Created in ${elapsed}ms!\n\n`;
       output += `📦 Project: ${projectName}\n`;
       output += `🎯 Purpose: ${projectGoal}\n`;
-      output += `💻 Stack: ${mainLanguage}${framework !== 'none' ? ` + ${framework}` : ''}\n`;
+      const stackShown = [mainLanguage, framework !== 'none' ? framework : undefined].filter(Boolean).join(' + ');
+      output += `💻 Stack: ${stackShown || '(not given)'}\n`;
       output += `📍 Type: ${projectType}\n\n`;
       output += `✅ Created: ${fafPath}\n\n`;
       output += `Next steps:\n`;
@@ -2602,7 +2614,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
               results.push({
                 status: 'warning',
                 message: `Score could be better: ${score}% (${slotSummary})`,
-                fix: 'Target 70%+ for championship AI context'
+                fix: 'Run faf_go — the target is 100%'
               });
             } else {
               results.push({
@@ -2693,7 +2705,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
       output += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
       if (!hasErrors && !hasWarnings) {
-        output += `✅ Perfect health! Your FAF setup is championship-ready!`;
+        output += `✅ Perfect health — no issues found.`;
       } else if (!hasErrors) {
         output += `🎯 Good health with minor improvements suggested.`;
       } else {
@@ -2850,9 +2862,12 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
     const outputPath = args?.path ? this.getProjectPath(args.path) : undefined;
 
     try {
+      // --force goes last: the engine reads url and the output path from the
+      // positional args, flags excluded.
       const result = await this.engineAdapter.callEngine('git', [
         url,
         ...(outputPath ? [outputPath] : []),
+        ...(args?.force ? ['--force'] : []),
       ]);
 
       if (!result.success) {
@@ -2865,7 +2880,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
       const data = result.data;
       let output = `GitHub Context:\n\n✅ ${data?.message || 'Done'}\n⏱️ ${result.duration}ms`;
 
-      // Include generated .faf content if no output path (preview mode)
+      // Include the authored .faf content if no output path (preview mode)
       if (!outputPath && data?.data?.fafContent) {
         output += `\n\n--- Authored project.faf ---\n${data.data.fafContent}`;
       }

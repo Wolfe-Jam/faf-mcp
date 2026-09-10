@@ -9,7 +9,6 @@
 
 import type { GitHubMetadata } from './github-extractor.js';
 import { fetchGitHubFileContent } from './github-extractor.js';
-import { countSlots } from './slot-counter.js';
 import { stringify as stringifyYAML } from '../fix-once/yaml.js';
 import { VERSION } from '../../version';
 
@@ -260,7 +259,7 @@ export function analyzePackageJson(packageJson: any, _metadata: GitHubMetadata):
 export async function generateEnhancedFaf(
   metadata: GitHubMetadata,
   _files: any[]
-): Promise<{ content: string; score: number }> {
+): Promise<{ content: string }> {
 
   // Fetch README.md
   const readme = await fetchGitHubFileContent(
@@ -318,32 +317,9 @@ export async function generateEnhancedFaf(
   // Determine project type
   const projectType = determineProjectType(metadata, stackAnalysis, packageJsonContent);
 
-  // Calculate score internally for display (slot-counting)
-  const slotCount = countSlots({
-    projectName: metadata.repo,
-    projectGoal: metadata.description || null,
-    mainLanguage: mainLanguage || 'Unknown',
-    projectType: projectType,
-    who: sixWs.who,
-    what: sixWs.what,
-    why: sixWs.why || 'slotignored',
-    where: sixWs.where,
-    when: sixWs.when,
-    how: sixWs.how,
-    frontend: stackAnalysis.frontend || 'slotignored',
-    uiLibrary: 'slotignored',
-    backend: stackAnalysis.backend || 'slotignored',
-    runtime: stackAnalysis.runtime || 'slotignored',
-    database: stackAnalysis.database || 'slotignored',
-    build: stackAnalysis.buildTool || 'slotignored',
-    packageManager: packageJsonContent ? 'npm' : 'slotignored',
-    apiType: 'slotignored',
-    hosting: stackAnalysis.hosting || 'slotignored',
-    cicd: 'slotignored',
-    cssFramework: 'slotignored'
-  });
-
-  const score = slotCount.score;
+  // No score here: the caller scores the authored bytes with faf-cli's
+  // scorer (one score function). The slot counter that lived here credited
+  // defaults and 'slotignored' slots that were never written.
 
   // === Build clean .faf output ===
 
@@ -351,11 +327,12 @@ export async function generateEnhancedFaf(
   const project: Record<string, any> = {
     name: metadata.repo,
   };
+  // .faf spec slots (the ones faf-cli scores): goal and main_language.
   if (metadata.description) {
-    project.description = metadata.description;
+    project.goal = metadata.description;
   }
   if (mainLanguage) {
-    project.language = mainLanguage;
+    project.main_language = mainLanguage;
   }
   project.type = projectType;
   if (metadata.license && metadata.license !== 'NOASSERTION') {
@@ -395,10 +372,12 @@ export async function generateEnhancedFaf(
   if (packageJsonContent) { stack.package_manager = 'npm'; }
   if (stackAnalysis.hosting) { stack.hosting = stackAnalysis.hosting; }
 
-  // Context section — only non-default, actually extracted values
+  // human_context — the .faf spec block faf-cli scores; only non-default,
+  // actually extracted values.
   const context: Record<string, string> = {};
-  if (sixWs.what && sixWs.what !== metadata.description) {
-    context.what = sixWs.what;
+  const what = sixWs.what || metadata.description;
+  if (what) {
+    context.what = what;
   }
   if (sixWs.who && sixWs.who !== DEFAULT_WHO) {
     context.who = sixWs.who;
@@ -422,10 +401,10 @@ export async function generateEnhancedFaf(
   }
 
   if (Object.keys(context).length > 0) {
-    fafData.context = context;
+    fafData.human_context = context;
   }
 
-  fafData.generated_by = {
+  fafData.authored_by = {
     tool: 'faf-mcp',
     version: VERSION,
     command: `faf git ${metadata.owner}/${metadata.repo}`,
@@ -444,7 +423,6 @@ export async function generateEnhancedFaf(
 
   return {
     content: header + yamlContent,
-    score
   };
 }
 

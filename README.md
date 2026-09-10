@@ -179,20 +179,28 @@ Works on all platforms — stops web search, forces tool usage.
 
 ## 29 MCP Tools
 
+The 15 Core tools, shown by default:
+
 | Tool | Purpose |
 |------|---------|
-| `faf_init` | Initialize project.faf |
-| `faf_score` | Check AI-readiness (0-100%) |
-| `faf_sync` | Reconcile project.faf with package.json / git (dry-run; `apply:true` writes) |
-| `faf_claude` | Write CLAUDE.md (+ AGENTS.md, .cursorrules, GEMINI.md) from project.faf |
-| `faf_read` | Parse and validate FAF files |
-| `faf_write` | Create/update FAF with validation |
+| `faf_init` | Create a new `project.faf` (use `faf_auto` to enhance an existing one) |
+| `faf_auto` | One-call setup: init or merge, stack detection, CLAUDE.md, score |
+| `faf_go` | Guided interview that fills the missing human-context and goal fields toward 100% |
+| `faf_score` | AI-readiness score (0-100%) and tier; `details:true` adds a slot-by-slot breakdown |
+| `faf_doctor` | Diagnose a low score: missing files, slot counts, config issues, each with a fix |
+| `faf_check` | Rate each `human_context` field empty / generic / good |
+| `faf_trust` | Validate the required fields and `about.*` block with faf-cli's validator |
+| `faf_sync` | Reconcile `project.faf` with package.json (dry-run; `apply:true` writes) |
+| `faf_context` | Set or show the active project path |
+| `faf_about` | What the IANA-registered `.faf` format is, in plain language |
 | **Interop Tools** | |
-| `faf_agents` | Import/export/sync AGENTS.md |
-| `faf_cursor` | Import/export/sync .cursorrules |
-| `faf_gemini` | Import/export/sync GEMINI.md |
-| `faf_conductor` | Import/export directory structure |
-| `faf_git` | Author .faf from GitHub repo URL |
+| `faf_claude` | Write CLAUDE.md from `project.faf` (`all:true` also writes AGENTS.md, .cursorrules, GEMINI.md) |
+| `faf_agents` | Import AGENTS.md into `project.faf`, or write it from `project.faf` |
+| `faf_cursor` | Import .cursorrules into `project.faf`, or write it from `project.faf` |
+| `faf_gemini` | Import GEMINI.md into `project.faf`, or write it from `project.faf` |
+| `faf_git` | Author a `project.faf` from a public GitHub repo URL |
+
+**+14 more with `FAF_TOOLS=all`:** `faf_status` · `faf_what` · `faf_guide` · `faf_debug` · `faf_clear` · `faf_list` · `faf_read` (read a file within the allowed roots: cwd, the OS temp dir, or `FAF_ALLOWED_ROOTS`) · `faf_write` (write a file within the same roots) · `faf_readme` · `faf_human_add` · `faf_quick` · `faf_formats` · `faf_dna` · `faf_conductor`
 
 **Built on faf-cli.** Every tool composes the bundled [faf-cli](https://www.npmjs.com/package/faf-cli) in-process — the same scorer, the same renderers, the same block injector the CLI uses. Nothing shells out to a `faf` on your PATH.
 

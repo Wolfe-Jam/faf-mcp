@@ -25,7 +25,8 @@ This project follows F1-inspired engineering standards:
 
 ### Prerequisites
 
-- Node.js 18 or higher
+- Node.js 22 or higher (CI runs 22 and 24)
+- Bun (`npm test` runs `bun test`)
 - npm or yarn
 - Git
 - your MCP client (for testing)
@@ -77,11 +78,10 @@ npm link
    
    Example:
    ```
-   feat: add faf_enhance tool for context optimization
+   fix: faf_sync lists the fields it would change
    
-   - Implements scoring algorithm with 21-slot system
-   - Adds TypeScript interfaces for tool parameters
-   - Includes test coverage for edge cases
+   - Dry-run reports each field as path: old → new
+   - Adds a test that fails without the fix
    ```
 
 5. **Push to your fork** and submit a pull request
@@ -155,7 +155,7 @@ To test your changes locally with your MCP client:
      "mcpServers": {
        "faf-mcp": {
          "command": "node",
-         "args": ["/path/to/your/local/faf-mcp/build/index.js"]
+         "args": ["/path/to/your/local/faf-mcp/dist/src/index.js"]
        }
      }
    }

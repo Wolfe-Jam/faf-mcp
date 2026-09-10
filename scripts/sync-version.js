@@ -3,7 +3,7 @@
  * Sync the package.json version to every other stamp that carries it.
  * Run: npm run sync-version   (auto on `npm version` via the "version" hook)
  *
- *   project.faf       project.version
+ *   project.faf       project.version + the first vX.Y.Z on the human_context `when:` line
  *   server.json       top-level version + packages[].version
  *   CHANGELOG.md      <!-- faf: doc=changelog | latest=vX.Y.Z ... --> meta-stamp
  *   docs/index.html   the version badge (guarded by wjttc-p0-no-false-hosted-claim)
@@ -31,6 +31,7 @@ function sub(file, pattern, replacement, label) {
 
 try {
   sub('project.faf', /^(\s*version:\s*).+$/m, `$1${version}`, 'project.version');
+  sub('project.faf', /^(  when:.*?\bv)\d+\.\d+\.\d+/m, `$1${version}`, 'human_context.when');
 
   const serverJson = JSON.parse(read('server.json'));
   let touched = false;
