@@ -3,7 +3,7 @@
 
 # AGENTS.md — faf-mcp
 
-TypeScript · CLI · Bun · npm package manager · v2.3.1
+TypeScript · CLI · Bun · npm package manager · v3.0.0
 
 ## Setup & build
 

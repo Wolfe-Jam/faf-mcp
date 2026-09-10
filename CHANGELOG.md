@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
-<!-- faf: doc=changelog | latest=v2.3.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v3.0.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,9 +8,9 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.0.0] - 2026-09-09 — The Compose Edition
 
-Every number, file and claim this package makes is now true — and every tool composes faf-cli instead of carrying its own copy.
+**Compose, don't port: faf-mcp 3.0 runs on faf-cli 7.12 in-process — one scorer, one set of renderers, one injector — and every number, file and claim this package makes is true. Local stdio, 29 tools, Node 22+.**
 
 ### Fixed
 - **One score function.** `faf_auto`, `faf_dna`, `faf_doctor`, `faf_go` and `faf_bi_sync` all report faf-cli's `scoreFafYaml` on the bytes on disk. The local `calculateSimpleScore` heuristic (29 points off `faf_score` on the same file), `faf_go`'s 8-field ratio, `faf_bi_sync`'s "FAF Score: 0%" and `faf_dna`'s frozen birth score are gone.

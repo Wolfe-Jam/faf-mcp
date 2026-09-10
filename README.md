@@ -27,9 +27,17 @@ The MCP you didn't realise you needed, or wanted but didn't know who to ask, is 
 
 ---
 
-## What's New in 2.3.0 — The Curated Edition
+## What's New in 3.0.0 — The Compose Edition
 
-**The tools you actually need, up front.** faf-mcp now leads with **15 essential tools** by default — a clean, focused surface instead of a wall of options. Need everything? Set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way). And every Core tool's description was rewritten so your AI picks the right one, first time.
+**Compose, don't port: faf-mcp 3.0 runs on faf-cli 7.12 in-process — one scorer, one set of renderers, one injector — and every number, file and claim this package makes is true. Local stdio, 29 tools, Node 22+.**
+
+- **Composes faf-cli 7.12.** AGENTS.md, GEMINI.md, .cursorrules and CLAUDE.md are written by faf-cli's own renderers, repo enrichment and block injector — the same bytes `faf export` and `faf sync` write. `faf_auto` runs faf-cli's own update chain. The hand-ported renderers, the pre-v3 CLAUDE.md template and the local injector are gone.
+- **One score function.** `faf_auto`, `faf_go`, `faf_dna`, `faf_doctor` and `faf_bi_sync` all report faf-cli's scorer on the bytes on disk — no local heuristics, no frozen birth score, no "0%".
+- **Nothing shells out.** The `which faf` detector, the exec fallback and the "install faf-cli first" banner are gone; nothing under `src/` imports `child_process`. A machine with an unrelated `faf` on PATH is no longer a problem.
+- **Every tool contract matches its handler.** Descriptions say what the tools do, schemas declare only flags that are read, failures carry their reason.
+- **The Mk3 engine is deleted.** 44 unreachable modules, ~15,900 lines; the tarball halves. `prebuild` clears `dist/` so nothing deleted ever ships again.
+- **Resource URIs** are `faf://context` and `faf://status`; `claude-faf://` remains readable as an alias for this release.
+- **Node 22 or newer.** 18 and 20 are end of life; the CI matrix runs 22 and 24 and a guard keeps the floor honest.
 
 ---
 
@@ -39,7 +47,7 @@ You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team
 
 **faf-mcp is the dedicated MCP server for Cursor, Windsurf, Cline, VS Code, and every non-Claude platform.** One `.faf` file in your repo, synced to every format your team needs.
 
-**Context for Cursor & IDE agents:** faf-cli (v7.1) authors the files this server syncs — `bunx faf export --agents`, zero-install and git-native. See [FAF-CLI for Cursor & IDE agents 👀](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
+**Context for Cursor & IDE agents:** faf-cli (v7.12) authors the files this server syncs — `bunx faf export --agents`, zero-install and git-native. See [FAF-CLI for Cursor & IDE agents 👀](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
 
 ```
                       project.faf
@@ -182,7 +190,7 @@ Works on all platforms — stops web search, forces tool usage.
 
 ## Ecosystem
 
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop (33 tools)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop
 - **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
 - **[faf-wasm-gen](https://www.npmjs.com/package/faf-wasm-gen)** — Rust→WASM `project.faf` authoring engine, browser/edge (faf-wasm's authoring sibling)
