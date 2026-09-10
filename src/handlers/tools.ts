@@ -1329,7 +1329,6 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 **Extensions:**
 - \`new\` - force overwrite existing
 - \`full\` - detailed output
-- \`bi\` - bi-directional sync
 
 ## UX Rules
 1. **Don't offer option menus** - just solve it

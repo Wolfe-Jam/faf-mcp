@@ -103,7 +103,7 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
       result.message = `CLAUDE.md refreshed from project.faf. FAF Score: ${currentScore}`;
     }
 
-    // v4.5.0: Chain additional format exports if requested
+    // Chain additional format exports if requested
     const doAgents = _options.agents || _options.all;
     const doCursor = _options.cursor || _options.all;
     const doGemini = _options.gemini || _options.all;
