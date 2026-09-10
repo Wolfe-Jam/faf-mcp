@@ -12,7 +12,8 @@
  * Note: This generates legacy .cursorrules (single file).
  * The new .cursor/rules/ MDC directory format is a future enhancement.
  *
- * Ported from faf-cli for faf-mcp v4.5.0
+ * Import parser ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0;
+ * landed in faf-mcp 2.0.0 (The Interop MCP for Context). Export composes faf-cli >=7.12.0 in-process.
  */
 
 import { promises as fs } from 'fs';
@@ -277,8 +278,8 @@ function createEmptyFaf(): FafFromCursor {
 /**
  * Render .cursorrules content from .faf data.
  *
- * v3.0: ported from faf-cli's CURRENT `renderCursorrules`
- * (~/FAF/cli/src/interop/cursorrules.ts, faf-cli 7.11.0) — deliberately
+ * v3.0: composes faf-cli's `renderCursorrules` in-process (faf-cli >=7.12.0,
+ * The Open Renderers Edition) — deliberately
  * minimal. Modern Cursor reads `.cursor/rules/*.mdc` (`alwaysApply: true`)
  * every turn; `.cursorrules` is the legacy, largely-ignored format faf-cli
  * itself keeps thin rather than richly authored — the previous v4.5.0-

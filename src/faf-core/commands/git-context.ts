@@ -1,5 +1,5 @@
 /**
- * Git Context Command - v4.5.0 Interop Edition
+ * Git Context Command — Interop (faf-mcp 2.0.0; ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0)
  *
  * Generate project.faf from a GitHub repository URL.
  * Fetches metadata, README, package.json — no cloning needed.
@@ -69,7 +69,7 @@ export async function gitContextCommand(
 
     return {
       success: true,
-      message: `Generated project.faf for ${owner}/${repo} — Score: ${score}% (${tier})`,
+      message: `Authored project.faf for ${owner}/${repo} — Score: ${score}% (${tier})`,
       data: {
         owner,
         repo,

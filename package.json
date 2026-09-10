@@ -13,7 +13,7 @@
   "scripts": {
     "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "tsc",
-    "dev": "ts-node src/server.ts",
+    "dev": "ts-node src/cli.ts",
     "dev:stdio": "ts-node src/cli.ts --transport stdio",
     "test": "bun test --isolate --timeout=120000 --path-ignore-patterns=\"**/performance.test.ts\"",
     "test:performance": "bun test tests/performance.test.ts",

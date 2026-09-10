@@ -102,11 +102,12 @@ The missing format was never missing. It's been there all along.
 
 - IANA: [application/vnd.faf+yaml](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 - MCP: [claude-faf-mcp](https://github.com/modelcontextprotocol/servers/pull/2759)
-- CLI: [faf-cli v3.1.5](https://www.npmjs.com/package/@faf/cli)
-- Full Article: [THE-MISSING-FORMAT.md](https://github.com/yourusername/faf-mcp/blob/main/docs/THE-MISSING-FORMAT.md)
+- CLI: [faf-cli](https://www.npmjs.com/package/faf-cli)
+- Full Article: [THE-MISSING-FORMAT.md](https://github.com/Wolfe-Jam/faf-mcp/blob/main/docs/THE-MISSING-FORMAT.md)
 
 ---
 
+**Published:** 2025-11-14
 **Author:** Wolfe James, .faf format creator, faf-mcp steward
 
 *Format before code. .faf defines, Claude interprets.*

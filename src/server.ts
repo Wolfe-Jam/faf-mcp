@@ -195,7 +195,7 @@ export class FafMcpServer {
       transport: this.config.transport,
       port: this.config.port,
       host: this.config.host,
-      championship: 'v3.0.0 - 33+ native tools',
+      championship: `v${VERSION} — 29 native tools (15 core by default, all via FAF_TOOLS=all)`,
     };
   }
 }

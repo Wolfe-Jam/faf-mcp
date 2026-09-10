@@ -1,4 +1,4 @@
-<!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
+<!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
 <!-- faf: doc=contributing | canonical=project.faf | family=FAF -->
 
 # Contributing to faf-mcp

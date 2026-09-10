@@ -1,8 +1,8 @@
 /**
- * Gemini Command - v4.5.0 Interop Edition
+ * Gemini Command — Interop (faf-mcp 2.0.0; ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0)
  *
  * Import/Export/Sync between GEMINI.md and project.faf
- * Bundled command — no CLI dependency required.
+ * Bundled command — no shell-out; export composes faf-cli in-process.
  */
 
 import path from 'path';

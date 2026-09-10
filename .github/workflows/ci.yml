@@ -89,7 +89,7 @@ jobs:
           flags: unittests
           name: codecov-umbrella
 
-      - name: Generate TAF Receipt
+      - name: Write TAF Receipt
         if: matrix.os == 'ubuntu-latest' && github.event_name == 'push'
         uses: Wolfe-Jam/faf-taf-git@v2.2.2
         with:
@@ -144,7 +144,7 @@ jobs:
         run: npm ci
 
       - name: 🎨 Style-sheet drift gate
-        run: npm run check:stylesheet  # HARD gate — surfaces must derive from docs/style-sheet.html
+        run: npm run check:stylesheet  # HARD gate — surfaces must derive from docs/style-source.html
 
       - name: 🧱 Engine floor gate
         run: npm run check:engines  # HARD gate — engines.node floor == lowest Node in the smoke matrix
@@ -242,6 +242,6 @@ jobs:
           echo "✅ Tests: All platforms"
           echo "✅ Quality: Championship level"
           echo "✅ Build: Ready to ship"
-          echo "✅ Performance: F1-grade"
+          echo "✅ Performance: Championship-grade"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "🏆 PODIUM READY!"

@@ -9,7 +9,8 @@
  * - H2: Section headers (Project Overview, Tech Stack, etc.)
  * - Bullets: Specific guidelines
  *
- * Ported from faf-cli for faf-mcp v4.5.0
+ * Import parser ported from faf-cli 4.5.0 (The AGENTS.md Edition) via claude-faf-mcp 4.5.0;
+ * landed in faf-mcp 2.0.0 (The Interop MCP for Context). Export composes faf-cli >=7.12.0 in-process.
  */
 
 import { promises as fs } from 'fs';
@@ -228,8 +229,8 @@ function createEmptyFaf(): FafFromAgents {
 /**
  * Author an AGENTS.md from .faf data (+ repo enrichment at export).
  *
- * v3.0: ported from faf-cli's CURRENT `renderAgentsMd` (~/FAF/cli/src/
- * interop/agents.ts, faf-cli 7.11.0 — "The AGENTS.md Edition") — replaces
+ * v3.0: composes faf-cli's `renderAgentsMd` in-process (faf-cli >=7.12.0,
+ * The Open Renderers Edition) — replaces
  * the v4.5.0-vintage section set (Project Overview / Tech Stack / Code
  * Style Guidelines / Build and Test Commands / Architecture / General
  * Instructions) with faf-cli's current shape: orientation · setup · verify

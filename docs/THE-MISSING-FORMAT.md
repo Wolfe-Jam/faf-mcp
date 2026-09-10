@@ -93,7 +93,7 @@ Projects contain 200K context windows with uploaded documents. `project.faf` pro
 
 Lives alongside `package.json` and `README.md` as the third pillar of project metadata:
 
-![Three Pillars: package.json, project.faf (highlighted in red), README.md](./images/three-pillars.png)
+![Three Pillars: package.json, project.faf (highlighted in red), README.md](./images/Project-faf-pckg-json-README.png)
 
 ```
 project-root/
@@ -256,7 +256,7 @@ Recent Windsurf multi-model validation tested faf-mcp v1.1.0 across 4 AI models:
 
 Zero MCP protocol failures. Universal compatibility confirmed.
 
-([Full WJTTC Test Report](./tests/WJTTC-WINDSURF-MULTI-MODEL-2025-11-14.md))
+([Full WJTTC Test Report](../tests/WJTTC-WINDSURF-MULTI-MODEL-2025-11-14.md))
 
 ## Why Format Matters
 
@@ -301,15 +301,15 @@ The missing format was never missing. It's been there all along
 
 **Format Specification:**
 - IANA Registration: [application/vnd.faf+yaml](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
-- Format Spec: [faf-spec](https://github.com/faf-format/faf-spec)
+- Format Spec: [The FAF Format](https://faf.one/spec)
 
 **MCP Integration:**
 - claude-faf-mcp: [Official Anthropic MCP steward](https://github.com/modelcontextprotocol/servers/pull/2759)
 - faf-mcp: [Universal MCP server](https://www.npmjs.com/package/faf-mcp) (5K+ downloads)
 
 **CLI Tools:**
-- faf-cli: [v3.1.5, 41 commands](https://www.npmjs.com/package/@faf/cli) (6K+ downloads)
-- npm: `npx @faf/cli init` (zero-config setup)
+- faf-cli: [v3.1.5, 41 commands](https://www.npmjs.com/package/faf-cli) (6K+ downloads)
+- npm: `npx faf-cli init` (zero-config setup)
 
 **Ecosystem Stats:**
 - 13,000+ total downloads
@@ -321,7 +321,7 @@ The missing format was never missing. It's been there all along
 **References:**
 - Anthropic Skills Blog: [Introducing Agent Skills](https://claude.com/blog/skills)
 - Anthropic Engineering: [Equipping agents for the real world](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
-- WJTTC Test Report: [Multi-Model Validation](./tests/WJTTC-WINDSURF-MULTI-MODEL-2025-11-14.md)
+- WJTTC Test Report: [Multi-Model Validation](../tests/WJTTC-WINDSURF-MULTI-MODEL-2025-11-14.md)
 
 ---
 

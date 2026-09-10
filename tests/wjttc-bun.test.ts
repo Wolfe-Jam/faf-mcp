@@ -17,12 +17,11 @@ import * as path from 'path';
 import { FafMcpServer } from '../src/server.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-// faf-cli's "exports" map sets a `bun` condition that points at a non-shipped
-// `src/index.ts`. Bun's resolver picks that condition first and fails. The
-// published dist works fine via the relative path — same module the production
-// server uses through tsc's CommonJS require. Cast to any to keep tsc happy.
-// (Tradeoff documented in the AERO report; once faf-cli ships src/ or drops
-// the bun condition, this can become a bare specifier.)
+// faf-cli <=6.7.1's "exports" map set a `bun` condition pointing at a
+// non-shipped `src/index.ts`; 6.8.0 dropped it (7.12.0 exports only
+// types/default). The relative dist path is kept because it loads the same
+// module the bridge (src/utils/faf-cli-bridge.ts) loads. Cast to any to keep
+// tsc happy.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fafCliPromise: Promise<any> = import('../node_modules/faf-cli/dist/index.js');
 

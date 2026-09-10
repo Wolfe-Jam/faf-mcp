@@ -1,4 +1,4 @@
-<!-- faf: faf-mcp | TypeScript | mcp-server | FAF MCP IDE Edition — persistent project context for Cursor, Windsurf, Cline, VS Code -->
+<!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
 <!-- faf: doc=readme | canonical=project.faf | score=100 | family=FAF -->
 
 <div style="display: flex; align-items: center; gap: 12px;">
@@ -105,15 +105,16 @@ faf-mcp runs locally over stdio. Point your IDE at one of these commands.
 | `faf_conductor` | Conductor | Import/export directory structure |
 | `faf_git` | GitHub | Author .faf from any repo URL |
 
-```bash
+```text
+# MCP tool calls — ask your IDE's AI
 # Sync to all formats at once
-faf bi-sync --all
+faf_bi_sync { all: true }
 
 # Author .faf from any GitHub repo
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **9 test suites** · **7 bundled parsers**
+**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **25 test suites** · **7 bundled parsers**
 
 ---
 
@@ -127,7 +128,7 @@ project.faf  ←── 8ms ──→  .cursorrules / AGENTS.md / CLAUDE.md / GEM
 ```
 
 - Update either side → both stay aligned
-- `--all` flag syncs to all four formats at once
+- `faf_bi_sync { all: true }` syncs to all four formats at once
 - Zero manual maintenance
 - Works across teams, branches, sessions
 
@@ -139,7 +140,7 @@ AI assistants forget. They drift. Every new session, AI starts guessing again. B
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **TROPHY** | 100% | AI never has to guess |
+| ✪ **TROPHY** | 100% | AI never has to guess |
 | ★ **GOLD** | 99%+ | 1 slot from Trophy |
 | ◆ **SILVER** | 95%+ | Close — keep going |
 | ◇ **BRONZE** | 85%+ | Interim — keep going |
@@ -240,6 +241,6 @@ MIT License — Free and open source
 
 ---
 
-**Zero drift. Eternal sync. AI optimized.** 🏆
+**Zero drift. Eternal sync. AI optimized.** ✪
 
 *"It's so logical if it didn't exist, AI would have built it itself" — Claude*

@@ -13,8 +13,9 @@
  *      wrong place when the compiled file lands at `dist/src/utils/` (one
  *      level deeper, so the relative escape comes up short).
  *   3. faf-cli's dist is ESM (`"type": "module"`). Node 18 rejects sync
- *      `require()` of ESM (`ERR_REQUIRE_ESM`); Node 20 allows it. faf-mcp
- *      supports Node 18+ per `engines`, so we must use dynamic `import()`.
+ *      `require()` of ESM (`ERR_REQUIRE_ESM`); Node 22 only allows it by
+ *      default from 22.12. faf-mcp's floor is Node 22.0 (`engines.node
+ *      >=22.0.0`), so the CJS build keeps dynamic `import()`.
  *
  * How this bridge works:
  *   At runtime, walk upward from `__dirname` (which is `src/utils/` when
@@ -22,7 +23,7 @@
  *   CJS) until we find `node_modules/faf-cli/dist/index.js`. Then load it
  *   via dynamic `import()` of an absolute `file://` URL — which:
  *     - bypasses the exports map (no package specifier, no condition picked)
- *     - handles ESM-from-CJS correctly on Node 18+ AND in bun
+ *     - handles ESM-from-CJS correctly on Node 22+ AND in bun
  *     - resolves the same module regardless of source-vs-compiled __dirname
  *
  *   The type info comes via `import type` — purely compile-time, esbuild
@@ -33,11 +34,14 @@
  *   Module evaluation is one-shot — the Promise is created at module load
  *   and cached forever.
  *
- *   This is intentionally a TEMPORARY workaround tied to faf-cli's bun
- *   exports bug. Once faf-cli ships `src/` OR drops the `bun` condition,
- *   this whole file becomes `export * from 'faf-cli'` and consumers go
- *   back to bare specifiers. Tracked alongside the AERO test's matching
- *   workaround comment in tests/wjttc-bun.test.ts.
+ *   This began as a TEMPORARY workaround for faf-cli's bun exports bug.
+ *   faf-cli dropped the `bun` condition in 6.8.0 (7.12.0 exports only
+ *   `types`/`default`), so problem 1 is gone. The file stays: faf-cli is
+ *   ESM and faf-mcp compiles to CJS, so a bare `export * from 'faf-cli'`
+ *   needs sync require(esm), which Node only enables by default from
+ *   22.12 (engines floor is 22.0.0). It is also the single loud load point
+ *   and hosts bundledFafCliVersion()'s path-walk. tests/wjttc-bun.test.ts
+ *   carries the matching note.
  *
  *   Doctrine: silent-drift = fail = forbidden. The bridge is loud and
  *   localized — one file, fully commented — not scattered ts-ignores or

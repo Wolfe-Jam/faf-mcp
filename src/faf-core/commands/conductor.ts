@@ -1,5 +1,5 @@
 /**
- * Conductor Command - v4.5.0 Interop Edition
+ * Conductor Command — Interop (faf-mcp 2.0.0; ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0)
  *
  * Import/Export between conductor/ directory and project.faf
  * Bundled command — no CLI dependency required.

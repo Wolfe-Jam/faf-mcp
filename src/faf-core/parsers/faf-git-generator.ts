@@ -4,13 +4,14 @@
  * Generates clean, accurate .faf files from GitHub repos without cloning.
  * Output is compact and PR-ready — every line adds value.
  *
- * Ported from faf-cli for faf-mcp v4.5.0
+ * Ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0; landed in faf-mcp 2.0.0 (The Interop MCP for Context)
  */
 
 import type { GitHubMetadata } from './github-extractor.js';
 import { fetchGitHubFileContent } from './github-extractor.js';
 import { countSlots } from './slot-counter.js';
 import { stringify as stringifyYAML } from '../fix-once/yaml.js';
+import { VERSION } from '../../version';
 
 export interface Enhanced6Ws {
   who: string;
@@ -411,7 +412,7 @@ export async function generateEnhancedFaf(
 
   // Assemble the data
   const fafData: Record<string, any> = {
-    faf_version: '2.5.0',
+    faf_version: '3.0',
     project,
     metadata: metadataSection,
   };
@@ -426,7 +427,7 @@ export async function generateEnhancedFaf(
 
   fafData.generated_by = {
     tool: 'faf-mcp',
-    version: '4.5.0',
+    version: VERSION,
     command: `faf git ${metadata.owner}/${metadata.repo}`,
   };
 
@@ -436,8 +437,8 @@ export async function generateEnhancedFaf(
   // Clean, informative header
   const header = `# project.faf — Machine-readable project context for AI tools
 # ${metadata.url}
-# Spec: https://faf.dev | MIME: application/vnd.faf+yaml
-# Generated: faf git ${metadata.owner}/${metadata.repo}
+# Spec: https://faf.one | MIME: application/vnd.faf+yaml
+# Authored by: faf git ${metadata.owner}/${metadata.repo}
 
 `;
 

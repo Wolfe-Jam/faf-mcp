@@ -9,7 +9,8 @@
  * - H2: Section headers (General Instructions, Coding Style, etc.)
  * - Bullets: Specific guidelines
  *
- * Ported from faf-cli for faf-mcp v4.5.0
+ * Import parser ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0;
+ * landed in faf-mcp 2.0.0 (The Interop MCP for Context). Export composes faf-cli >=7.12.0 in-process.
  */
 
 import { promises as fs } from 'fs';
@@ -212,8 +213,8 @@ function createEmptyFaf(): FafFromGemini {
 /**
  * Render GEMINI.md content from .faf data.
  *
- * v3.0: ported from faf-cli's CURRENT `renderGeminiMd`
- * (~/FAF/cli/src/interop/gemini.ts, faf-cli 7.11.0) — matches Gemini CLI's
+ * v3.0: composes faf-cli's `renderGeminiMd` in-process (faf-cli >=7.12.0,
+ * The Open Renderers Edition) — matches Gemini CLI's
  * own GEMINI.md convention (hierarchical, concatenation-friendly,
  * `@file.md`-importable): commands, key files, and confirmation-required
  * actions, not the AGENTS.md guardrail ladder — a different spec for a

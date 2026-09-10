@@ -15,12 +15,12 @@ import { resolveProjectPath, formatPathConfirmation } from '../utils/path-resolv
 // scoring or the tier ladder here — that's exactly the drift v2.1.0 set out
 // to kill across the surface; v2.1.1 closes the loop on the active handler.
 //
-// Imported via ../utils/faf-cli-bridge.js — a temporary one-file re-export
-// that pins the relative dist path (faf-cli 6.7.1's `bun` exports condition
-// resolves to a non-shipped src/, breaking the test runner). Both Node and
-// Bun load the same compiled module through the bridge. Bridge is removable
-// once faf-cli drops the bad `bun` condition. See the bridge header for full
-// rationale and the linked tracked issue.
+// Imported via ../utils/faf-cli-bridge.js — a one-file re-export that pins
+// the relative dist path. It began as a workaround for faf-cli 6.7.1's `bun`
+// exports condition (pointed at a non-shipped src/); 6.8.0 dropped it and
+// 7.12.0 exports only `types`/`default`. Node and Bun load the same compiled
+// module through the bridge, which stays for the CJS-to-ESM load and
+// bundledFafCliVersion()'s path-walk. See the bridge header for the rationale.
 import {
   fafCli,
   bundledFafCliVersion,
@@ -465,7 +465,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_dna',
-          description: 'Show your FAF DNA journey - See your evolution from birth to championship (22% 85% 99%)',
+          description: 'Show your FAF DNA journey — the score evolution of this project.faf from birth to today (e.g. 22% → 85% → 100%)',
           annotations: {
             title: 'View Project DNA',
             readOnlyHint: true,
@@ -533,7 +533,7 @@ export class FafToolHandler {
           }
         },
         // ============================================================================
-        // v4.5.0 INTEROP TOOLS
+        // INTEROP TOOLS — landed in faf-mcp 2.0.0 (The Interop MCP for Context); ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0
         // ============================================================================
         {
           name: 'faf_agents',
@@ -621,7 +621,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_git',
-          description: 'Generate a project.faf from any public GitHub repository URL — fetches the repo and extracts its stack and context. Returns the generated .faf. Use this to bootstrap context for a project you have the URL for but not cloned locally.',
+          description: 'Author a project.faf from any public GitHub repository URL — fetches the repo and extracts its stack and context. Returns the authored .faf. Use this to bootstrap context for a project you have the URL for but not cloned locally.',
           annotations: {
             title: 'Extract from GitHub',
             readOnlyHint: false,
@@ -632,7 +632,7 @@ export class FafToolHandler {
             type: 'object',
             properties: {
               url: { type: 'string', description: 'GitHub repository URL (e.g., https://github.com/owner/repo or owner/repo)' },
-              path: { type: 'string', description: 'Output directory for generated project.faf. If omitted, returns content without writing.' }
+              path: { type: 'string', description: 'Output directory for the authored project.faf. If omitted, returns content without writing.' }
             },
             required: ['url'],
             additionalProperties: false
@@ -712,7 +712,7 @@ export class FafToolHandler {
         return await this.handleFafQuick(args);
       case 'faf_doctor':
         return await this.handleFafDoctor(args);
-      // v4.5.0 Interop tools
+      // Interop tools (faf-mcp 2.0.0; ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0)
       case 'faf_agents':
         return await this.handleFafAgents(args);
       case 'faf_cursor':
@@ -747,7 +747,7 @@ export class FafToolHandler {
         return {
           content: [{
             type: 'text',
-            text: `🤖 Claude FAF Project Status:\n\n❌ No FAF file found in ${cwd}\n💡 Run faf_init to create project.faf`
+            text: `🤖 FAF Project Status:\n\n❌ No FAF file found in ${cwd}\n💡 Run faf_init to create project.faf`
           }]
         };
       }
@@ -758,14 +758,14 @@ export class FafToolHandler {
       return {
         content: [{
           type: 'text',
-          text: `🤖 Claude FAF Project Status:\n\n✅ ${fafResult.filename} found in ${cwd}\n\nContent preview:\n${lines.join('\n')}`
+          text: `🤖 FAF Project Status:\n\n✅ ${fafResult.filename} found in ${cwd}\n\nContent preview:\n${lines.join('\n')}`
         }]
       };
     } catch (error: any) {
       return {
         content: [{
           type: 'text',
-          text: `🤖 Claude FAF Project Status:\n\n❌ Error: ${error.message}`
+          text: `🤖 FAF Project Status:\n\n❌ Error: ${error.message}`
         }],
         isError: true
       };
@@ -834,7 +834,7 @@ export class FafToolHandler {
               `FAF SCORE: 0/100 (0%)  ○ INVALID\n\n` +
               `\`${fafPath}\` couldn't be parsed as a valid .faf YAML:\n` +
               `  ${error?.message ?? String(error)}\n\n` +
-              `Re-run \`faf_init\` to regenerate a valid file.`,
+              `Re-run \`faf_init\` with force: true to write a fresh, valid file.`,
           },
         ],
         isError: true,
@@ -912,7 +912,7 @@ export class FafToolHandler {
         return {
           content: [{
             type: 'text',
-            text: `🚀 Claude FAF Initialization:\n\n⚠️ ${existingFaf.filename} already exists in ${targetDir}\n💡 Use force: true to overwrite`
+            text: `🚀 FAF Initialization:\n\n⚠️ ${existingFaf.filename} already exists in ${targetDir}\n💡 Use force: true to overwrite`
           }]
         };
       }
@@ -979,7 +979,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🚀 Claude FAF Initialization:\n\n✅ Created project.faf\n\n${pathConfirmation}${sourceExplanation}\n\n🍊 Vitamin Context activated!\n⚡ FAFFLESS AI ready!${
+          text: `🚀 FAF Initialization:\n\n✅ Created project.faf\n\n${pathConfirmation}${sourceExplanation}\n\n🍊 Vitamin Context activated!\n⚡ FAFFLESS AI ready!${
             chromeDetection.detected ? '\n\n🎯 Friday Feature: Chrome Extension detected!\n📈 Auto-filled 7 slots for 90%+ score!' : ''
           }${
             chromeDetection.corrected ? `\n📝 Auto-corrected: "${args?.description}" → "${chromeDetection.corrected}"` : ''
@@ -990,7 +990,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🚀 Claude FAF Initialization:\n\n❌ Error: ${error.message}`
+          text: `🚀 FAF Initialization:\n\n❌ Error: ${error.message}`
         }],
         isError: true
       };
@@ -1020,7 +1020,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🔒 Claude FAF Trust Validation:\n\n❌ No .faf found in ${cwd}\n💡 Run faf_init to create one — then faf_trust reports real trust metrics.`
+          text: `🔒 FAF Trust Validation:\n\n❌ No .faf found in ${cwd}\n💡 Run faf_init to create one — then faf_trust reports real trust metrics.`
         }]
       };
     }
@@ -1034,7 +1034,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🔒 Claude FAF Trust Validation:\n\n❌ Could not read ${fafPath}: ${error?.message ?? String(error)}`
+          text: `🔒 FAF Trust Validation:\n\n❌ Could not read ${fafPath}: ${error?.message ?? String(error)}`
         }],
         isError: true
       };
@@ -1056,7 +1056,7 @@ package_manager: ${projectData.package_manager}` : ''}
     return {
       content: [{
         type: 'text',
-        text: `🔒 Claude FAF Trust Validation:\n\n${output}`
+        text: `🔒 FAF Trust Validation:\n\n${output}`
       }],
       isError: !validation.valid
     };
@@ -1075,7 +1075,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🔄 Claude FAF Sync:\n\nFailed to sync: ${result.error}`
+          text: `🔄 FAF Sync:\n\nFailed to sync: ${result.error}`
         }],
         isError: true
       };
@@ -1088,7 +1088,7 @@ package_manager: ${projectData.package_manager}` : ''}
     return {
       content: [{
         type: 'text',
-        text: `🔄 Claude FAF Sync:\n\n${output}`
+        text: `🔄 FAF Sync:\n\n${output}`
       }]
     };
   }
@@ -1125,7 +1125,7 @@ package_manager: ${projectData.package_manager}` : ''}
       return {
         content: [{
           type: 'text',
-          text: `🔗 Claude FAF Bi-Sync:\n\nFailed to bi-sync: ${result.error}`
+          text: `🔗 FAF Bi-Sync:\n\nFailed to bi-sync: ${result.error}`
         }],
         isError: true
       };
@@ -1138,7 +1138,7 @@ package_manager: ${projectData.package_manager}` : ''}
     return {
       content: [{
         type: 'text',
-        text: `🔗 Claude FAF Bi-Sync:\n\n${output}`
+        text: `🔗 FAF Bi-Sync:\n\n${output}`
       }]
     };
   }
@@ -1184,7 +1184,7 @@ package_manager: ${projectData.package_manager}` : ''}
     return {
       content: [{
         type: 'text',
-        text: `🧹 Claude FAF Clear:\n\n${lines.join('\n')}`
+        text: `🧹 FAF Clear:\n\n${lines.join('\n')}`
       }]
     };
   }
@@ -1215,7 +1215,7 @@ WHAT IS .FAF?
 • The dot (.) means it's a file format!
 
 🧡 Trust: Context verified
-⚡️ Speed: Generated in <29ms
+⚡️ Speed: Authored in <29ms
 SPEEDY AI you can TRUST!
 
 Version ${packageInfo.version}
@@ -1226,10 +1226,10 @@ Just like JPEG makes images universal,
 HOW IT WORKS:
 1. Drop a file or paste the path
 2. Create .faf (Foundational AI-context Format)
-3. Talk to Claude to bi-sync it
+3. Ask your AI to bi-sync it
 4. You're done⚡
 
-🩵 You just made Claude Happy
+🩵 You just made your AI happy
 🧡⚡️ SPEEDY AI you can TRUST!`;
 
     return {
@@ -1250,7 +1250,7 @@ WHY:  Just like JPEG makes images viewable everywhere,
       .faf makes projects understandable by AI.
 
 HOW:  Run 'faf' on any project to create one.
-      Run 'faf_score' to check AI-readiness (target: 99%).
+      Run 'faf_score' to check AI-readiness (target: 100%).
 
 REMEMBER: Always use ".faf" with the dot - it's a FORMAT!
 
@@ -1317,7 +1317,7 @@ ${debugInfo.permissions.writeError ? `   Error: ${debugInfo.permissions.writeErr
       return {
         content: [{
           type: 'text',
-          text: `🔍 Claude FAF Debug Failed: ${error instanceof Error ? error.message : String(error)}`
+          text: `🔍 faf-mcp Debug Failed: ${error instanceof Error ? error.message : String(error)}`
         }],
         isError: true
       };
@@ -1547,7 +1547,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // NEW: Human Context Tools (v3.2.0 parity)
+  // Human Context Tools (parity with faf-cli v3.2.0)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   private async handleFafReadme(args: any): Promise<CallToolResult> {
@@ -1802,7 +1802,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 
       // Default: show quality report
       const icons: Record<string, string> = {
-        empty: '⬜', generic: '🟡', good: '🟢', excellent: '💎'
+        empty: '⬜', generic: '◻️', good: '◼️', excellent: '💎'
       };
 
       let output = `🔍 FAF Human Context Quality\n\n`;
@@ -2011,7 +2011,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
             text: JSON.stringify({
               complete: true,
               score: 100,
-              message: '🏆 GOLD CODE ACHIEVED! Your project has 100% AI-Readiness.',
+              message: '✪ GOLD CODE ACHIEVED! Your project has 100% AI-Readiness.',
               context: 'faf_go'
             }, null, 2)
           }]
@@ -2157,12 +2157,16 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       output += `📊 Before: ${beforeScore}% | After: ${newScore}% ${deltaDisplay}\n`;
       output += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-      if (newScore >= 99) {
-        output += `🏆 CHAMPIONSHIP ACHIEVED! Your AI has complete context.\n`;
+      if (newScore >= 100) {
+        output += `✪ TROPHY — 100% AI-Readiness. Your AI has complete context.\n`;
+      } else if (newScore >= 99) {
+        output += `★ Gold — 1% to Trophy. Run faf_go to finish.\n`;
+      } else if (newScore >= 95) {
+        output += `◆ Silver — ${100 - newScore}% to Trophy.\n`;
       } else if (newScore >= 85) {
-        output += `🥇 Elite level! ${100 - newScore}% to perfection.\n`;
+        output += `◇ Bronze — production ready. ${100 - newScore}% to Trophy.\n`;
       } else if (newScore >= 70) {
-        output += `🥈 Great progress! Run faf_go to reach championship.\n`;
+        output += `● Green — solid foundation. Run faf_go to climb tiers.\n`;
       } else {
         output += `🚀 Good start! Run faf_go for guided improvement.\n`;
       }
@@ -2181,7 +2185,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
 
   /**
    * faf_dna - Show your FAF DNA journey
-   * Displays evolution from birth to current (22% → 85% → 99%)
+   * Displays the score evolution from birth to today (e.g. 22% → 85% → 100%)
    */
   private async handleFafDna(args: any): Promise<CallToolResult> {
     const cwd = this.getProjectPath(args?.path);
@@ -2312,7 +2316,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       output += `\n🧬 MILESTONES\n`;
       const milestoneIcons: Record<string, string> = {
         birth: '🐣', first_save: '💾', doubled: '2️⃣', sync: '🔄',
-        championship: '🏆', elite: '⭐', peak: '🏔️', perfect: '💎'
+        championship: '✪', elite: '⭐', peak: '🏔️', perfect: '💎'
       };
 
       for (const m of milestones) {
@@ -2366,7 +2370,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       }
 
       // Format human-readable output
-      let output = `😽 TURBO-CAT™ Format Discovery v2.0.0\n`;
+      let output = `😽 TURBO-CAT™ Format Discovery\n`;
       output += `═══════════════════════════════════════════════════\n\n`;
       output += `✅ Found ${analysis.discoveredFormats.length} formats in ${elapsed}ms!\n\n`;
 
@@ -2377,7 +2381,7 @@ All work: \`faf init\`, \`faf init new\`, \`faf init --new\`, \`faf init -new\`
       }
 
       output += `\n💡 Stack Signature: ${analysis.stackSignature}\n`;
-      output += `🏆 Intelligence Score: ${analysis.totalIntelligenceScore}\n\n`;
+      output += `🧠 Intelligence Score: ${analysis.totalIntelligenceScore}\n\n`;
 
       if (Object.keys(analysis.slotFillRecommendations).length > 0) {
         output += `📊 Recommended Slot Fills:\n`;
@@ -2603,7 +2607,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
             results.push({
               status: 'error',
               message: '.faf file is empty',
-              fix: 'Run: faf_init with force option to regenerate'
+              fix: 'Run: faf_init with force option to rewrite it'
             });
           } else {
             // Check for required fields
@@ -2655,7 +2659,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
           results.push({
             status: 'error',
             message: '.faf file is corrupted or invalid YAML',
-            fix: 'Run: faf_init with force option to regenerate'
+            fix: 'Run: faf_init with force option to rewrite it'
           });
         }
       }
@@ -2733,7 +2737,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
       output += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
       if (!hasErrors && !hasWarnings) {
-        output += `🏆 Perfect health! Your FAF setup is championship-ready!`;
+        output += `✅ Perfect health! Your FAF setup is championship-ready!`;
       } else if (!hasErrors) {
         output += `🎯 Good health with minor improvements suggested.`;
       } else {
@@ -2751,7 +2755,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
   }
 
   // ============================================================================
-  // v4.5.0 INTEROP HANDLERS
+  // INTEROP HANDLERS (faf-mcp 2.0.0; ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0)
   // ============================================================================
 
   private async handleFafAgents(args: any): Promise<CallToolResult> {
@@ -2907,7 +2911,7 @@ Use force: true to overwrite, or use faf_go / faf_human_add to modify.`
 
       // Include generated .faf content if no output path (preview mode)
       if (!outputPath && data?.data?.fafContent) {
-        output += `\n\n--- Generated project.faf ---\n${data.data.fafContent}`;
+        output += `\n\n--- Authored project.faf ---\n${data.data.fafContent}`;
       }
 
       return {

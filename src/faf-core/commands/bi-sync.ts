@@ -1,7 +1,7 @@
 /**
  * 🔗 Bi-Sync Engine - Mk3 Bundled Edition
  * Revolutionary project.faf ↔ CLAUDE.md Synchronization
- * v4.5.0: Added agents/cursor/gemini/all flags for multi-format sync
+ * Interop flags (agents/cursor/gemini/all): faf-mcp 2.0.0, ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0
  */
 
 import { parse as parseYAML } from '../fix-once/yaml';

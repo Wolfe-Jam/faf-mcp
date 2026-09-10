@@ -84,9 +84,9 @@ Outside the managed block on purpose: `faf export --agents` refreshes the block 
 ### Layout beyond the entry points
 
 - `src/server.ts` — server wiring · `src/handlers/tools.ts` — the MCP tool surface (29 tools, 15 shown by default) · `src/handlers/resources.ts`, `skills.ts` — resources and skills
-- `src/faf-core/` — scoring, parsers, extract, fix-once, engines, and the `commands/` that compose faf-cli
+- `src/faf-core/` — parsers, extract, fix-once, engines, and the `commands/` that compose faf-cli · scoring is `scoreFafYaml` from faf-cli via `src/utils/faf-cli-bridge.ts`
 - `tests/` — WJTTC suites: compose parity with faf-cli, interop freshness, line-anchored injection, security and path confinement, MCP conformance
-- `scripts/sync-version.js` — one bump stamps package.json, server.json, AGENTS.md, CHANGELOG.md and docs/index.html
+- `scripts/sync-version.js` — runs on `npm version`; reads package.json and stamps project.faf, server.json, CHANGELOG.md, docs/index.html and AGENTS.md
 
 ### Load-bearing conventions
 
