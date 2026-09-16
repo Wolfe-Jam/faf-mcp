@@ -7,7 +7,7 @@ Thank you for your interest in contributing to faf-mcp. This document provides g
 
 ## Development Philosophy
 
-This project follows F1-inspired engineering standards:
+This project follows these engineering standards:
 
 - **Championship-grade quality** - No compromises on reliability or performance
 - **Sub-50ms performance targets** - Speed matters
