@@ -133,7 +133,7 @@ faf_claude { all: true }
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **25 test suites** · **7 bundled parsers**
+**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **26 test suites** · **7 bundled parsers**
 
 ---
 
