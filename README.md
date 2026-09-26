@@ -29,16 +29,13 @@
 
 ## What's New in 4.0.0 — The Always33 Edition
 
-**One engine, one number: faf-mcp 4 scores all 33 slots with faf-cli 8's always-33 kernel — the same score faf-cli, claude-faf-mcp and rust-faf-mcp give.**
+**One engine, one number: faf-mcp 4 scores all 33 slots with faf-cli 8's always-33 kernel — the same score faf-cli, claude-faf-mcp 7 and faf-kernel give.**
 
 - **The always-33 engine.** Every tool scores with faf-cli 8.0.0 — all 33 Mk4 slots, one Rust kernel, one copy of it. Checked live: faf-python-sdk 56, mcp-context-card 56, faf-cli ✪ 100.
-- **Your 21 slots, and the 12 enterprise slots in view.** The enterprise slots (infra, app, ops) are marked `slotignored` unless your app-type uses them, and `faf_score` counts all 33.
+- **Your 21 slots, and the 12 enterprise slots in view.** The enterprise slots (infra, app, ops) are marked `slotignored` unless your app-type uses them. `faf_score` scores against all 33; `slotignored` slots drop out of the denominator.
 - **Upgrading from 3.x:** a `.faf` without the 12 markers now scores against 33. **Run `faf_auto`** — it writes them and your score returns.
 
-The full history is in the [CHANGELOG](CHANGELOG.md).
-
 ## 3.0.2 — The Compose Edition
-
 
 **Tools that say what they do: `faf_git` scores with faf-cli and asks before overwriting, `faf_sync` previews each change, and imports say when nothing was written.**
 
