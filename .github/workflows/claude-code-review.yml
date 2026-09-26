@@ -40,8 +40,10 @@ jobs:
       # Print the final result message alone (the API error text, e.g. an
       # invalid key or low credit balance) so the cause is readable in the log
       # and in the run annotations, without enabling show_full_output.
+      # failure() is required: without a status function the step gets an
+      # implicit success() and never runs after the review step fails.
       - name: Report review failure reason
-        if: steps.claude-review.outcome == 'failure'
+        if: failure() && steps.claude-review.outcome == 'failure'
         env:
           EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
         run: |
