@@ -35,3 +35,20 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+
+      # The action hides its output, so a failed run shows only "is_error:true".
+      # Print the final result message alone (the API error text, e.g. an
+      # invalid key or low credit balance) so the cause is readable in the log
+      # and in the run annotations, without enabling show_full_output.
+      - name: Report review failure reason
+        if: steps.claude-review.outcome == 'failure'
+        env:
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+        run: |
+          FILE="${EXECUTION_FILE:-$RUNNER_TEMP/claude-execution-output.json}"
+          if [ ! -f "$FILE" ]; then
+            echo "::warning title=Claude Code Review::No execution log at $FILE"
+            exit 0
+          fi
+          REASON=$(jq -r '[.[] | select(.type == "result")] | last | .result // "no result message"' "$FILE" | head -c 500 | tr '\n' ' ')
+          echo "::warning title=Claude Code Review failed::$REASON"
