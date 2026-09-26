@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v3.0.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.0.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,22 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.0.0] - 2026-09-26 — The Always33 Edition
+
+**One engine, one number: faf-mcp 4 scores all 33 slots with faf-cli 8's always-33 kernel — the same score faf-cli, claude-faf-mcp 7 and faf-kernel give.** 402 tests.
+
+**4.0.0 is a major release because scores can move.** A `.faf` without the 12 enterprise `slotignored` markers now counts them as empty (21 filled = 64%). Run `faf_auto` — it writes the markers and the score returns (a v3-era mcp-context-card file: 56% → 100%). Anything that gates on `faf_score` should re-check its threshold.
+
+### Changed
+- **The always-33 engine.** faf-mcp composes **faf-cli ^8.0.0** (was ^7.12.0, which could never resolve 8.x). Every tool's score is faf-cli 8's: all 33 Mk4 slots, one Rust kernel (`faf-scoring-kernel` 3.0.0). Verified live: `faf_score` on faf-python-sdk 56, mcp-context-card 56, faf-cli ✪ 100 — identical to faf-cli 8.0.0 and claude-faf-mcp 7.0.0 (which ships first).
+- **One kernel copy.** The direct `faf-scoring-kernel ^2.0.3` dependency is gone (nothing imported it); the only kernel in an install is faf-cli's own.
+- **The 12 enterprise slots stay in view** — marked `slotignored` unless your app-type uses them. `faf_score` scores against all 33; `slotignored` slots drop out of the denominator.
+- **faf-cli's owner rule for the blocks it writes** (faf-cli 7.13+, which npm installs of 3.0.2 already had): a block faf can prove is its own is replaced in place; an ambiguous one — a marker with trailing whitespace, a marker behind an unclosed or misread fence, a metastamp-only file — is left whole below a fresh block. Nothing is ever partly wiped.
+- `tbd` and `todo` (any case) count as empty.
+
+### Tests
+- The doctor fixtures carry the 12 enterprise markers; the injector tests assert the owner rule against faf-cli 8's actual output.
 
 ## [3.0.2] - 2026-09-10 — The Compose Edition
 
