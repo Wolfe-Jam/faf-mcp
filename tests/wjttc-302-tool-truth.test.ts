@@ -70,9 +70,23 @@ human_context:
   where: local disks only
   when: every test run
   how: bun test on this file
+stack:
+  monorepo_tool: slotignored
+  package_manager: slotignored
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: slotignored
+monorepo:
+  packages_count: slotignored
+  build_orchestrator: slotignored
+  versioning_strategy: slotignored
+  shared_configs: slotignored
+  remote_cache: slotignored
 `;
 
-// 100%: every active slot populated, the rest slotignored.
+// 100%: every active slot populated, the rest slotignored (always-33: the 12 enterprise slots too).
 const FULL_FAF = `faf_version: "3.0"
 project:
   name: doctor-full
@@ -93,6 +107,18 @@ stack:
   build: tsc
   cicd: GitHub Actions
   package_manager: npm
+  monorepo_tool: slotignored
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: slotignored
+monorepo:
+  packages_count: slotignored
+  build_orchestrator: slotignored
+  versioning_strategy: slotignored
+  shared_configs: slotignored
+  remote_cache: slotignored
 human_context:
   who: maintainers of the fixture
   what: a fixture for the doctor suite
