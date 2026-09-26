@@ -165,12 +165,19 @@ describe('🏁 WJTTC — injectFafBlock line-anchored markers', () => {
     expect(second).toBe(first);
   });
 
+  // faf-cli 7.13 owner rule: a block faf can prove is its own is replaced in
+  // place; an ambiguous one (a marker line with trailing whitespace, a marker
+  // an unclosed or misread fence may be hiding) is never touched — the fresh
+  // block goes on top and every original byte stays below it.
+  const prefixed = (seeded: string) => `${FAF_START}\n${BLOCK_V1}\n${FAF_END}\n\n${seeded}`;
+
   test('CRLF files and marker lines with trailing whitespace still match', async () => {
-    fs.writeFileSync(file, 'above\r\n<!-- faf:start -->  \r\nold body\r\n<!-- faf:end -->\r\nbelow\r\n');
+    // A marker line with trailing whitespace is not an exact marker: the CRLF
+    // file is kept byte-for-byte below a fresh block.
+    const seeded = 'above\r\n<!-- faf:start -->  \r\nold body\r\n<!-- faf:end -->\r\nbelow\r\n';
+    fs.writeFileSync(file, seeded);
     const [first, second] = await twice(BLOCK_V1, BLOCK_V1);
-    expect(first.startsWith('above\r\n' + FAF_START + '\n')).toBe(true);
-    expect(first).toContain('\n' + FAF_END + '\r\nbelow\r\n'); // the end line keeps its own CRLF
-    expect(first).not.toContain('old body');
+    expect(first).toBe(prefixed(seeded));
     expect(second).toBe(first);
   });
 
@@ -190,11 +197,7 @@ describe('🏁 WJTTC — injectFafBlock line-anchored markers', () => {
     const seeded = 'user-above-sentinel\n\n<!-- faf:start -->\nold body\n```bash\nnpm test\n<!-- faf:end -->\n\nuser-below-sentinel\n';
     fs.writeFileSync(file, seeded);
     const [first, second] = await twice(BLOCK_V1, BLOCK_V1);
-    expect(first).toContain('user-above-sentinel');
-    expect(first).toContain('user-below-sentinel');
-    expect(first).not.toContain('old body');
-    expect(wholeLines(first, FAF_START)).toBe(1);
-    expect(wholeLines(first, FAF_END)).toBe(1);
+    expect(first).toBe(prefixed(seeded)); // nothing wiped: the old region is kept whole
     expect(second).toBe(first);
   });
 
@@ -210,10 +213,11 @@ describe('🏁 WJTTC — injectFafBlock line-anchored markers', () => {
       const seeded = `user-above-sentinel\n\n${shape}\n<!-- faf:start -->\nold body\n<!-- faf:end -->\n\nuser-below-sentinel\n`;
       fs.writeFileSync(file, seeded);
       const [first, second] = await twice(BLOCK_V1, BLOCK_V1);
-      expect(first).toContain('user-above-sentinel');
-      expect(first).toContain('user-below-sentinel');
-      expect(first).not.toContain('old body');
       expect(count(first, 'faf-mcp render v1')).toBe(1);
+      // Either the block is found and replaced in place, or it is ambiguous and
+      // the whole file is kept below a fresh block — never a partial wipe.
+      if (first.includes('old body')) {expect(first).toBe(prefixed(seeded));}
+      else {expect(first.startsWith('user-above-sentinel\n')).toBe(true); expect(first).toContain('user-below-sentinel');}
       expect(second).toBe(first);
     }
   });
@@ -254,16 +258,17 @@ describe('🏁 WJTTC — injectFafBlock line-anchored markers', () => {
     expect(out).not.toContain('\nold\n');
   });
 
-  test('unchanged: user file without markers is prefixed and preserved; legacy metastamp file is reclaimed', async () => {
+  test('unchanged: user file without markers is prefixed and preserved; a legacy metastamp file is prefixed too', async () => {
     fs.writeFileSync(file, '# Hand-written\n\nkeep-me\n');
     await injectFafBlock(file, BLOCK_V1);
     const user = fs.readFileSync(file, 'utf-8');
     expect(user.startsWith(FAF_START + '\n')).toBe(true);
     expect(user.endsWith('\n\n# Hand-written\n\nkeep-me\n')).toBe(true);
 
-    fs.writeFileSync(file, '<!-- faf: demo | TypeScript -->\n# old legacy output\n');
+    const legacySeed = '<!-- faf: demo | TypeScript -->\n# old legacy output\n';
+    fs.writeFileSync(file, legacySeed);
     await injectFafBlock(file, BLOCK_V1);
     const legacy = fs.readFileSync(file, 'utf-8');
-    expect(legacy).toBe(`${FAF_START}\n${BLOCK_V1}\n${FAF_END}\n`);
+    expect(legacy).toBe(prefixed(legacySeed)); // no markers → never reclaimed, kept whole
   });
 });
