@@ -113,9 +113,9 @@
   },
   "overrides": {
     "hono": ">=4.13.5",
-    "fast-uri": ">=4.1.2",
-    "ip-address": ">=10.3.1",
-    "brace-expansion@1": "1.1.18",
-    "brace-expansion@2": "2.1.4"
+    "fast-uri": ">=4.1.5",
+    "ip-address": ">=10.7.1",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7"
   }
 }
