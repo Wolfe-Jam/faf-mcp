@@ -19,6 +19,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* === faf-mcp:stylesheet canonical — source of truth: docs/style-source.html === */
+/* === edit ONLY here; surfaces derive · drift-checked in CI                  === */
 :root{
   --bg:#f7f8fa; --surface:#ffffff; --line:#e3e6ea; --text:#16181d; --text-2:#3b4048;
   --accent:#00A3A3; --accent-soft:rgba(0,163,163,.10); --orange:#FF6B35;
@@ -26,6 +28,7 @@
   /* editor window is dark in both themes, like the editors it serves */
   --ed-bg:#1e1f24; --ed-bar:#17181c; --ed-tab:#25262c; --ed-line:#2e3038;
   --ed-text:#d6d9de; --ed-dim:#9aa0aa; --ed-key:#7fd8d8; --ed-str:#e8c08a; --ed-cyan:#00D4D4;
+  --ed-dot:#3a3c44; --ed-gutter:#5d626d; --ed-status:#0f6f6f; --ed-bright:#ffffff;
   --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
@@ -43,6 +46,7 @@
   --btn-bg:#f1f2f4; --btn-fg:#0e0f12;
   --ed-bg:#16171b; --ed-bar:#0b0c0e; --ed-tab:#1d1e23; --ed-line:#2a2c33;
 }
+/* === /faf-mcp:stylesheet canonical === */
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -76,18 +80,18 @@ h1 span{color:var(--accent)}
 /* editor window */
 .editor{margin-top:44px;background:var(--ed-bg);color:var(--ed-text);border-radius:12px;overflow:hidden;border:1px solid var(--ed-line);box-shadow:0 20px 50px rgba(0,0,0,.18)}
 .ed-bar{display:flex;align-items:center;gap:8px;background:var(--ed-bar);padding:10px 14px}
-.ed-bar i{width:11px;height:11px;border-radius:50%;background:#3a3c44;display:block}
+.ed-bar i{width:11px;height:11px;border-radius:50%;background:var(--ed-dot);display:block}
 .ed-bar .title{margin-left:10px;font-size:12px;color:var(--ed-dim);font-family:var(--mono)}
 .tabs{display:flex;overflow-x:auto;background:var(--ed-bar);border-bottom:1px solid var(--ed-line)}
 .tab{font-family:var(--mono);font-size:13px;padding:9px 16px;color:var(--ed-dim);border-right:1px solid var(--ed-line);white-space:nowrap;background:transparent;border-top:2px solid transparent;cursor:pointer;border-left:0;border-bottom:0}
-.tab.on{background:var(--ed-bg);color:#ffffff;border-top-color:var(--ed-cyan)}
+.tab.on{background:var(--ed-bg);color:var(--ed-bright);border-top-color:var(--ed-cyan)}
 .tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:7px;vertical-align:1px}
 .ed-body{display:grid;grid-template-columns:44px 1fr;font-family:var(--mono);font-size:13.5px;line-height:1.75;min-height:300px}
-.gutter{color:#5d626d;text-align:right;padding:16px 10px 16px 0;user-select:none;border-right:1px solid var(--ed-line)}
+.gutter{color:var(--ed-gutter);text-align:right;padding:16px 10px 16px 0;user-select:none;border-right:1px solid var(--ed-line)}
 .code{padding:16px 18px;white-space:pre;overflow-x:auto;color:var(--ed-text)}
-.k{color:var(--ed-key)} .s{color:var(--ed-str)} .c{color:var(--ed-dim)} .w{color:#ffffff}
+.k{color:var(--ed-key)} .s{color:var(--ed-str)} .c{color:var(--ed-dim)} .w{color:var(--ed-bright)}
 .panel{display:none} .panel.on{display:contents}
-.ed-status{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#0f6f6f;color:#ffffff;font-family:var(--mono);font-size:12px;padding:5px 14px}
+.ed-status{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ed-status);color:var(--ed-bright);font-family:var(--mono);font-size:12px;padding:5px 14px}
 
 /* sections */
 section{padding:56px 0;border-top:1px solid var(--line)}
@@ -114,8 +118,8 @@ h2{font-size:clamp(26px,3.6vw,34px);letter-spacing:-.02em;line-height:1.15;font-
 .tool code{flex:none;background:none;padding:0;color:var(--accent);font-weight:600}
 .tool span{color:var(--text-2)}
 .stats{display:flex;flex-wrap:wrap;gap:28px;margin:6px 0 26px}
-.stat b{display:block;font-size:30px;font-weight:800;letter-spacing:-.02em}
-.stat span{font-size:13.5px;color:var(--text-2)}
+.stat-value{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.stat-label{font-size:13.5px;color:var(--text-2)}
 
 .facts{display:flex;flex-wrap:wrap;gap:10px}
 .fact{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500}
@@ -154,7 +158,7 @@ footer a{text-decoration:none;color:var(--text)}
 <main>
 <div class="wrap">
   <div class="hero">
-    <div class="chip"><span class="v">v4.0.0</span>The Always33 Edition <span class="sub">· One engine, one number</span></div>
+    <div class="chip"><span class="v" id="versionBadge">v4.0.0</span>The Always33 Edition <span class="sub">· One engine, one number</span></div>
     <h1>One <span>project.faf</span>. Every IDE's context file.</h1>
     <p class="lede">A local MCP server for Cursor, VS Code, Windsurf and Cline. It reads your IANA-registered <code>project.faf</code> and writes the facts into AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md, scored always-33, the same number faf-cli gives.</p>
     <div class="ctas">
@@ -269,10 +273,14 @@ For: Freelancers billing in three currencies
     <h2>Every tool says what it does</h2>
     <p class="intro">All 29 tools carry MCP annotations, so your IDE can tell which ones only read and which ones write.</p>
     <div class="stats">
-      <div class="stat"><b>15</b><span>shown by default</span></div>
-      <div class="stat"><b>29</b><span>with <code>FAF_TOOLS=all</code></span></div>
-      <div class="stat"><b>12</b><span>read-only</span></div>
-      <div class="stat"><b>4</b><span>marked destructive</span></div>
+      <div class="stat"><div class="stat-value">29</div>
+        <div class="stat-label">MCP Tools</div></div>
+      <div class="stat"><div class="stat-value">15</div>
+        <div class="stat-label">Shown by default</div></div>
+      <div class="stat"><div class="stat-value">12</div>
+        <div class="stat-label">Read-only</div></div>
+      <div class="stat"><div class="stat-value">4</div>
+        <div class="stat-label">Marked destructive</div></div>
     </div>
     <div class="tools">
       <div class="tool"><code>faf_auto</code><span>Set up in one call: init, stack detection, CLAUDE.md, score</span></div>
@@ -286,7 +294,7 @@ For: Freelancers billing in three currencies
       <div class="tool"><code>faf_sync</code><span>Preview, then apply, what changed in your manifests</span></div>
       <div class="tool"><code>faf_doctor</code><span>Find what's missing and why</span></div>
     </div>
-    <p class="note">Every tool stays callable by name, whichever set is shown.</p>
+    <p class="note">Set <code>FAF_TOOLS=all</code> to show all 29. Every tool stays callable by name, whichever set is shown.</p>
   </div>
 </section>
 
