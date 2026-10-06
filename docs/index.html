@@ -1,376 +1,339 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>.FAF Context — faf-mcp</title>
-  <meta name="description" content=".FAF Context (npm: faf-mcp) — the local MCP server that gives Cursor, VS Code and every MCP-compatible IDE persistent project context from project.faf. One source authors AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md.">
+  <meta name="description" content=".FAF Context (npm: faf-mcp) is a local MCP server for Cursor, VS Code, Windsurf and Cline. One project.faf writes the facts into AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://faf.one/orange-smiley.svg" type="image/svg+xml">
   <meta property="og:title" content=".FAF Context — faf-mcp">
-  <meta property="og:description" content="Persistent project context for Cursor, VS Code and every MCP-compatible IDE. Local, stdio, 29 tools. One project.faf authors AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md.">
+  <meta property="og:description" content="One project.faf. Every IDE's context file. A local MCP server for Cursor, VS Code, Windsurf and Cline. 29 tools, all annotated.">
   <meta property="og:image" content="https://faf.one/orange-smiley.svg">
   <meta property="og:url" content="https://wolfe-jam.github.io/faf-mcp/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content=".FAF Context — faf-mcp">
-  <meta name="twitter:description" content="Persistent project context for Cursor, VS Code and every MCP-compatible IDE. Local, stdio, 29 tools.">
+  <meta name="twitter:description" content="One project.faf. Every IDE's context file. Local MCP server, 29 tools.">
   <meta name="twitter:image" content="https://faf.one/orange-smiley.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
 /* === faf-mcp:stylesheet canonical — source of truth: docs/style-source.html === */
 /* === edit ONLY here; surfaces derive · drift-checked in CI                  === */
-:root {
-  --bg:#0a0a0a; --ink:#ffffff;
-  --crimson:#8B1A2B; --crimson-hot:#a52035;
-  --red:#E23B3B; --gold:#FFD700; --cyan:#00D4D4;
-  --grey-1:#cccccc; --grey-2:#999999; --grey-3:#888888;
-  --grey-4:#666666; --grey-5:#555555; --grey-6:#444444;
-  --glow:radial-gradient(ellipse at 70% 30%, rgba(139,26,43,0.12) 0%, transparent 60%);
-  --accent-grad:linear-gradient(90deg, transparent 0%, #8B1A2B 30%, #FFD700 50%, #8B1A2B 70%, transparent 100%);
-  --card-bg:rgba(139,26,43,0.06); --card-border:rgba(139,26,43,0.20);
-  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  --mono:'SF Mono','Monaco','Courier New',monospace;
-  --w-regular:400; --w-semi:600; --w-bold:700; --w-x:800; --w-black:900;
-  --r-sm:6px; --r-md:8px; --r-lg:12px; --r-pill:24px;
+:root{
+  --bg:#f7f8fa; --surface:#ffffff; --line:#e3e6ea; --text:#16181d; --text-2:#3b4048;
+  --accent:#00A3A3; --accent-soft:rgba(0,163,163,.10); --orange:#FF6B35;
+  --btn-bg:#16181d; --btn-fg:#ffffff;
+  /* editor window is dark in both themes, like the editors it serves */
+  --ed-bg:#1e1f24; --ed-bar:#17181c; --ed-tab:#25262c; --ed-line:#2e3038;
+  --ed-text:#d6d9de; --ed-dim:#9aa0aa; --ed-key:#7fd8d8; --ed-str:#e8c08a; --ed-cyan:#00D4D4;
+  --ed-dot:#3a3c44; --ed-gutter:#5d626d; --ed-status:#0f6f6f; --ed-bright:#ffffff;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e0f12; --surface:#16171b; --line:#2a2c33; --text:#f1f2f4; --text-2:#c4c8cf;
+    --accent:#00D4D4; --accent-soft:rgba(0,212,212,.12);
+    --btn-bg:#f1f2f4; --btn-fg:#0e0f12;
+    --ed-bg:#16171b; --ed-bar:#0b0c0e; --ed-tab:#1d1e23; --ed-line:#2a2c33;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e0f12; --surface:#16171b; --line:#2a2c33; --text:#f1f2f4; --text-2:#c4c8cf;
+  --accent:#00D4D4; --accent-soft:rgba(0,212,212,.12);
+  --btn-bg:#f1f2f4; --btn-fg:#0e0f12;
+  --ed-bg:#16171b; --ed-bar:#0b0c0e; --ed-tab:#1d1e23; --ed-line:#2a2c33;
 }
 /* === /faf-mcp:stylesheet canonical === */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--ink);
-      min-height: 100vh;
-      position: relative;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--glow);
-      pointer-events: none;
-    }
-    .accent-line {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--accent-grad);
-      z-index: 100;
-    }
-    .container {
-      position: relative;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 80px 2rem 0;
-    }
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+code{font-family:var(--mono);font-size:.88em;background:var(--accent-soft);color:var(--text);padding:.1em .38em;border-radius:5px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
 
-    /* Hero */
-    .hero {
-      display: flex;
-      align-items: center;
-      gap: 60px;
-      min-height: 70vh;
-    }
-    .hero-left { flex: 1; }
-    .hero-right {
-      width: 280px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .so-2025 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--grey-4);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-    .so-2025 span {
-      color: var(--red);
-      text-decoration: line-through;
-    }
-    .title {
-      font-size: 5rem;
-      font-weight: 900;
-      line-height: 1;
-      margin-bottom: 16px;
-      letter-spacing: -3px;
-    }
-    .title .accent { color: var(--crimson); }
-    .subtitle {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: var(--grey-1);
-      margin-bottom: 12px;
-    }
-    .subtitle .gold { color: var(--gold); }
-    .tagline {
-      font-size: 1rem;
-      color: var(--grey-4);
-      margin-bottom: 32px;
-    }
-    .lightning {
-      font-size: 120px;
-      line-height: 1;
-      margin-bottom: 20px;
-      filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.4));
-    }
-    .hero-badge {
-      background: var(--crimson);
-      color: var(--ink);
-      padding: 10px 24px;
-      border-radius: 24px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    .iana-label {
-      margin-top: 12px;
-      font-size: 11px;
-      color: var(--red);
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+/* top bar */
+.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;text-decoration:none}
+.brand img{width:24px;height:24px}
+.brand small{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--text-2)}
+.top nav{display:flex;gap:20px;font-size:14px;font-weight:500}
+.top nav a{text-decoration:none;color:var(--text-2)}
+.top nav a:hover{color:var(--text)}
 
-    /* Stats */
-    .stats {
-      display: flex;
-      gap: 40px;
-      margin-bottom: 32px;
-    }
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
-    }
-    .stat-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--grey-5);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+/* hero */
+.hero{padding:64px 0 40px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px 5px 6px;margin-bottom:22px}
+.chip .v{background:var(--btn-bg);color:var(--btn-fg);border-radius:999px;padding:2px 9px;font-family:var(--mono);font-size:12px}
+.chip .sub{color:var(--text-2);font-weight:500}
+h1{font-size:clamp(36px,6vw,58px);line-height:1.05;letter-spacing:-.03em;font-weight:800;max-width:19ch}
+h1 span{color:var(--accent)}
+.lede{font-size:18px;color:var(--text-2);max-width:60ch;margin:20px 0 28px}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--line)}
+.btn.primary{background:var(--btn-bg);color:var(--btn-fg);border-color:var(--btn-bg)}
+.btn.ghost{background:var(--surface);color:var(--text)}
 
-    /* CTAs */
-    .ctas {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .ctas a {
-      display: inline-block;
-      padding: 12px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.95rem;
-      transition: transform 0.2s;
-    }
-    .ctas a:hover { transform: translateY(-2px); }
-    .btn-primary { background: var(--crimson); color: var(--ink); }
-    .btn-primary:hover { background: var(--crimson-hot); }
-    .btn-secondary { background: var(--red); color: var(--ink); }
-    .btn-tertiary { background: transparent; border: 2px solid var(--grey-6); color: var(--grey-1); }
-    .btn-tertiary:hover { border-color: var(--grey-3); color: var(--ink); }
+/* editor window */
+.editor{margin-top:44px;background:var(--ed-bg);color:var(--ed-text);border-radius:12px;overflow:hidden;border:1px solid var(--ed-line);box-shadow:0 20px 50px rgba(0,0,0,.18)}
+.ed-bar{display:flex;align-items:center;gap:8px;background:var(--ed-bar);padding:10px 14px}
+.ed-bar i{width:11px;height:11px;border-radius:50%;background:var(--ed-dot);display:block}
+.ed-bar .title{margin-left:10px;font-size:12px;color:var(--ed-dim);font-family:var(--mono)}
+.tabs{display:flex;overflow-x:auto;background:var(--ed-bar);border-bottom:1px solid var(--ed-line)}
+.tab{font-family:var(--mono);font-size:13px;padding:9px 16px;color:var(--ed-dim);border-right:1px solid var(--ed-line);white-space:nowrap;background:transparent;border-top:2px solid transparent;cursor:pointer;border-left:0;border-bottom:0}
+.tab.on{background:var(--ed-bg);color:var(--ed-bright);border-top-color:var(--ed-cyan)}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:7px;vertical-align:1px}
+.ed-body{display:grid;grid-template-columns:44px 1fr;font-family:var(--mono);font-size:13.5px;line-height:1.75;min-height:300px}
+.gutter{color:var(--ed-gutter);text-align:right;padding:16px 10px 16px 0;user-select:none;border-right:1px solid var(--ed-line)}
+.code{padding:16px 18px;white-space:pre;overflow-x:auto;color:var(--ed-text)}
+.k{color:var(--ed-key)} .s{color:var(--ed-str)} .c{color:var(--ed-dim)} .w{color:var(--ed-bright)}
+.panel{display:none} .panel.on{display:contents}
+.ed-status{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ed-status);color:var(--ed-bright);font-family:var(--mono);font-size:12px;padding:5px 14px}
 
-    /* Features */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      margin: 80px 0 60px;
-    }
-    .feature {
-      background: var(--card-bg);
-      padding: 2rem;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-    }
-    .feature h3 {
-      color: var(--red);
-      margin: 0 0 0.5rem;
-      font-size: 1rem;
-      font-weight: 700;
-    }
-    .feature p {
-      color: var(--grey-3);
-      margin: 0;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
+/* sections */
+section{padding:56px 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(26px,3.6vw,34px);letter-spacing:-.02em;line-height:1.15;font-weight:800;margin-bottom:12px}
+.intro{color:var(--text-2);max-width:62ch;margin-bottom:28px}
+.tagline{font-size:clamp(20px,3vw,26px);font-weight:700;letter-spacing:-.01em;text-align:center;padding:44px 0}
+.tagline b{color:var(--accent)}
 
-    /* Three Doors */
-    .three-doors {
-      background: var(--card-bg);
-      border: 1px solid rgba(139, 26, 43, 0.3);
-      border-radius: 12px;
-      padding: 2rem;
-      margin: 0 0 60px;
-    }
-    .three-doors h3 {
-      color: var(--ink);
-      font-size: 1.2rem;
-      margin-bottom: 1.5rem;
-      font-weight: 800;
-    }
-    .door {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.25rem;
-      margin: 0.5rem 0;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 8px;
-      border: 1px solid rgba(139, 26, 43, 0.15);
-      font-family: var(--mono);
-      font-size: 0.9rem;
-    }
-    .door-name { color: var(--grey-1); font-weight: 600; }
-    .door-value { color: var(--red); font-weight: 600; }
-    .door-value a {
-      color: var(--red);
-      text-decoration: none;
-    }
-    .door-value a:hover { color: var(--gold); }
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+.card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.card p{font-size:14.5px;color:var(--text-2)}
+.card .file{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px;display:block}
 
-    /* Bottom bar */
-    .bottom-bar {
-      border-top: 2px solid transparent;
-      border-image: var(--accent-grad) 1;
-      padding: 20px 0;
-      margin-top: 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .bottom-left {
-      font-size: 13px;
-      color: var(--grey-2);
-      font-weight: 600;
-    }
-    .bottom-platforms {
-      display: flex;
-      gap: 20px;
-      font-size: 12px;
-      color: var(--grey-1);
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .bottom-platforms .dot { color: var(--red); }
-    .bottom-platforms .copy-cmd { cursor: pointer; position: relative; }
-    .bottom-platforms .copy-cmd:hover { color: var(--cyan); }
-    .bottom-version {
-      text-align: center;
-      padding: 20px 0 40px;
-      color: var(--grey-6);
-      font-size: 0.8rem;
-    }
+.install{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+.term{background:var(--ed-bg);color:var(--ed-text);border:1px solid var(--ed-line);border-radius:10px;font-family:var(--mono);font-size:13.5px;padding:16px 18px;white-space:pre;overflow-x:auto;line-height:1.7}
+.paths{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:4px}
+.paths td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.paths td:first-child{font-weight:600;width:38%;padding-right:12px}
+.note{font-size:14px;color:var(--text-2);margin-top:14px}
 
-    @media (max-width: 768px) {
-      .hero { flex-direction: column; text-align: center; min-height: auto; padding-top: 40px; }
-      .hero-right { width: 100%; }
-      .title { font-size: 3.5rem; }
-      .stats { justify-content: center; }
-      .ctas { justify-content: center; }
-      .features { grid-template-columns: 1fr; }
-      .bottom-bar { flex-direction: column; gap: 12px; text-align: center; }
-    }
-  </style>
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px 28px}
+.tool{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.tool code{flex:none;background:none;padding:0;color:var(--accent);font-weight:600}
+.tool span{color:var(--text-2)}
+.stats{display:flex;flex-wrap:wrap;gap:28px;margin:6px 0 26px}
+.stat-value{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.stat-label{font-size:13.5px;color:var(--text-2)}
+
+.facts{display:flex;flex-wrap:wrap;gap:10px}
+.fact{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500}
+
+footer{border-top:1px solid var(--line);padding:40px 0 56px;font-size:14px;color:var(--text-2)}
+footer .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:center}
+footer nav{display:flex;flex-wrap:wrap;gap:18px}
+footer a{text-decoration:none;color:var(--text)}
+.bm{margin-top:18px}
+
+@media (max-width:760px){
+  .wrap{padding:0 16px}
+  .top nav{display:none}
+  .chip .sub{display:none}
+  .hero{padding:44px 0 28px}
+  .install{grid-template-columns:1fr}
+  .ed-body{grid-template-columns:34px 1fr;font-size:12.5px}
+  .tools{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-  <a id="versionBadge" href="https://github.com/Wolfe-Jam/faf-mcp" target="_blank" rel="noopener" style="position:fixed;top:14px;left:14px;z-index:9999;text-decoration:none;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);background:rgba(0,0,0,0.6);border:1px solid var(--card-border);border-radius:var(--r-pill);padding:6px 14px;" title="faf-mcp on GitHub">v4.0.0</a>
-  <div class="accent-line"></div>
 
-  <div class="container">
-    <div class="hero">
-      <div class="hero-left">
-        <div class="so-2025">The Interop MCP for Context · npm: faf-mcp</div>
-        <div class="title">.FAF<span class="accent"> </span>Context</div>
-        <div class="subtitle">Persistent project context for Cursor, VS Code and every MCP-compatible IDE <span class="gold">&#9889;</span></div>
-        <p class="tagline">One <code>project.faf</code> authors <code>AGENTS.md</code> · <code>.cursorrules</code> · <code>GEMINI.md</code> · <code>CLAUDE.md</code> — detected from your repo, never guessed.</p>
-
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-value">29</div>
-            <div class="stat-label">MCP Tools</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">15</div>
-            <div class="stat-label">Shown by default</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">0</div>
-            <div class="stat-label">Env vars required</div>
-          </div>
-        </div>
-
-        <div class="ctas">
-          <a href="https://www.npmjs.com/package/faf-mcp" class="btn-primary">npm · faf-mcp</a>
-          <a href="https://faf.one/mcp" class="btn-tertiary">Learn More</a>
-        </div>
-      </div>
-
-      <div class="hero-right">
-        <div class="lightning">&#9889;</div>
-        <div class="hero-badge">LOCAL &middot; STDIO</div>
-        <div class="iana-label">IANA REGISTERED<br><span style="color:var(--grey-3);font-size:10px;letter-spacing:1.5px;">SINCE OCT 2025</span></div>
-      </div>
-    </div>
-
-    <div class="features">
-      <div class="feature">
-        <h3>Runs where you code</h3>
-        <p>A local stdio server. <code>npx faf-mcp</code>, add it to your IDE's MCP config, done. Your project files stay on your machine.</p>
-      </div>
-      <div class="feature">
-        <h3>One source, every surface</h3>
-        <p><code>project.faf</code> authors AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md through faf-cli's own renderers. Hand-written content outside the managed block is preserved.</p>
-      </div>
-      <div class="feature">
-        <h3>Scored, not guessed</h3>
-        <p>Every tool reads the same scorer as <code>faf_score</code>. Trophy is 100% — every slot sourced from the repo, or from you.</p>
-      </div>
-    </div>
-
-    <div class="three-doors">
-      <h3>Run It</h3>
-      <div class="door">
-        <span class="door-name">npm</span>
-        <span class="door-value">npx faf-mcp</span>
-      </div>
-      <div class="door">
-        <span class="door-name">Bun</span>
-        <span class="door-value">bunx faf-mcp</span>
-      </div>
-    </div>
-
-    <div class="bottom-bar">
-      <div class="bottom-left">The Interop MCP for Context · IANA Registered · application/vnd.faf+yaml</div>
-      <div class="bottom-platforms">
-        <span class="copy-cmd" data-cmd="npx claude-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Claude</span><span class="dot">&bull;</span>
-        <span class="copy-cmd" data-cmd="npx grok-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Grok</span><span class="dot">&bull;</span>
-        <span class="copy-cmd" data-cmd="uvx gemini-faf-mcp" title="Copy the install command — paste in any terminal or your AI">Gemini</span><span class="dot">&bull;</span>
-        <span class="copy-cmd" data-cmd="npx faf-mcp" title="Copy the install command — paste in any terminal or your AI">Cursor</span><span class="dot">&bull;</span>
-        <span class="copy-cmd" data-cmd="npx faf-mcp" title="Copy the install command — paste in any terminal or your AI">Any MCP</span>
-      </div>
-    </div>
-    <div class="bottom-version">One format. Any MCP client. Local, in your IDE.</div>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="https://faf.one/orange-smiley.svg" alt="">.FAF Context <small>faf-mcp</small></a>
+    <nav>
+      <a href="#install">Install</a>
+      <a href="#tools">Tools</a>
+      <a href="https://github.com/Wolfe-Jam/faf-mcp">GitHub</a>
+      <a href="https://www.npmjs.com/package/faf-mcp">npm</a>
+    </nav>
   </div>
-  <script>
-    document.querySelectorAll('.copy-cmd').forEach(el => {
-      el.addEventListener('click', async () => {
-        await navigator.clipboard.writeText(el.dataset.cmd);
-        const orig = el.textContent;
-        el.textContent = 'Copied!';
-        el.style.color = 'var(--cyan)';
-        setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1500);
-      });
-    });
-    // Single source of truth for the version: read npm live so the badge can never drift.
-    // The hardcoded text on the badge is just a fallback if the fetch fails (offline / npm down).
-    fetch('https://registry.npmjs.org/faf-mcp/latest').then(r=>r.json()).then(d=>{if(d&&d.version)document.getElementById('versionBadge').textContent='v'+d.version;}).catch(()=>{});
-  </script>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="hero">
+    <div class="chip"><span class="v" id="versionBadge">v4.0.0</span>The Always33 Edition <span class="sub">· One engine, one number</span></div>
+    <h1>One <span>project.faf</span>. Every IDE's context file.</h1>
+    <p class="lede">A local MCP server for Cursor, VS Code, Windsurf and Cline. It reads your IANA-registered <code>project.faf</code> and writes the facts into AGENTS.md, .cursorrules, GEMINI.md and CLAUDE.md, scored always-33, the same number faf-cli gives.</p>
+    <div class="ctas">
+      <a class="btn primary" href="cursor://anysphere.cursor-deeplink/mcp/install?name=faf-mcp&amp;config=eyJjb21tYW5kIjoiYnVueCIsImFyZ3MiOlsiZmFmLW1jcCJdfQ==">Add to Cursor</a>
+      <a class="btn ghost" href="#install">Other IDEs</a>
+    </div>
+
+    <div class="editor" aria-label="project.faf and the files it writes">
+      <div class="ed-bar"><i></i><i></i><i></i><span class="title">your-repo</span></div>
+      <div class="tabs" role="tablist">
+        <button class="tab on" data-p="faf" role="tab"><span class="dot"></span>project.faf</button>
+        <button class="tab" data-p="agents" role="tab">AGENTS.md</button>
+        <button class="tab" data-p="cursor" role="tab">.cursorrules</button>
+        <button class="tab" data-p="gemini" role="tab">GEMINI.md</button>
+        <button class="tab" data-p="claude" role="tab">CLAUDE.md</button>
+      </div>
+      <div class="ed-body">
+        <div class="gutter">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10</div>
+        <div class="code"><div class="panel on" data-p="faf"><span class="k">project</span>:
+  <span class="k">name</span>: <span class="s">your-app</span>
+  <span class="k">goal</span>: <span class="s">Invoices that pay themselves</span>
+<span class="k">stack</span>:
+  <span class="k">frontend</span>: <span class="s">SvelteKit</span>
+  <span class="k">database</span>: <span class="s">Postgres</span>
+<span class="k">human_context</span>:
+  <span class="k">who</span>: <span class="s">Freelancers billing in three currencies</span>
+  <span class="k">why</span>: <span class="s">Chasing late payments by hand</span>
+<span class="c"># the facts, in one place</span></div>
+<div class="panel" data-p="agents"><span class="c">&lt;!-- faf:start --&gt;</span>
+<span class="w"># your-app</span>
+Invoices that pay themselves.
+Stack: SvelteKit · Postgres
+For: Freelancers billing in three currencies
+<span class="c">&lt;!-- faf:end --&gt;</span>
+
+<span class="w">## Our rules</span>
+<span class="c">Your own instructions live here, untouched.</span>
+</div>
+<div class="panel" data-p="cursor"><span class="c"># faf:start</span>
+<span class="w">your-app</span>: Invoices that pay themselves.
+Stack: SvelteKit · Postgres
+For: Freelancers billing in three currencies
+<span class="c"># faf:end</span>
+
+<span class="c"># Your own Cursor rules below, untouched.</span>
+</div>
+<div class="panel" data-p="gemini"><span class="c">&lt;!-- faf:start --&gt;</span>
+<span class="w"># your-app</span>
+Invoices that pay themselves.
+Stack: SvelteKit · Postgres
+For: Freelancers billing in three currencies
+<span class="c">&lt;!-- faf:end --&gt;</span>
+
+<span class="c">Your own Gemini notes below, untouched.</span>
+</div>
+<div class="panel" data-p="claude"><span class="c">&lt;!-- faf:start --&gt;</span>
+<span class="w"># your-app</span>
+Invoices that pay themselves.
+Stack: SvelteKit · Postgres
+For: Freelancers billing in three currencies
+<span class="c">&lt;!-- faf:end --&gt;</span>
+
+<span class="c">Your own Claude notes below, untouched.</span>
+</div>
+        </div>
+      </div>
+      <div class="ed-status"><span>faf_claude { all: true } · writes all four</span><span>project.faf · application/vnd.faf+yaml</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap"><p class="tagline">FAF <b>defines</b>. AGENTS.md instructs. AI codes.</p></div>
+
+<section>
+  <div class="wrap">
+    <h2>Define once. Sync everywhere.</h2>
+    <p class="intro">You keep <code>.cursorrules</code>. A teammate keeps AGENTS.md. Someone just moved to Gemini. Every tool wants its own file, and they drift apart. With faf-mcp, the facts come from one place.</p>
+    <div class="grid">
+      <div class="card"><span class="file">project.faf</span><h3>Facts in one file</h3><p>The stack, the goal and who it's for. Derived from your repo; the human slots are approved by you.</p></div>
+      <div class="card"><span class="file">AGENTS.md · .cursorrules · GEMINI.md · CLAUDE.md</span><h3>Written, not copied</h3><p>faf-cli's own renderers write a managed block in each. Your own rules outside it stay byte for byte.</p></div>
+      <div class="card"><span class="file">faf_score</span><h3>Scored, not guessed</h3><p>The always-33 score from faf-cli's kernel, the same number in the terminal and in your IDE. 100% is Trophy ✪.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install in your IDE</h2>
+    <p class="intro">It runs locally over stdio, so your files stay on your machine. No API key, no env vars required.</p>
+    <div class="install">
+      <div>
+<div class="term"><span class="c">// add to your MCP config</span>
+{"mcpServers": {"faf": {
+  "command": "bunx",
+  "args": ["faf-mcp"]
+}}}</div>
+        <p class="note">No Bun? Use <code>npx</code> with <code>["-y", "faf-mcp"]</code>. Node 22 or newer.</p>
+      </div>
+      <table class="paths">
+        <tr><td>Cursor</td><td><code>~/.cursor/mcp.json</code> or the one-click button above</td></tr>
+        <tr><td>Windsurf</td><td><code>~/.codeium/windsurf/mcp_config.json</code></td></tr>
+        <tr><td>Cline</td><td>Cline's MCP settings</td></tr>
+        <tr><td>VS Code</td><td>Your MCP config</td></tr>
+        <tr><td>Claude Desktop</td><td>Use <a href="https://github.com/Wolfe-Jam/claude-faf-mcp">claude-faf-mcp</a></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <h2>Every tool says what it does</h2>
+    <p class="intro">All 29 tools carry MCP annotations, so your IDE can tell which ones only read and which ones write.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-value">29</div>
+        <div class="stat-label">MCP Tools</div></div>
+      <div class="stat"><div class="stat-value">15</div>
+        <div class="stat-label">Shown by default</div></div>
+      <div class="stat"><div class="stat-value">12</div>
+        <div class="stat-label">Read-only</div></div>
+      <div class="stat"><div class="stat-value">4</div>
+        <div class="stat-label">Marked destructive</div></div>
+    </div>
+    <div class="tools">
+      <div class="tool"><code>faf_auto</code><span>Set up in one call: init, stack detection, CLAUDE.md, score</span></div>
+      <div class="tool"><code>faf_score</code><span>The always-33 score, slot by slot</span></div>
+      <div class="tool"><code>faf_go</code><span>A guided interview to 100%</span></div>
+      <div class="tool"><code>faf_claude</code><span>Write CLAUDE.md, or all four files at once</span></div>
+      <div class="tool"><code>faf_agents</code><span>Import or write AGENTS.md</span></div>
+      <div class="tool"><code>faf_cursor</code><span>Import or write .cursorrules</span></div>
+      <div class="tool"><code>faf_gemini</code><span>Import or write GEMINI.md</span></div>
+      <div class="tool"><code>faf_git</code><span>Author a project.faf from any public GitHub repo</span></div>
+      <div class="tool"><code>faf_sync</code><span>Preview, then apply, what changed in your manifests</span></div>
+      <div class="tool"><code>faf_doctor</code><span>Find what's missing and why</span></div>
+    </div>
+    <p class="note">Set <code>FAF_TOOLS=all</code> to show all 29. Every tool stays callable by name, whichever set is shown.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="facts">
+      <span class="fact">IANA-registered · application/vnd.faf+yaml</span>
+      <span class="fact">Local stdio</span>
+      <span class="fact">Runs on faf-cli v8</span>
+      <span class="fact">MCP Registry · one.faf/faf-mcp</span>
+      <span class="fact">MIT</span>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <span>.FAF Context · npm: faf-mcp · v4.0.0</span>
+      <nav>
+        <a href="https://github.com/Wolfe-Jam/faf-mcp">GitHub</a>
+        <a href="https://www.npmjs.com/package/faf-mcp">npm</a>
+        <a href="https://github.com/Wolfe-Jam/faf-mcp/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://faf.one">faf.one</a>
+      </nav>
+    </div>
+    <p class="bm">Bookmark this page for later.</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){
+    var p=t.getAttribute('data-p');
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===t)});
+    document.querySelectorAll('.panel').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-p')===p)});
+  });
+});
+</script>
 </body>
 </html>
