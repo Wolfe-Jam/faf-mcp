@@ -1,0 +1,54 @@
+version: "1.0"
+agent:
+  name: faf-mcp
+  displayName: .FAF Context
+  id: urn:air:faf.one:agent:faf-mcp
+  version: 4.0.0
+  description: ".FAF Context: persistent project context for Cursor, VS Code and every MCP-compatible IDE."
+  homepage: https://faf.one
+capabilities:
+  - name: faf_score
+    type: tool
+    description: Score a project.faf's AI-readiness (0-100%) from its populated context slots
+    tags:
+      - faf_score
+  - name: faf_init
+    type: tool
+    description: Create a project.faf, making a project instantly AI-readable
+    tags:
+      - faf_init
+  - name: faf_sync
+    type: tool
+    description: Reconcile project.faf with what the repo's manifests say now
+    tags:
+      - faf_sync
+  - name: faf_agents
+    type: tool
+    description: Import AGENTS.md into project.faf, or write it from project.faf
+    tags:
+      - faf_agents
+  - name: faf_cursor
+    type: tool
+    description: Import .cursorrules into project.faf, or write it from project.faf
+    tags:
+      - faf_cursor
+  - name: faf_git
+    type: tool
+    description: Author a project.faf from any public GitHub repository URL
+    tags:
+      - faf_git
+endpoints:
+  - protocol: mcp
+    transport: stdio
+    location: faf-mcp
+metadata:
+  cards:
+    accent: "#00B8B8" # key colour: dark cyan, the FAF cyan for text on light
+    domain: faf.one
+    examples:
+      - What's my project's AI-readiness score?
+      - Write AGENTS.md from my project.faf
+      - Sync my project.faf with this repo
+    packages:
+      - registryType: npm
+        identifier: faf-mcp
