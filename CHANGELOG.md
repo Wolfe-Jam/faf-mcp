@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v4.0.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.0.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,13 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.0.1] - 2026-10-16
+
+**`faf-mcp --version` and `--help` answer and exit. Before, both started the server.** 407 tests pass, 0 fail.
+
+### Fixed
+- `--version` / `-v` / `-V` prints `faf-mcp 4.0.1` and exits 0; `--help` / `-h` prints usage and a client config and exits 0. Both used to start the server on stdio and print nothing. Any other argument still starts the server, so client configs don't change. New `tests/cli-flags.test.ts` runs each flag with stdin closed and a time limit. Closes #94.
 
 ## [4.0.0] - 2026-09-26 — The Always33 Edition
 

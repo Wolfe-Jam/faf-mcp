@@ -28,7 +28,13 @@
 
 ---
 
-## What's New in 4.0.0 — The Always33 Edition
+## What's New in 4.0.1
+
+**`faf-mcp --version` and `--help` answer and exit. Before, both started the server.**
+
+- `--version` (`-v`) prints the version; `--help` (`-h`) prints usage and a client config. Anything else starts the server as before, so your client config doesn't change.
+
+## 4.0.0 — The Always33 Edition
 
 **One engine, one number: faf-mcp 4 scores with faf-cli 8's always-33 kernel — the same score faf-cli, claude-faf-mcp 7 and faf-kernel give.**
 
