@@ -3,7 +3,7 @@ agent:
   name: faf-mcp
   displayName: .FAF Context
   id: urn:air:faf.one:agent:faf-mcp
-  version: 4.0.0
+  version: 4.0.1
   description: ".FAF Context: persistent project context for Cursor, VS Code and every MCP-compatible IDE."
   homepage: https://faf.one
 capabilities:
