@@ -11,13 +11,13 @@ import { FafResourceHandler } from './handlers/resources';
 import { FafToolHandler } from './handlers/tools';
 import { FafEngineAdapter } from './handlers/engine-adapter';
 import {
-  FAF_IDE_SKILL_URI,
   SKILLS_EXTENSION_ID,
   SkillCatalog,
   SkillsGetRequestSchema,
   SkillsListRequestSchema,
 } from './handlers/skills';
 import { isError } from './utils/type-guards.js';
+import { SERVER_INSTRUCTIONS } from './instructions';
 import { VERSION } from './version';
 
 export interface FafMcpServerConfig {
@@ -68,10 +68,7 @@ export class FafMcpServer {
             listChanged: true,
           },
         },
-        instructions:
-          'FAF MCP IDE edition (one.faf/faf-mcp) — IANA application/vnd.faf+yaml. ' +
-          'Skills: experimental io.modelcontextprotocol/skills — skills/list · skills/get · ' +
-          `resources/read ${FAF_IDE_SKILL_URI} (sha256 digests). Stdio local; tools unchanged.`,
+        instructions: SERVER_INSTRUCTIONS,
       }
     );
 
