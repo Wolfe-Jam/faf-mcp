@@ -28,7 +28,15 @@
 
 ---
 
-## What's New in 4.0.1
+## What's New in 4.1.0 — The Instructions Edition
+
+**faf-mcp now tells the model how its tools fit together: server instructions in initialize (642 characters), plus faf-cli 8.5.0, which knows a skills repo when it sees one.**
+
+- **Server instructions.** When your editor's AI connects, the server says how its tools fit together: one project at a time, start with `faf_doctor` or `faf_score`, ask the user for the human answers, and project.faf is the source for CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md.
+- **faf-cli 8.5.0 inside.** `faf_init` and `faf_auto` detect a skills repo: `SKILL.md` folders make it `skills` (10 slots), and a Claude Code plugin manifest makes it `skills-plugin` (14).
+- **hono advisory cleared** (serveStatic double-decode).
+
+## 4.0.1
 
 **`faf-mcp --version` and `--help` answer and exit. Before, both started the server.**
 

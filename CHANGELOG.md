@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v4.0.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.1.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,20 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.1.0] - 2026-10-27 — The Instructions Edition
+
+**faf-mcp now tells the model how its tools fit together: server instructions in initialize (642 characters), plus faf-cli 8.5.0, which knows a skills repo when it sees one.** 410 tests pass, 0 fail.
+
+### Added
+- **Server instructions** (#97). `initialize` now returns `instructions`: 642 characters on how the tools fit together. One project at a time (`faf_context`); start with `faf_doctor` or `faf_score`; `faf_auto` or `faf_git` when there is no project.faf; human fields come from the user through `faf_go` or `faf_check`, never invented; project.faf is the source for CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md. The last line keeps the pointer to the bundled skill guide. Identity and IANA wording dropped (serverInfo carries the name). `tests/server-instructions.test.ts` checks they are sent, stay under 1,000 characters, and name only tools on the default list.
+
+### Changed
+- **faf-cli ^8.5.0** (#98 and this release, was ^8.0.0). `faf_init` and `faf_auto` now detect a skills repo: `SKILL.md` folders make it `skills` (10 slots); add `.claude-plugin/plugin.json` and it's `skills-plugin` (14 slots). A CLI or library that ships a skill keeps its type.
+- The `version` script runs `faf-cli sync` (faf-cli 8 has no `--direction` option).
+
+### Fixed
+- **hono 4.13.13** (serveStatic double-decode advisory, #96), transitive through the MCP SDK. Lockfile only.
 
 ## [4.0.1] - 2026-10-16
 
