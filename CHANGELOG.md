@@ -10,17 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.0] - 2026-10-27 — The Instructions Edition
 
-**faf-mcp now tells the model how its tools fit together: server instructions in initialize (642 characters), plus faf-cli 8.5.0, which knows a skills repo when it sees one.** 410 tests pass, 0 fail.
+**faf-mcp now tells the model how its tools fit together: server instructions in initialize (642 characters), plus faf-cli 8.5.0, which knows a skills repo when it sees one.** 413 tests pass, 0 fail.
 
 ### Added
 - **Server instructions** (#97). `initialize` now returns `instructions`: 642 characters on how the tools fit together. One project at a time (`faf_context`); start with `faf_doctor` or `faf_score`; `faf_auto` or `faf_git` when there is no project.faf; human fields come from the user through `faf_go` or `faf_check`, never invented; project.faf is the source for CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md. The last line keeps the pointer to the bundled skill guide. Identity and IANA wording dropped (serverInfo carries the name). `tests/server-instructions.test.ts` checks they are sent, stay under 1,000 characters, and name only tools on the default list.
 
 ### Changed
-- **faf-cli ^8.5.0** (#98 and this release, was ^8.0.0). `faf_init` and `faf_auto` now detect a skills repo: `SKILL.md` folders make it `skills` (10 slots); add `.claude-plugin/plugin.json` and it's `skills-plugin` (14 slots). A CLI or library that ships a skill keeps its type.
+- **faf-cli ^8.5.0** (#98 and this release, was ^8.0.0). `faf_init` and `faf_auto` now detect a skills repo: `SKILL.md` folders make it `skills` (10 slots); add `.claude-plugin/plugin.json` and it's `skills-plugin` (14 slots). A CLI or library that ships a skill keeps its type. faf-cli proves the detection in its own suite (`tests/detect/skills-detect.test.ts`, v8.5.0); `tests/wjttc-compose-faf-cli.test.ts` checks that `faf_auto` reaches it over MCP (skills, skills-plugin, and a CLI that ships a skill stays `cli`).
 - The `version` script runs `faf-cli sync` (faf-cli 8 has no `--direction` option).
 
 ### Fixed
 - **hono 4.13.13** (serveStatic double-decode advisory, #96), transitive through the MCP SDK. Lockfile only.
+- Comments that cited an internal document and an internal process are gone from `dist` and `scripts/`.
+
+### Not claimed
+- Instructions are offered to the client; the client decides whether the model sees them.
+- Detection reads files only: `SKILL.md` folders and `.claude-plugin/plugin.json`. It does not check that a skill is well written.
 
 ## [4.0.1] - 2026-10-16
 

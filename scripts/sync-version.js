@@ -9,7 +9,7 @@
  *   docs/index.html   the version badge (guarded by wjttc-p0-no-false-hosted-claim)
  *   AGENTS.md         the "· vX.Y.Z" stamp on the facts line
  *
- * Doc Gate 101 (/pubpro) refuses on any drift between these; this is what
+ * The release check refuses on any drift between these; this is what
  * keeps them from drifting in the first place.
  */
 
