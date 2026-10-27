@@ -160,3 +160,63 @@ describe('🏁 WJTTC — compose faf-cli', () => {
     expect(after).toBe(cli.scoreFafYaml(got).score);
   });
 });
+
+// Skills detection (faf-cli ^8.5.0) through the MCP protocol. faf-cli proves the
+// behaviour in its own suite (tests/detect/skills-detect.test.ts, v8.5.0); this
+// proves faf_auto reaches it: the type project.faf gets.
+describe('🏁 WJTTC — skills detection via faf_auto (compose floor 8.5)', () => {
+  let client: Client;
+  let server: FafMcpServer;
+  const dirs: string[] = [];
+  const SKILL = (n: string): string => `---\nname: ${n}\ndescription: Does ${n}.\n---\nBody\n`;
+  const CASES: Array<{ name: string; files: Record<string, string>; type: string }> = [
+    { name: 'skills', files: { 'skills/alpha/SKILL.md': SKILL('alpha'), 'skills/beta/SKILL.md': SKILL('beta') }, type: 'skills' },
+    {
+      name: 'skills-plugin',
+      files: {
+        'skills/alpha/SKILL.md': SKILL('alpha'),
+        'skills/beta/SKILL.md': SKILL('beta'),
+        '.claude-plugin/plugin.json': '{"name":"alpha-skills","version":"0.1.0"}\n',
+      },
+      type: 'skills-plugin',
+    },
+    {
+      name: 'cli-ships-a-skill',
+      files: {
+        'package.json': '{"name":"tool","version":"1.0.0","bin":{"tool":"cli.js"}}\n',
+        'cli.js': '#!/usr/bin/env node\n',
+        'skills/tool/SKILL.md': SKILL('tool'),
+        '.claude-plugin/plugin.json': '{"name":"tool","version":"1.0.0"}\n',
+      },
+      type: 'cli',
+    },
+  ];
+
+  beforeAll(async () => {
+    server = new FafMcpServer({ transport: 'stdio', fafEnginePath: 'native' });
+    const [clientT, serverT] = InMemoryTransport.createLinkedPair();
+    await server.getServer().connect(serverT);
+    client = new Client({ name: 'wjttc-skills', version: '1.0.0' }, { capabilities: {} });
+    await client.connect(clientT);
+  });
+  afterAll(async () => {
+    await client.close();
+    await server.getServer().close();
+    for (const d of dirs) fs.rmSync(d, { recursive: true, force: true });
+  });
+
+  for (const c of CASES) {
+    test(`faf_auto on ${c.name} writes type: ${c.type}`, async () => {
+      const d = fs.mkdtempSync(path.join(os.tmpdir(), `faf-skills-${c.name}-`));
+      dirs.push(d);
+      for (const [rel, body] of Object.entries(c.files)) {
+        fs.mkdirSync(path.dirname(path.join(d, rel)), { recursive: true });
+        fs.writeFileSync(path.join(d, rel), body);
+      }
+      const res = (await client.callTool({ name: 'faf_auto', arguments: { path: d } })) as ToolText;
+      expect(res.isError).not.toBe(true);
+      const faf = fs.readFileSync(path.join(d, 'project.faf'), 'utf-8');
+      expect(faf).toMatch(new RegExp(`^\\s*type: ${c.type}(\\s|$)`, 'm'));
+    });
+  }
+});

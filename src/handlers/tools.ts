@@ -37,7 +37,6 @@ import { turboCatDisplay } from '../faf-core/extract/turbocat-bridge.js';
  * Spine mirrors claude-faf-mcp's proven-A Core; the interop quad
  * (faf_claude + faf_agents/faf_cursor/faf_gemini) is this edition's identity —
  * the Cursor / IDE multi-format write — where CFM carries memory tools instead.
- * See PLANET-FAF/strategy/claude-faf-mcp-core-tier-glama-a-2026-06-17.md.
  */
 const CORE_TOOLS = new Set<string>([
   // Spine — mirrors CFM
