@@ -25,12 +25,12 @@ The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for
 - **What:** The Cursor / IDE Edition — persistent context for Cursor, VS Code, and every MCP-compatible IDE — 29 MCP tools (15 essential shown by default), interop with AGENTS.md, .cursorrules, GEMINI.md
 - **Why:** Eliminate the 20-minute AI context tax — give AI instant project understanding in 30 seconds
 - **Where:** npm · MCP Registry · any MCP-compatible IDE — people get it how they wish
-- **When:** Production/Stable — v4.1.0 The Instructions Edition, WJTTC certified
+- **When:** Production/Stable — v4.1.1 The Instructions Edition, WJTTC certified
 - **How:** npx faf-mcp or npm install -g faf-mcp, then add to your MCP config
 
 ---
 
-*STATUS: SYNC ACTIVE — 2026-10-27T21:01:01.358Z*
+*STATUS: SYNC ACTIVE — 2026-10-29T02:09:48.329Z*
 <!-- faf:end -->
 
 ## Working here

@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v4.1.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.1.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,7 +8,9 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.1.1] - 2026-10-28 — The Instructions Edition
+
+**One rule for project questions: read project.faf first.**
 
 ### Changed
 - **Server instructions: a rule for project questions.** Line 2 now reads "For questions about the project (stack, goal, commands), read project.faf first and answer from it. faf_score shows what is missing; faf_doctor says why." It replaces "Start with faf_doctor or faf_score…", which models read as a hint: in a 3-run pilot on a repo where project.faf and package.json disagree, Claude Code and Grok Build read package.json first 3 of 3 with the old line, and project.faf first 3 of 3 (Claude) and 2 of 3 (Grok) with the new one. 712 characters.
