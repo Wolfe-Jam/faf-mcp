@@ -28,7 +28,13 @@
 
 ---
 
-## What's New in 4.1.0 — The Instructions Edition
+## What's New in 4.1.1 — The Instructions Edition
+
+**One rule for project questions: read project.faf first.**
+
+- **Server instructions, line 2.** "For questions about the project (stack, goal, commands), read project.faf first and answer from it. faf_score shows what is missing; faf_doctor says why." It replaces "start with `faf_doctor` or `faf_score`", which agents read as a hint. In a 3-run pilot on a repo where project.faf and package.json disagree, Claude Code read project.faf first 3 of 3 and Grok Build 2 of 3 with the new line, against 0 of 3 for both with the old one. 712 characters.
+
+## 4.1.0 — The Instructions Edition
 
 **faf-mcp now tells the model how its tools fit together: server instructions in initialize (642 characters), plus faf-cli 8.5.0, which knows a skills repo when it sees one.**
 
