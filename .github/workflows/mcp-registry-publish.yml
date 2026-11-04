@@ -77,6 +77,22 @@ jobs:
             echo "already=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Wait for the npm version to be live
+        if: steps.served.outputs.already != 'true'
+        # The registry checks that the npm version exists. npm takes a minute
+        # or two to serve a new publish, so a release cut right after
+        # `npm publish` can race it (wjttc v1.4.2: 404, then 400).
+        run: |
+          PKG=$(jq -r '[.packages[] | select((.registryType // .registry_type) == "npm")][0].identifier' server.json)
+          VER=$(jq -r '.version' server.json)
+          for i in $(seq 1 40); do
+            if curl -sf -o /dev/null "https://registry.npmjs.org/${PKG}/${VER}"; then
+              echo "npm serves ${PKG}@${VER}"; exit 0
+            fi
+            echo "waiting for ${PKG}@${VER} on npm (${i}/40)"; sleep 15
+          done
+          echo "::error::${PKG}@${VER} is not on npm after 10 minutes: publish it, then re-run this workflow"; exit 1
+
       - name: Login via DNS (one.faf namespace; the key from the environment)
         if: steps.served.outputs.already != 'true'
         env:
