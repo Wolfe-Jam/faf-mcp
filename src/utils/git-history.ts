@@ -8,12 +8,15 @@
  *
  *   1. the index (staged entries, so a file deleted only in the working tree
  *      is found without walking history), then
- *   2. every commit reachable from HEAD, refs/ and packed-refs — loose and
- *      packed objects, OFS/REF deltas — looking the path up in each tree.
+ *   2. every commit reachable from HEAD, refs/, packed-refs and every reflog
+ *      (logs/HEAD, logs/refs/**), so a commit dropped by `reset --hard` is
+ *      still checked — loose and packed objects, OFS/REF deltas, and the
+ *      object stores named in objects/info/alternates (`clone --shared`) —
+ *      looking the path up in each tree.
  *
  * Read-only, and fail-closed: `never` is returned only when the whole
  * history was read. Any read error, missing object, unreadable or malformed
- * pack/index/ref, a shallow clone, a SHA-256 repository, or a walk past the
+ * pack/index/ref/reflog, an alternate object store that cannot be read, a shallow clone, a SHA-256 repository, or a walk past the
  * budget returns `unknown` (never throws). The caller decides what `unknown`
  * means; faf_dna refuses to issue a certificate on it.
  */
@@ -125,14 +128,56 @@ function indexHas(gitDir: string, rel: string): boolean {
   return false;
 }
 
+/**
+ * The object directories to search: `objectsDir` plus the directories listed
+ * in its `info/alternates` (written by `git clone --shared` / `--reference`).
+ * Relative entries resolve against `objectsDir`. One level is followed. An
+ * alternates file or an alternate directory that cannot be read throws.
+ */
+function objectDirs(objectsDir: string): string[] {
+  const dirs = [objectsDir];
+  const raw = readOptional(path.join(objectsDir, 'info', 'alternates'));
+  if (!raw) return dirs;
+  for (const line of raw.toString('utf-8').split('\n')) {
+    const entry = line.trim();
+    if (!entry || entry.startsWith('#')) continue;
+    if (entry.startsWith('"')) throw new HistoryUnreadable('alternates has a quoted path it cannot parse');
+    const dir = path.resolve(objectsDir, entry);
+    let st: fs.Stats;
+    try {
+      st = fs.statSync(dir);
+    } catch (err) {
+      throw new HistoryUnreadable(`cannot read alternate object store ${entry}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    if (!st.isDirectory()) throw new HistoryUnreadable(`alternate object store ${entry} is not a directory`);
+    try {
+      fs.readdirSync(dir);
+    } catch (err) {
+      throw new HistoryUnreadable(`cannot read alternate object store ${entry}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    if (!dirs.includes(dir)) dirs.push(dir);
+  }
+  return dirs;
+}
+
 class ObjectStore {
   private packs: Pack[] | null = null;
-  constructor(private readonly objectsDir: string) {}
+  private readonly dirs: string[];
+  constructor(objectsDir: string) {
+    this.dirs = objectDirs(objectsDir);
+  }
 
   private loadPacks(): Pack[] {
     if (this.packs) return this.packs;
     const packs: Pack[] = [];
-    const dir = path.join(this.objectsDir, 'pack');
+    for (const objectsDir of this.dirs) packs.push(...this.loadPacksIn(objectsDir));
+    this.packs = packs;
+    return packs;
+  }
+
+  private loadPacksIn(objectsDir: string): Pack[] {
+    const packs: Pack[] = [];
+    const dir = path.join(objectsDir, 'pack');
     let names: string[] = [];
     try {
       names = fs.readdirSync(dir);
@@ -159,7 +204,6 @@ class ObjectStore {
       }
       packs.push({ idx, pack, count: idx.readUInt32BE(8 + 255 * 4) });
     }
-    this.packs = packs;
     return packs;
   }
 
@@ -212,8 +256,9 @@ class ObjectStore {
 
   /** The object, or null when it is in neither loose storage nor any pack. Read errors throw. */
   read(hex: string, depth = 0): { type: string; data: Buffer } | null {
-    const loose = readOptional(path.join(this.objectsDir, hex.slice(0, 2), hex.slice(2)));
-    if (loose) {
+    for (const dir of this.dirs) {
+      const loose = readOptional(path.join(dir, hex.slice(0, 2), hex.slice(2)));
+      if (!loose) continue;
       const raw = inflateSync(loose);
       const sp = raw.indexOf(0x20);
       const nul = raw.indexOf(0);
@@ -282,6 +327,24 @@ function treeEntry(tree: Buffer, name: string): string | null {
   return null;
 }
 
+/**
+ * The admin dirs of linked worktrees: <commonDir>/worktrees/<id>/. Each holds
+ * that worktree's own HEAD and logs/HEAD, which git counts as reachable (gc
+ * keeps them, `git log --all --reflog` walks them). No worktrees dir is fine;
+ * one that exists but cannot be listed throws.
+ */
+function linkedWorktreeDirs(commonDir: string): string[] {
+  const dir = path.join(commonDir, 'worktrees');
+  let entries: fs.Dirent[] = [];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (err) {
+    if (isAbsent(err)) return [];
+    throw new HistoryUnreadable(`cannot list worktrees: ${(err as Error).message}`);
+  }
+  return entries.filter((e) => e.isDirectory()).map((e) => path.join(dir, e.name));
+}
+
 function refTips(commonDir: string, gitDir: string): string[] {
   const tips = new Set<string>();
   const packed = new Map<string, string>();
@@ -331,6 +394,60 @@ function refTips(commonDir: string, gitDir: string): string[] {
   walk(path.join(commonDir, 'refs'));
   const head = readRef(gitDir, 'HEAD');
   if (head) tips.add(head);
+  // Every linked worktree's HEAD, wherever faf_dna was called from: a detached
+  // worktree can hold the only commit with .faf-dna.
+  for (const w of linkedWorktreeDirs(commonDir)) {
+    const h = readRef(w, 'HEAD');
+    if (h) tips.add(h);
+  }
+  if (commonDir !== gitDir) {
+    const mainHead = readRef(commonDir, 'HEAD');
+    if (mainHead) tips.add(mainHead);
+  }
+  return [...tips];
+}
+
+const ZERO_SHA = '0'.repeat(40);
+
+/**
+ * Every commit a reflog names: logs/HEAD of this worktree, of the common dir
+ * and of every linked worktree, and every file under logs/refs/. A commit dropped by `reset --hard`,
+ * `commit --amend` or a deleted branch is reachable only from here until the
+ * reflog expires. No logs directory is fine (core.logAllRefUpdates=false);
+ * a reflog that exists but cannot be read or parsed throws.
+ */
+function reflogTips(commonDir: string, gitDir: string): string[] {
+  const tips = new Set<string>();
+  const readLog = (p: string): void => {
+    const raw = readOptional(p);
+    if (!raw) return;
+    for (const line of raw.toString('utf-8').split('\n')) {
+      if (!line) continue;
+      const m = line.match(/^([0-9a-f]{40}) ([0-9a-f]{40}) /);
+      if (!m) throw new HistoryUnreadable(`reflog ${path.basename(p)} has a line it cannot parse`);
+      for (const sha of [m[1], m[2]]) if (sha !== ZERO_SHA) tips.add(sha);
+    }
+  };
+  const walk = (dir: string): void => {
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (err) {
+      if (isAbsent(err)) return;
+      throw new HistoryUnreadable(`cannot list reflogs: ${(err as Error).message}`);
+    }
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else readLog(p);
+    }
+  };
+  readLog(path.join(gitDir, 'logs', 'HEAD'));
+  if (commonDir !== gitDir) readLog(path.join(commonDir, 'logs', 'HEAD'));
+  for (const w of linkedWorktreeDirs(commonDir)) {
+    if (w !== gitDir) readLog(path.join(w, 'logs', 'HEAD'));
+  }
+  walk(path.join(commonDir, 'logs', 'refs'));
   return [...tips];
 }
 
@@ -362,7 +479,7 @@ export function gitEverTracked(file: string, maxCommits = 200_000): GitHistoryRe
     const segments = rel.split('/');
     const seenCommits = new Set<string>();
     const seenTrees = new Set<string>();
-    const queue = refTips(repo.commonDir, repo.gitDir);
+    const queue = [...refTips(repo.commonDir, repo.gitDir), ...reflogTips(repo.commonDir, repo.gitDir)];
 
     while (queue.length) {
       let sha = queue.pop()!;

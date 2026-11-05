@@ -18,6 +18,14 @@
  *   F4  faf_write accepted `.faf-dna/x` (made a directory) → any segment refused.
  *   I4  outside git, the birth reply says no history could be checked.
  *   I5  faf_write overwrite keeps the replaced file's mode.
+ *
+ * Round 3 (second review of #110, at f5fd963):
+ *   N1  a commit reachable only from the reflog (reset --hard) was not
+ *       checked → reflogs are walked; an unreadable reflog is unknown.
+ *   N2  a `clone --shared` repo (objects/info/alternates) was always refused
+ *       → alternates are followed; an unreadable alternate is unknown.
+ *   N3  a path through a broken symlinked folder was stopped only by mkdir
+ *       → refused explicitly before mkdir.
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import * as fs from 'fs';
@@ -597,5 +605,307 @@ describe('🏁 WJTTC — in-process git history reader (faf_dna, no child_proces
   test('fresh repo with no commits (unborn HEAD) is still never', () => {
     const d = repo();
     expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('never');
+  });
+});
+
+describe('🏁 WJTTC — round 3: reflog, shared clones, broken symlinked folders (N1–N3)', () => {
+  const handler = new FafToolHandler(new FafEngineAdapter('native'));
+  const dna = async (dir: string): Promise<ToolText> =>
+    (await handler.callTool('faf_dna', { path: dir })) as ToolText;
+
+  const dirs: string[] = [];
+  const tmp = (prefix: string): string => {
+    const d = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), prefix)));
+    dirs.push(d);
+    return d;
+  };
+  const repo = (): string => {
+    const d = tmp('faf-dna-r3-');
+    git(d, 'init', '-q');
+    git(d, 'config', 'user.email', 'wjttc@example.invalid');
+    git(d, 'config', 'user.name', 'wjttc');
+    git(d, 'config', 'commit.gpgsign', 'false');
+    fs.writeFileSync(path.join(d, 'project.faf'), FAF);
+    git(d, 'add', 'project.faf');
+    git(d, 'commit', '-q', '-m', 'base');
+    return d;
+  };
+  /** .faf-dna committed, then dropped by reset --hard: reachable only from the reflog. */
+  const reflogOnly = (): string => {
+    const d = repo();
+    fs.writeFileSync(path.join(d, '.faf-dna'), CERT);
+    git(d, 'add', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'birth');
+    git(d, 'reset', '-q', '--hard', 'HEAD~1');
+    expect(fs.existsSync(path.join(d, '.faf-dna'))).toBe(false);
+    expect(git(d, 'log', '--all', '--oneline', '--', '.faf-dna').trim()).toBe('');
+    return d;
+  };
+  const shared = (src: string): string => {
+    const d = path.join(tmp('faf-dna-shared-'), 'clone');
+    git(os.tmpdir(), 'clone', '-q', '--shared', src, d);
+    return d;
+  };
+  const expectFound = (res: ToolText, dir: string): void => {
+    expect(res.isError).toBe(true);
+    expect(textOf(res)).toContain('git shows it existed');
+    expect(textOf(res)).toContain('git log --all --reflog --diff-filter=AM --oneline -- .faf-dna');
+    expect(textOf(res)).toContain('git checkout <sha> -- .faf-dna');
+    expect(textOf(res)).not.toContain('Birth Certificate Created');
+    expect(fs.existsSync(path.join(dir, '.faf-dna'))).toBe(false);
+  };
+  const expectUnknown = (res: ToolText, dir: string): void => {
+    expect(res.isError).toBe(true);
+    expect(textOf(res)).toContain('could not be checked');
+    expect(textOf(res)).toContain('git checkout');
+    expect(textOf(res)).not.toContain('Birth Certificate Created');
+    expect(fs.existsSync(path.join(dir, '.faf-dna'))).toBe(false);
+  };
+
+  afterEach(() => {
+    for (const d of dirs.splice(0)) fs.rmSync(d, { recursive: true, force: true });
+  });
+
+  // ── N1: reflog ──────────────────────────────────────────────────────────
+
+  test('N1: reflog-only .faf-dna (reset --hard) → refused with the restore steps', async () => {
+    const d = reflogOnly();
+    const res = await dna(d);
+    expectFound(res, d);
+    // The printed step finds the commit.
+    expect(git(d, 'log', '--all', '--reflog', '--oneline', '--', '.faf-dna')).toContain('birth');
+  });
+
+  test('N1: reflog-only, packed after gc → found', () => {
+    const d = reflogOnly();
+    git(d, 'gc', '-q');
+    const r = gitEverTracked(path.join(d, '.faf-dna'));
+    expect(r.status).toBe('found');
+  });
+
+  test('N1: reflog-only on a deleted branch (logs/HEAD removed) → found via logs/refs', () => {
+    const d = repo();
+    const main = git(d, 'rev-parse', '--abbrev-ref', 'HEAD').trim();
+    git(d, 'checkout', '-q', '-b', 'side');
+    fs.writeFileSync(path.join(d, '.faf-dna'), CERT);
+    git(d, 'add', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'birth');
+    git(d, 'checkout', '-q', main);
+    git(d, 'reset', '-q', '--hard'); // keep side's reflog under logs/refs/heads/side
+    fs.rmSync(path.join(d, '.git/refs/heads/side'));
+    fs.rmSync(path.join(d, '.git/logs/HEAD'));
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('found');
+  });
+
+  test('N1: unreadable reflog (logs/HEAD is a directory) → unknown → refused', async () => {
+    const d = reflogOnly();
+    fs.rmSync(path.join(d, '.git/logs/HEAD'));
+    fs.mkdirSync(path.join(d, '.git/logs/HEAD'));
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown');
+    expectUnknown(await dna(d), d);
+  });
+
+  test('N1: malformed reflog line → unknown → refused', async () => {
+    const d = repo();
+    fs.appendFileSync(path.join(d, '.git/logs/HEAD'), 'not a reflog line\n');
+    const r = gitEverTracked(path.join(d, '.faf-dna'));
+    expect(r.status).toBe('unknown');
+    expectUnknown(await dna(d), d);
+  });
+
+  test('N1: reflog names a pruned commit → unknown, not never', () => {
+    const d = reflogOnly();
+    const birth = git(d, 'rev-parse', 'HEAD@{1}').trim();
+    fs.rmSync(path.join(d, '.git/objects', birth.slice(0, 2), birth.slice(2)));
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown');
+  });
+
+  test('N1: no logs directory at all (logAllRefUpdates off) is still never', () => {
+    const d = repo();
+    fs.rmSync(path.join(d, '.git/logs'), { recursive: true });
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('never');
+  });
+
+  // ── N2: clone --shared (objects/info/alternates) ────────────────────────
+
+  test('N2: --shared clone of a new project → one birth', async () => {
+    const src = repo();
+    const d = shared(src);
+    expect(fs.existsSync(path.join(d, '.git/objects/info/alternates'))).toBe(true);
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('never');
+    const replies = await Promise.all([dna(d), dna(d)]);
+    for (const r of replies) expect(r.isError).toBeFalsy();
+    expect(replies.filter((r) => textOf(r).includes('Birth Certificate Created')).length).toBe(1);
+    expect(fs.existsSync(path.join(d, '.faf-dna'))).toBe(true);
+  });
+
+  test('N2: --shared clone, .faf-dna committed then deleted (history in the alternate) → refused', async () => {
+    const src = repo();
+    fs.writeFileSync(path.join(src, '.faf-dna'), CERT);
+    git(src, 'add', '.faf-dna');
+    git(src, 'commit', '-q', '-m', 'birth');
+    git(src, 'rm', '-q', '.faf-dna');
+    git(src, 'commit', '-q', '-m', 'delete');
+    git(src, 'gc', '-q');
+    const d = shared(src);
+    expectFound(await dna(d), d);
+  });
+
+  test('N2: --shared clone, .faf-dna committed then deleted in the clone → refused', async () => {
+    const d = shared(repo());
+    git(d, 'config', 'user.email', 'wjttc@example.invalid');
+    git(d, 'config', 'user.name', 'wjttc');
+    git(d, 'config', 'commit.gpgsign', 'false');
+    fs.writeFileSync(path.join(d, '.faf-dna'), CERT);
+    git(d, 'add', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'birth');
+    git(d, 'rm', '-q', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'delete');
+    expectFound(await dna(d), d);
+  });
+
+  test('N2: relative alternates path is followed', () => {
+    const src = repo();
+    fs.writeFileSync(path.join(src, '.faf-dna'), CERT);
+    git(src, 'add', '.faf-dna');
+    git(src, 'commit', '-q', '-m', 'birth');
+    git(src, 'rm', '-q', '.faf-dna');
+    git(src, 'commit', '-q', '-m', 'delete');
+    const d = shared(src);
+    const alt = path.join(d, '.git/objects/info/alternates');
+    const abs = fs.readFileSync(alt, 'utf-8').trim();
+    const rel = path.relative(path.join(d, '.git/objects'), abs);
+    expect(path.isAbsolute(rel)).toBe(false);
+    fs.writeFileSync(alt, `# comment\n${rel}\n`);
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('found');
+  });
+
+  test('N2: alternate that cannot be read → unknown → refused', async () => {
+    const src = repo();
+    const d = shared(src);
+    fs.writeFileSync(path.join(d, '.git/objects/info/alternates'), path.join(src, 'no-such-objects') + '\n');
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown');
+    expectUnknown(await dna(d), d);
+  });
+
+  test('N2: alternates file that is not a file (EISDIR) → unknown', () => {
+    const d = shared(repo());
+    const alt = path.join(d, '.git/objects/info/alternates');
+    fs.rmSync(alt);
+    fs.mkdirSync(alt);
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown');
+  });
+
+  // ── N3: broken symlinked folder ─────────────────────────────────────────
+
+  describe('N1b: linked worktrees (round 4)', () => {
+    /** Main repo plus a detached linked worktree that commits .faf-dna. */
+    const withWorktree = (): { main: string; wt: string } => {
+      const main = repo();
+      const wt = path.join(tmp('faf-dna-wt-'), 'wt');
+      git(main, 'worktree', 'add', '-q', '--detach', wt);
+      fs.writeFileSync(path.join(wt, '.faf-dna'), CERT);
+      git(wt, 'add', '.faf-dna');
+      git(wt, 'commit', '-q', '-m', 'birth');
+      return { main, wt };
+    };
+
+    test('detached linked worktree holds the birth commit → refused from the main worktree', async () => {
+      const { main } = withWorktree();
+      expectFound(await dna(main), main);
+    });
+
+    test('detached linked worktree: birth then reset --hard → refused from the main worktree', async () => {
+      const { main, wt } = withWorktree();
+      git(wt, 'reset', '-q', '--hard', 'HEAD~1');
+      expect(git(main, 'log', '--all', '--oneline', '--', '.faf-dna').trim()).toBe('');
+      expectFound(await dna(main), main);
+    });
+
+    test('same after git gc --prune=now → still refused (git keeps the commit)', async () => {
+      const { main, wt } = withWorktree();
+      git(wt, 'reset', '-q', '--hard', 'HEAD~1');
+      git(main, 'gc', '-q', '--prune=now');
+      expectFound(await dna(main), main);
+    });
+
+    // Root can list a mode-000 directory, so this only runs as a normal user (CI).
+    test.skipIf(process.getuid?.() === 0 || process.platform === 'win32')(
+      'a worktrees dir that cannot be listed → unknown → refused', async () => {
+        const { main } = withWorktree();
+        const wtAdmin = path.join(main, '.git', 'worktrees');
+        fs.chmodSync(wtAdmin, 0o000);
+        try {
+          expectUnknown(await dna(main), main);
+        } finally {
+          fs.chmodSync(wtAdmin, 0o755);
+        }
+      });
+  });
+
+  test('restore step: with a delete commit in history, the first line printed restores .faf-dna', async () => {
+    const d = repo();
+    fs.writeFileSync(path.join(d, '.faf-dna'), CERT);
+    git(d, 'add', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'birth');
+    git(d, 'rm', '-q', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'remove');
+    expectFound(await dna(d), d);
+    const first = git(d, 'log', '--all', '--reflog', '--diff-filter=AM', '--oneline', '--', '.faf-dna').trim().split('\n')[0];
+    const sha = first.split(' ')[0];
+    git(d, 'checkout', sha, '--', '.faf-dna');
+    // git on Windows may check the file out with CRLF line endings (core.autocrlf).
+    expect(fs.readFileSync(path.join(d, '.faf-dna'), 'utf-8').replace(/\r\n/g, '\n')).toBe(CERT);
+  });
+
+  describe('N3: faf_write through a broken symlinked folder', () => {
+    let originalCwd: string;
+    let dir: string;
+    const write = async (args: Record<string, unknown>): Promise<ToolText> =>
+      (await handler.callTool('faf_write', args)) as ToolText;
+
+    beforeEach(() => {
+      originalCwd = process.cwd();
+      dir = tmp('faf-write-r3-');
+      process.chdir(dir);
+    });
+    afterEach(() => process.chdir(originalCwd));
+
+    test('dangling symlinked folder → refused before mkdir, target not created', async () => {
+      fs.symlinkSync(path.join(dir, 'nowhere'), path.join(dir, 'ghost'));
+      for (const p of ['ghost/x.txt', 'ghost/a/b/x.txt']) {
+        const res = await write({ path: p, content: 'x' });
+        expect(res.isError).toBe(true);
+        expect(textOf(res)).toContain('Security error');
+        expect(textOf(res)).toContain('broken symlinked folder');
+        expect(fs.existsSync(path.join(dir, 'nowhere'))).toBe(false);
+      }
+    });
+
+    test('symlink loop folder → refused before mkdir', async () => {
+      fs.symlinkSync(path.join(dir, 'loop'), path.join(dir, 'loop'));
+      const res = await write({ path: 'loop/x.txt', content: 'x' });
+      expect(res.isError).toBe(true);
+      expect(textOf(res)).toContain('broken symlinked folder');
+    });
+
+    test('broken link reached through a working symlinked folder → refused', async () => {
+      fs.mkdirSync(path.join(dir, 'real'));
+      fs.symlinkSync(path.join(dir, 'real'), path.join(dir, 'via'));
+      fs.symlinkSync(path.join(dir, 'gone'), path.join(dir, 'real', 'ghost'));
+      const res = await write({ path: 'via/ghost/x.txt', content: 'x' });
+      expect(res.isError).toBe(true);
+      expect(textOf(res)).toContain('broken symlinked folder');
+      expect(fs.existsSync(path.join(dir, 'gone'))).toBe(false);
+    });
+
+    test('a working symlinked folder inside cwd and a new folder still write', async () => {
+      fs.mkdirSync(path.join(dir, 'real'));
+      fs.symlinkSync(path.join(dir, 'real'), path.join(dir, 'via'));
+      expect((await write({ path: 'via/x.txt', content: 'x' })).isError).toBeFalsy();
+      expect(fs.readFileSync(path.join(dir, 'real', 'x.txt'), 'utf-8')).toBe('x');
+      expect((await write({ path: 'new/deep/y.txt', content: 'y' })).isError).toBeFalsy();
+      expect(fs.readFileSync(path.join(dir, 'new/deep/y.txt'), 'utf-8')).toBe('y');
+    });
   });
 });
