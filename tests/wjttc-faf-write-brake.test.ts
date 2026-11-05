@@ -10,6 +10,14 @@
  *       another project under /tmp and into .git/hooks.
  *   B2  faf_dna issued two certificates under a race, and reissued one when
  *       a committed .faf-dna had been deleted.
+ *
+ * Round 2 (review of b9888c0):
+ *   F1  unreadable git objects read as "never tracked" → now unknown.
+ *   F2  unknown history (SHA-256, shallow, over the walk limit, unreadable)
+ *       → faf_dna refuses; it never issues a certificate it cannot justify.
+ *   F4  faf_write accepted `.faf-dna/x` (made a directory) → any segment refused.
+ *   I4  outside git, the birth reply says no history could be checked.
+ *   I5  faf_write overwrite keeps the replaced file's mode.
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import * as fs from 'fs';
@@ -198,6 +206,44 @@ describe('🏁 WJTTC — faf_write brakes (B1)', () => {
     expect(fs.existsSync('.git/hooks/post-merge')).toBe(false);
   });
 
+  test('F4: .faf-dna as a directory segment is refused in any case; faf_dna still works after', async () => {
+    fs.writeFileSync('project.faf', FAF);
+    for (const p of ['.faf-dna/x', '.FAF-DNA/x', '.Faf-Dna/deep/y.json', 'sub/.faf-dna/x', path.join(dir, '.faf-dna', 'x')]) {
+      const res = await write({ path: p, content: 'x', overwrite: true });
+      expect(res.isError).toBe(true);
+      expect(textOf(res)).toContain('.faf-dna');
+    }
+    expect(fs.existsSync('.faf-dna')).toBe(false);
+    expect(fs.existsSync('.FAF-DNA')).toBe(false);
+    expect(fs.existsSync('sub/.faf-dna')).toBe(false);
+
+    const res = (await handler.callTool('faf_dna', { path: dir })) as ToolText;
+    expect(res.isError).toBeFalsy();
+    expect(textOf(res)).toContain('Birth Certificate Created');
+    expect(fs.statSync('.faf-dna').isFile()).toBe(true);
+  });
+
+  test('F4: names that only contain .faf-dna are still ordinary files', async () => {
+    for (const p of ['notes.faf-dna.md', 'faf-dna/x.txt', '.faf-dna-backup/x.txt']) {
+      const res = await write({ path: p, content: 'ok' });
+      expect(res.isError).toBeFalsy();
+      expect(fs.readFileSync(p, 'utf-8')).toBe('ok');
+    }
+  });
+
+  test.skipIf(process.platform === 'win32')('I5: overwrite keeps the existing file mode (0755 stays 0755)', async () => {
+    fs.writeFileSync('run.sh', '#!/bin/sh\necho one\n');
+    fs.chmodSync('run.sh', 0o755);
+    expect((await write({ path: 'run.sh', content: '#!/bin/sh\necho two\n' })).isError).toBeFalsy();
+    expect(fs.statSync('run.sh').mode & 0o7777).toBe(0o755);
+    expect(fs.readFileSync('run.sh', 'utf-8')).toContain('two');
+
+    fs.writeFileSync('CLAUDE.md', 'keep');
+    fs.chmodSync('CLAUDE.md', 0o600);
+    expect((await write({ path: 'CLAUDE.md', content: 'new', overwrite: true })).isError).toBeFalsy();
+    expect(fs.statSync('CLAUDE.md').mode & 0o7777).toBe(0o600);
+  });
+
   test('faf_write advertises destructiveHint and the overwrite flag', async () => {
     const prev = process.env.FAF_TOOLS;
     process.env.FAF_TOOLS = 'all';
@@ -282,6 +328,96 @@ describe('🏁 WJTTC — faf_dna birth certificate (B2)', () => {
     expect(textOf(res)).toContain('Birth Certificate Created');
     expect(fs.existsSync(path.join(dir, '.faf-dna'))).toBe(true);
   });
+
+  const committedThenDeleted = (): string => {
+    const dir = mk();
+    git(dir, 'init', '-q');
+    git(dir, 'config', 'user.email', 'wjttc@example.invalid');
+    git(dir, 'config', 'user.name', 'wjttc');
+    git(dir, 'config', 'commit.gpgsign', 'false');
+    fs.writeFileSync(path.join(dir, '.faf-dna'), CERT);
+    git(dir, 'add', '.faf-dna', 'project.faf');
+    git(dir, 'commit', '-q', '-m', 'birth');
+    git(dir, 'rm', '-q', '.faf-dna');
+    git(dir, 'commit', '-q', '-m', 'delete');
+    git(dir, 'gc', '-q', '--prune=now');
+    return dir;
+  };
+  const packFile = (dir: string): string => {
+    const packDir = path.join(dir, '.git/objects/pack');
+    return path.join(packDir, fs.readdirSync(packDir).find((f) => f.endsWith('.pack'))!);
+  };
+  const expectRefused = (res: ToolText, dir: string): void => {
+    expect(res.isError).toBe(true);
+    expect(textOf(res)).toContain('could not be checked');
+    expect(textOf(res)).toContain('git checkout');
+    expect(textOf(res)).toContain('faf init');
+    expect(textOf(res)).not.toContain('Birth Certificate Created');
+    expect(fs.existsSync(path.join(dir, '.faf-dna'))).toBe(false);
+  };
+
+  test('F1/F2: committed-then-deleted .faf-dna with an unreadable pack → refused, not reissued', async () => {
+    const dir = committedThenDeleted();
+    const pack = packFile(dir);
+    // The review repro: the pack cannot be read. Replacing it with a directory
+    // gives EISDIR for every uid, root included, so the test is not uid-dependent.
+    fs.rmSync(pack);
+    fs.mkdirSync(pack);
+    expectRefused(await dna(dir), dir);
+  });
+
+  test.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
+    'F1/F2: pack with no read permission (chmod 000) → refused', async () => {
+      const dir = committedThenDeleted();
+      fs.chmodSync(packFile(dir), 0o000);
+      expectRefused(await dna(dir), dir);
+    });
+
+  test('F1/F2: pack truncated → refused', async () => {
+    const dir = committedThenDeleted();
+    const pack = packFile(dir);
+    fs.truncateSync(pack, 40);
+    expectRefused(await dna(dir), dir);
+  });
+
+  test('F2: SHA-256 repository → refused', async () => {
+    const dir = mk();
+    git(dir, 'init', '-q', '--object-format=sha256');
+    expectRefused(await dna(dir), dir);
+  });
+
+  test('F2: shallow clone → refused', async () => {
+    const src = committedThenDeleted();
+    for (let i = 0; i < 3; i++) {
+      fs.writeFileSync(path.join(src, 'a.txt'), `a${i}`);
+      git(src, 'add', 'a.txt');
+      git(src, 'commit', '-q', '-m', `later ${i}`);
+    }
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'faf-dna-shallow-')));
+    dirs.push(dir);
+    fs.rmSync(dir, { recursive: true });
+    git(os.tmpdir(), 'clone', '-q', '--depth', '1', `file://${src}`, dir);
+    expect(fs.existsSync(path.join(dir, '.faf-dna'))).toBe(false);
+    expectRefused(await dna(dir), dir);
+  });
+
+  test('I4: outside git, the birth reply says no history could be checked', async () => {
+    const dir = mk();
+    expect(gitEverTracked(path.join(dir, '.faf-dna')).status).toBe('not-a-repo');
+    const res = await dna(dir);
+    expect(res.isError).toBeFalsy();
+    expect(textOf(res)).toContain('Birth Certificate Created');
+    expect(textOf(res)).toContain('Not a git repository: no history could be checked');
+    expect(textOf(res)).toContain('cannot be told apart from a new project');
+  });
+
+  test('I4: inside git with clean history, the birth reply has no outside-git warning', async () => {
+    const dir = mk();
+    git(dir, 'init', '-q');
+    const res = await dna(dir);
+    expect(textOf(res)).toContain('Birth Certificate Created');
+    expect(textOf(res)).not.toContain('Not a git repository');
+  });
 });
 
 describe('🏁 WJTTC — in-process git history reader (faf_dna, no child_process)', () => {
@@ -364,5 +500,101 @@ describe('🏁 WJTTC — in-process git history reader (faf_dna, no child_proces
     git(d, 'add', '.faf-dna');
     fs.rmSync(path.join(d, '.faf-dna'));
     expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('found');
+  });
+
+  const deletedInHistory = (): string => {
+    const d = repo();
+    commitFiles(d, { '.faf-dna': CERT }, 'birth');
+    git(d, 'rm', '-q', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'delete');
+    commitFiles(d, { 'a.txt': 'a' }, 'later');
+    return d;
+  };
+
+  test('F1: a missing loose object → unknown, not never', () => {
+    const d = deletedInHistory();
+    // Remove the root tree of the "birth" commit.
+    const birth = git(d, 'rev-list', '--max-parents=0', 'HEAD').trim();
+    const tree = git(d, 'rev-parse', `${birth}^{tree}`).trim();
+    fs.rmSync(path.join(d, '.git/objects', tree.slice(0, 2), tree.slice(2)));
+    const r = gitEverTracked(path.join(d, '.faf-dna'));
+    expect(r.status).toBe('unknown');
+  });
+
+  test('F1: a missing commit object → unknown, not never', () => {
+    const d = repo();
+    commitFiles(d, { 'a.txt': 'a' }, 'one');
+    commitFiles(d, { 'a.txt': 'b' }, 'two');
+    const first = git(d, 'rev-parse', 'HEAD~1').trim();
+    fs.rmSync(path.join(d, '.git/objects', first.slice(0, 2), first.slice(2)));
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown');
+  });
+
+  test('F1: a corrupt loose object → unknown', () => {
+    const d = repo();
+    commitFiles(d, { 'a.txt': 'a' }, 'one');
+    const head = git(d, 'rev-parse', 'HEAD').trim();
+    const obj = path.join(d, '.git/objects', head.slice(0, 2), head.slice(2));
+    fs.chmodSync(obj, 0o644);
+    fs.writeFileSync(obj, 'not zlib');
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown');
+  });
+
+  test('F1: unreadable pack (EISDIR), missing pack, and bad idx → unknown', () => {
+    const d = deletedInHistory();
+    git(d, 'gc', '-q', '--prune=now');
+    const packDir = path.join(d, '.git/objects/pack');
+    const pack = path.join(packDir, fs.readdirSync(packDir).find((f) => f.endsWith('.pack'))!);
+    const idx = pack.replace(/\.pack$/, '.idx');
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('found');
+
+    const saved = fs.readFileSync(pack);
+    fs.rmSync(pack);
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown'); // missing .pack
+    fs.mkdirSync(pack);
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown'); // EISDIR
+    fs.rmSync(pack, { recursive: true });
+    fs.writeFileSync(pack, saved);
+    fs.chmodSync(idx, 0o644);
+    fs.writeFileSync(idx, Buffer.alloc(2048));
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('unknown'); // bad idx
+  });
+
+  test('F1: malformed index, ref and packed-refs → unknown', () => {
+    const a = repo();
+    commitFiles(a, { 'a.txt': 'a' }, 'one');
+    fs.writeFileSync(path.join(a, '.git/index'), 'garbage-index');
+    expect(gitEverTracked(path.join(a, '.faf-dna')).status).toBe('unknown');
+
+    const b = repo();
+    commitFiles(b, { 'a.txt': 'a' }, 'one');
+    fs.writeFileSync(path.join(b, '.git/refs/heads/broken'), 'not-a-sha\n');
+    expect(gitEverTracked(path.join(b, '.faf-dna')).status).toBe('unknown');
+
+    const c = repo();
+    commitFiles(c, { 'a.txt': 'a' }, 'one');
+    fs.writeFileSync(path.join(c, '.git/packed-refs'), 'junk line\n');
+    expect(gitEverTracked(path.join(c, '.faf-dna')).status).toBe('unknown');
+  });
+
+  test('F2: SHA-256 repository → unknown', () => {
+    const d = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'faf-git-sha256-')));
+    dirs.push(d);
+    git(d, 'init', '-q', '--object-format=sha256');
+    const r = gitEverTracked(path.join(d, '.faf-dna'));
+    expect(r.status).toBe('unknown');
+    expect(r.status === 'unknown' && r.reason).toContain('sha256');
+  });
+
+  test('F2: history over the walk limit → unknown', () => {
+    const d = repo();
+    for (let i = 0; i < 4; i++) commitFiles(d, { 'a.txt': `a${i}` }, `c${i}`);
+    expect(gitEverTracked(path.join(d, '.faf-dna'), 2).status).toBe('unknown');
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('never');
+  });
+
+  test('fresh repo with no commits (unborn HEAD) is still never', () => {
+    const d = repo();
+    expect(gitEverTracked(path.join(d, '.faf-dna')).status).toBe('never');
   });
 });

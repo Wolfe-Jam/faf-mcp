@@ -11,8 +11,11 @@
  *   2. every commit reachable from HEAD, refs/ and packed-refs — loose and
  *      packed objects, OFS/REF deltas — looking the path up in each tree.
  *
- * Read-only. Any parse failure, a SHA-256 repository, or a walk past the
- * budget returns `unknown` rather than throwing; the caller decides.
+ * Read-only, and fail-closed: `never` is returned only when the whole
+ * history was read. Any read error, missing object, unreadable or malformed
+ * pack/index/ref, a shallow clone, a SHA-256 repository, or a walk past the
+ * budget returns `unknown` (never throws). The caller decides what `unknown`
+ * means; faf_dna refuses to issue a certificate on it.
  */
 
 import * as fs from 'fs';
@@ -39,23 +42,45 @@ interface Pack {
 
 const OBJ_TYPES: Record<number, string> = { 1: 'commit', 2: 'tree', 3: 'blob', 4: 'tag' };
 
+/** Thrown for anything that stops the history from being read in full. */
+class HistoryUnreadable extends Error {}
+
+/** ENOENT / ENOTDIR: the path is simply absent. Anything else is a read failure. */
+function isAbsent(err: unknown): boolean {
+  const code = typeof err === 'object' && err !== null ? (err as { code?: unknown }).code : undefined;
+  return code === 'ENOENT' || code === 'ENOTDIR';
+}
+
+/** Read a file that may legitimately be absent (null). Any other error throws. */
+function readOptional(p: string): Buffer | null {
+  try {
+    return fs.readFileSync(p);
+  } catch (err) {
+    if (isAbsent(err)) return null;
+    throw new HistoryUnreadable(`cannot read ${path.basename(p)}: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
 function findRepo(start: string): Repo | null {
   let dir = path.resolve(start);
   for (;;) {
     const dotGit = path.join(dir, '.git');
     let st: fs.Stats | null = null;
-    try { st = fs.statSync(dotGit); } catch { st = null; }
+    try {
+      st = fs.statSync(dotGit);
+    } catch (err) {
+      if (!isAbsent(err)) throw new HistoryUnreadable(`cannot stat .git: ${(err as Error).message}`);
+      st = null;
+    }
     if (st) {
       let gitDir = dotGit;
       if (st.isFile()) {
         const m = fs.readFileSync(dotGit, 'utf-8').match(/^gitdir:\s*(.+)\s*$/m);
-        if (!m) return null;
+        if (!m) throw new HistoryUnreadable('.git file has no gitdir line');
         gitDir = path.resolve(dir, m[1].trim());
       }
-      let commonDir = gitDir;
-      try {
-        commonDir = path.resolve(gitDir, fs.readFileSync(path.join(gitDir, 'commondir'), 'utf-8').trim());
-      } catch { /* not a linked worktree */ }
+      const common = readOptional(path.join(gitDir, 'commondir'));
+      const commonDir = common ? path.resolve(gitDir, common.toString('utf-8').trim()) : gitDir;
       return { gitDir, commonDir, root: dir };
     }
     const parent = path.dirname(dir);
@@ -66,10 +91,11 @@ function findRepo(start: string): Repo | null {
 
 /** Paths staged in the index (versions 2, 3, 4). */
 function indexHas(gitDir: string, rel: string): boolean {
-  let buf: Buffer;
-  try { buf = fs.readFileSync(path.join(gitDir, 'index')); } catch { return false; }
-  if (buf.length < 12 || buf.toString('latin1', 0, 4) !== 'DIRC') return false;
+  const buf = readOptional(path.join(gitDir, 'index'));
+  if (!buf) return false; // no index yet (fresh repo)
+  if (buf.length < 12 || buf.toString('latin1', 0, 4) !== 'DIRC') throw new HistoryUnreadable('index has a bad signature');
   const version = buf.readUInt32BE(4);
+  if (version < 2 || version > 4) throw new HistoryUnreadable(`index version ${version} not supported`);
   const count = buf.readUInt32BE(8);
   let off = 12;
   let prev = '';
@@ -84,10 +110,12 @@ function indexHas(gitDir: string, rel: string): boolean {
       let strip = buf[off] & 0x7f;
       while (buf[off++] & 0x80) strip = ((strip + 1) << 7) | (buf[off] & 0x7f);
       const end = buf.indexOf(0, off);
+      if (end < 0 || strip > prev.length) throw new HistoryUnreadable('index entry is malformed');
       name = prev.slice(0, prev.length - strip) + buf.toString('utf-8', off, end);
       off = end + 1;
     } else {
       const end = buf.indexOf(0, off);
+      if (end < 0) throw new HistoryUnreadable('index entry is malformed');
       name = buf.toString('utf-8', off, end);
       off = start + Math.ceil((end - start + 1) / 8) * 8;
     }
@@ -106,15 +134,30 @@ class ObjectStore {
     const packs: Pack[] = [];
     const dir = path.join(this.objectsDir, 'pack');
     let names: string[] = [];
-    try { names = fs.readdirSync(dir); } catch { names = []; }
+    try {
+      names = fs.readdirSync(dir);
+    } catch (err) {
+      if (!isAbsent(err)) throw new HistoryUnreadable(`cannot list packs: ${(err as Error).message}`);
+      names = [];
+    }
     for (const n of names) {
       if (!n.endsWith('.idx')) continue;
+      // A pack that cannot be read is history that cannot be checked: fail closed.
+      let idx: Buffer;
+      let pack: Buffer;
       try {
-        const idx = fs.readFileSync(path.join(dir, n));
-        const pack = fs.readFileSync(path.join(dir, n.replace(/\.idx$/, '.pack')));
-        if (idx.readUInt32BE(0) !== 0xff744f63 || idx.readUInt32BE(4) !== 2) continue;
-        packs.push({ idx, pack, count: idx.readUInt32BE(8 + 255 * 4) });
-      } catch { /* unreadable pack: skip */ }
+        idx = fs.readFileSync(path.join(dir, n));
+        pack = fs.readFileSync(path.join(dir, n.replace(/\.idx$/, '.pack')));
+      } catch (err) {
+        throw new HistoryUnreadable(`cannot read pack ${n}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      if (idx.length < 8 + 256 * 4 || idx.readUInt32BE(0) !== 0xff744f63 || idx.readUInt32BE(4) !== 2) {
+        throw new HistoryUnreadable(`pack index ${n} is not a v2 index`);
+      }
+      if (pack.length < 12 || pack.toString('latin1', 0, 4) !== 'PACK') {
+        throw new HistoryUnreadable(`pack ${n.replace(/\.idx$/, '.pack')} has a bad signature`);
+      }
+      packs.push({ idx, pack, count: idx.readUInt32BE(8 + 255 * 4) });
     }
     this.packs = packs;
     return packs;
@@ -159,7 +202,7 @@ class ObjectStore {
     if (type === 7) {
       const baseSha = buf.subarray(off, off + 20);
       const base = this.read(baseSha.toString('hex'), depth + 1);
-      if (!base) throw new Error('missing delta base');
+      if (!base) throw new HistoryUnreadable('missing delta base');
       return { type: base.type, data: applyDelta(base.data, inflateSync(buf.subarray(off + 20))) };
     }
     const t = OBJ_TYPES[type];
@@ -167,18 +210,29 @@ class ObjectStore {
     return { type: t, data: inflateSync(buf.subarray(off)) };
   }
 
+  /** The object, or null when it is in neither loose storage nor any pack. Read errors throw. */
   read(hex: string, depth = 0): { type: string; data: Buffer } | null {
-    try {
-      const raw = inflateSync(fs.readFileSync(path.join(this.objectsDir, hex.slice(0, 2), hex.slice(2))));
+    const loose = readOptional(path.join(this.objectsDir, hex.slice(0, 2), hex.slice(2)));
+    if (loose) {
+      const raw = inflateSync(loose);
+      const sp = raw.indexOf(0x20);
       const nul = raw.indexOf(0);
-      return { type: raw.toString('latin1', 0, raw.indexOf(0x20)), data: raw.subarray(nul + 1) };
-    } catch { /* not loose */ }
+      if (sp < 0 || nul < sp) throw new HistoryUnreadable(`loose object ${hex.slice(0, 7)} is malformed`);
+      return { type: raw.toString('latin1', 0, sp), data: raw.subarray(nul + 1) };
+    }
     const sha = Buffer.from(hex, 'hex');
     for (const p of this.loadPacks()) {
       const off = this.packOffset(p, sha);
       if (off >= 0) return this.readPacked(p, off, depth);
     }
     return null;
+  }
+
+  /** Like read(), but a missing object is an error: history cannot be checked. */
+  need(hex: string): { type: string; data: Buffer } {
+    const obj = this.read(hex);
+    if (!obj) throw new HistoryUnreadable(`object ${hex.slice(0, 7)} is missing`);
+    return obj;
   }
 }
 
@@ -216,8 +270,13 @@ function treeEntry(tree: Buffer, name: string): string | null {
   let off = 0;
   while (off < tree.length) {
     const sp = tree.indexOf(0x20, off);
-    const nul = tree.indexOf(0, sp);
-    if (tree.toString('utf-8', sp + 1, nul) === name) return tree.toString('hex', nul + 1, nul + 21);
+    const nul = sp < 0 ? -1 : tree.indexOf(0, sp);
+    if (sp < 0 || nul < 0 || nul + 21 > tree.length) throw new HistoryUnreadable('tree object is malformed');
+    if (tree.toString('utf-8', sp + 1, nul) === name) {
+      // 160000 = gitlink (submodule): its commit lives in another repository.
+      if (tree.toString('latin1', off, sp) === '160000') return null;
+      return tree.toString('hex', nul + 1, nul + 21);
+    }
     off = nul + 21;
   }
   return null;
@@ -225,36 +284,48 @@ function treeEntry(tree: Buffer, name: string): string | null {
 
 function refTips(commonDir: string, gitDir: string): string[] {
   const tips = new Set<string>();
-  const readRef = (dir: string, name: string): string | null => {
-    try {
-      const v = fs.readFileSync(path.join(dir, name), 'utf-8').trim();
-      if (/^[0-9a-f]{40}$/.test(v)) return v;
-      const m = v.match(/^ref:\s*(.+)$/);
-      if (m) return readRef(commonDir, m[1]) ?? packed.get(m[1]) ?? null;
-    } catch { /* missing */ }
-    return null;
-  };
   const packed = new Map<string, string>();
-  try {
-    for (const line of fs.readFileSync(path.join(commonDir, 'packed-refs'), 'utf-8').split('\n')) {
-      const m = line.match(/^([0-9a-f]{40}) (\S+)/);
+  const packedRaw = readOptional(path.join(commonDir, 'packed-refs'));
+  if (packedRaw) {
+    for (const line of packedRaw.toString('utf-8').split('\n')) {
+      if (!line || line.startsWith('#')) continue;
+      const m = line.match(/^([0-9a-f]{40}) (\S+)$/);
+      const peeled = line.match(/^\^([0-9a-f]{40})$/);
       if (m) { packed.set(m[2], m[1]); tips.add(m[1]); }
-      const peeled = line.match(/^\^([0-9a-f]{40})/);
-      if (peeled) tips.add(peeled[1]);
+      else if (peeled) tips.add(peeled[1]);
+      else throw new HistoryUnreadable('packed-refs has a line it cannot parse');
     }
-  } catch { /* none */ }
+  }
+  // A ref that names a branch which does not exist yet (unborn HEAD) is null.
+  const readRef = (dir: string, name: string, depth = 0): string | null => {
+    if (depth > 8) throw new HistoryUnreadable('symbolic ref loop');
+    const raw = readOptional(path.join(dir, name));
+    if (!raw) return packed.get(name) ?? null;
+    const v = raw.toString('utf-8').trim();
+    if (/^[0-9a-f]{40}$/.test(v)) return v;
+    const m = v.match(/^ref:\s*(.+)$/);
+    if (m) return readRef(commonDir, m[1].trim(), depth + 1);
+    throw new HistoryUnreadable(`ref ${name} has content it cannot parse`);
+  };
   const walk = (dir: string): void => {
     let entries: fs.Dirent[] = [];
-    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (err) {
+      if (isAbsent(err)) return;
+      throw new HistoryUnreadable(`cannot list refs: ${(err as Error).message}`);
+    }
     for (const e of entries) {
       const p = path.join(dir, e.name);
-      if (e.isDirectory()) walk(p);
-      else {
-        try {
-          const v = fs.readFileSync(p, 'utf-8').trim();
-          if (/^[0-9a-f]{40}$/.test(v)) tips.add(v);
-        } catch { /* unreadable */ }
-      }
+      if (e.isDirectory()) { walk(p); continue; }
+      const raw = readOptional(p);
+      if (!raw) continue; // removed while listing
+      const v = raw.toString('utf-8').trim();
+      if (/^[0-9a-f]{40}$/.test(v)) tips.add(v);
+      else if (/^ref:\s*\S/.test(v)) {
+        const r = readRef(commonDir, path.relative(commonDir, p).split(path.sep).join('/'));
+        if (r) tips.add(r);
+      } else throw new HistoryUnreadable(`ref ${e.name} has content it cannot parse`);
     }
   };
   walk(path.join(commonDir, 'refs'));
@@ -278,10 +349,12 @@ export function gitEverTracked(file: string, maxCommits = 200_000): GitHistoryRe
     const rel = path.relative(rootReal, fileReal).split(path.sep).join('/');
     if (!rel || rel.startsWith('..')) return { status: 'unknown', reason: 'file outside work tree' };
 
-    try {
-      const cfg = fs.readFileSync(path.join(repo.commonDir, 'config'), 'utf-8');
-      if (/objectformat\s*=\s*sha256/i.test(cfg)) return { status: 'unknown', reason: 'sha256 repository' };
-    } catch { /* no config */ }
+    const cfg = readOptional(path.join(repo.commonDir, 'config'))?.toString('utf-8') ?? '';
+    if (/objectformat\s*=\s*sha256/i.test(cfg)) return { status: 'unknown', reason: 'sha256 repository' };
+    // A shallow clone has cut history: commits before the cut are not here.
+    if (readOptional(path.join(repo.commonDir, 'shallow'))) {
+      return { status: 'unknown', reason: 'shallow clone (history is incomplete)' };
+    }
 
     if (indexHas(repo.gitDir, rel)) return { status: 'found', where: 'the git index' };
 
@@ -296,27 +369,31 @@ export function gitEverTracked(file: string, maxCommits = 200_000): GitHistoryRe
       if (seenCommits.has(sha)) continue;
       seenCommits.add(sha);
       if (seenCommits.size > maxCommits) return { status: 'unknown', reason: 'history too large to scan' };
-      let obj = store.read(sha);
+      // Every reachable object must be readable; a missing one is unknown, not never.
+      let obj = store.need(sha);
       // Annotated tags point at the commit.
-      while (obj && obj.type === 'tag') {
+      for (let hops = 0; obj.type === 'tag'; hops++) {
         const m = obj.data.toString('latin1').match(/^object ([0-9a-f]{40})/);
-        if (!m) { obj = null; break; }
+        if (!m || hops > 16) throw new HistoryUnreadable(`tag ${sha.slice(0, 7)} is malformed`);
         sha = m[1];
-        obj = store.read(sha);
+        obj = store.need(sha);
       }
-      if (!obj || obj.type !== 'commit') continue; // shallow / missing: skip
+      if (obj.type !== 'commit') continue; // a ref to a tree or blob has no history
       const text = obj.data.toString('utf-8');
       const headerEnd = text.indexOf('\n\n');
       const header = headerEnd >= 0 ? text.slice(0, headerEnd) : text;
       const treeSha = header.match(/^tree ([0-9a-f]{40})/m)?.[1];
+      if (!treeSha) throw new HistoryUnreadable(`commit ${sha.slice(0, 7)} has no tree`);
       for (const m of header.matchAll(/^parent ([0-9a-f]{40})/gm)) queue.push(m[1]);
-      if (!treeSha || seenTrees.has(treeSha)) continue;
+      if (seenTrees.has(treeSha)) continue;
       seenTrees.add(treeSha);
 
+      // Absent from a readable tree is "not here"; an unreadable tree throws.
+      // A non-tree at a directory position (that name was a file) is "not here" too.
       let cur: string | null = treeSha;
       for (const seg of segments) {
-        const tree: { type: string; data: Buffer } | null = cur ? store.read(cur) : null;
-        cur = tree && tree.type === 'tree' ? treeEntry(tree.data, seg) : null;
+        const tree: { type: string; data: Buffer } = store.need(cur);
+        cur = tree.type === 'tree' ? treeEntry(tree.data, seg) : null;
         if (!cur) break;
       }
       if (cur) {

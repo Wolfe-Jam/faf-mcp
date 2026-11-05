@@ -195,11 +195,15 @@ export function isFafDnaFile(p: string): boolean {
   return path.basename(p).toLowerCase() === '.faf-dna';
 }
 
-/** True when any segment of `p` below its root is a `.git` directory (any case). */
-function insideGitDir(p: string, roots: string[]): boolean {
+/**
+ * True when any segment of `p` below its root is `name` (any case). Used for
+ * `.git` and `.faf-dna`: neither may be written, nor written under, so
+ * `.faf-dna/x` cannot turn the certificate's path into a directory.
+ */
+function hasSegment(p: string, roots: string[], name: string): boolean {
   const root = roots.find((r) => p === r || p.startsWith(r + path.sep));
   const rel = root ? path.relative(root, p) : p;
-  return rel.split(/[\\/]+/).some((seg) => seg.toLowerCase() === '.git');
+  return rel.split(/[\\/]+/).some((seg) => seg.toLowerCase() === name);
 }
 
 /**
@@ -207,8 +211,9 @@ function insideGitDir(p: string, roots: string[]): boolean {
  * refuses:
  *   - anything outside writeOpRoots() (cwd by default),
  *   - anything inside a `.git/` directory,
- *   - `.faf-dna`, by its lexical name or by the name of its real target, so a
- *     symlink to the birth certificate is refused too.
+ *   - `.faf-dna` as the file or as any path segment (any case), by its
+ *     lexical path or its real target, so `.faf-dna/x` and a symlink to the
+ *     birth certificate are refused too.
  * Returns the canonical path to write.
  */
 export function confineWriteOp(input: unknown): string {
@@ -220,15 +225,19 @@ export function confineWriteOp(input: unknown): string {
   }
   const lexical = path.resolve(expandTilde(input));
   const resolved = canonicalize(lexical);
-
-  if (isFafDnaFile(lexical) || isFafDnaFile(resolved)) {
-    throw new PathConfinementError(
-      `refusing to write .faf-dna: "${input}". The birth certificate is written once by faf_dna and never changed.`,
-    );
-  }
   const roots = writeOpRoots().map(canonicalize);
   const lexicalRoots = writeOpRoots().map((r) => path.resolve(r));
-  if (insideGitDir(lexical, lexicalRoots) || insideGitDir(resolved, roots)) {
+
+  // `.faf-dna` as the file or as any directory segment, lexical or real.
+  if (
+    isFafDnaFile(lexical) || isFafDnaFile(resolved) ||
+    hasSegment(lexical, lexicalRoots, '.faf-dna') || hasSegment(resolved, roots, '.faf-dna')
+  ) {
+    throw new PathConfinementError(
+      `refusing to write .faf-dna or anything under a .faf-dna path: "${input}". The birth certificate is written once by faf_dna and never changed.`,
+    );
+  }
+  if (hasSegment(lexical, lexicalRoots, '.git') || hasSegment(resolved, roots, '.git')) {
     throw new PathConfinementError(`refusing to write inside a .git directory: "${input}".`);
   }
   if (!withinRoots(resolved, roots)) {

@@ -2189,6 +2189,21 @@ Call these MCP tools:
             isError: true
           };
         }
+        // Fail closed: if git history could not be read in full, a deleted
+        // certificate cannot be ruled out, so none is issued.
+        if (history.status === 'unknown') {
+          return {
+            content: [{
+              type: 'text',
+              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing and git history could not be checked (${history.reason}).\nThe birth certificate is issued once and is not reissued, so faf_dna did not create one.\n\n💡 If .faf-dna existed before, restore it from git:\n   git log --all --oneline -- .faf-dna      (find the last commit that has it)\n   git checkout <sha> -- .faf-dna           (restore that version)\n💡 If this really is a brand-new project, create the first one with faf-cli:\n   faf init`
+            }],
+            isError: true
+          };
+        }
+        // Outside git there is no history to check: say so in the reply.
+        const noHistoryNote = history.status === 'not-a-repo'
+          ? `\n\n⚠️ Not a git repository: no history could be checked, so a lost .faf-dna cannot be told apart from a new project. If this project had a .faf-dna before, replace this one with the restored original.`
+          : '';
 
         // .faf exists but no DNA - create initial DNA. Real scorer — same
         // one faf_score reads — never a local pseudo-score (v3.0 fix).
@@ -2236,7 +2251,7 @@ Call these MCP tools:
         return {
           content: [{
             type: 'text',
-            text: `🧬 FAF DNA Journey\n\n🐣 Birth Certificate Created!\n\n📊 Birth DNA: ${currentScore}%\n📅 Born: ${new Date().toISOString().split('T')[0]}\n🎫 Certificate: ${dna.birthCertificate.certificate}\n\n💡 Your journey begins here! Run faf_auto or faf_go to grow.`
+            text: `🧬 FAF DNA Journey\n\n🐣 Birth Certificate Created!\n\n📊 Birth DNA: ${currentScore}%\n📅 Born: ${new Date().toISOString().split('T')[0]}\n🎫 Certificate: ${dna.birthCertificate.certificate}\n\n💡 Your journey begins here! Run faf_auto or faf_go to grow.${noHistoryNote}`
           }]
         };
       }
@@ -2266,6 +2281,7 @@ Call these MCP tools:
           // crash mid-write cannot truncate the certificate.
           const tmpDna = `${dnaPath}.tmp-${process.pid}-${Date.now()}`;
           fs.writeFileSync(tmpDna, JSON.stringify(dna, null, 2), { flag: 'wx' });
+          fs.chmodSync(tmpDna, fs.statSync(dnaPath).mode & 0o7777); // keep the certificate's mode
           fs.renameSync(tmpDna, dnaPath);
           currentScore = live;
         }

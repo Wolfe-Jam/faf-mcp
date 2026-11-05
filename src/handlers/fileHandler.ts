@@ -193,6 +193,9 @@ async function atomicWrite(target: string, content: string, noClobber: boolean):
   await fs.writeFile(tmp, content, { encoding: 'utf8', flag: 'wx' });
   try {
     if (!noClobber) {
+      // Keep the replaced file's permission bits (0755 stays 0755). The temp
+      // file was created with the default mode, so copy the old one across.
+      await keepMode(target, tmp);
       await fs.rename(tmp, target);
       return;
     }
@@ -206,6 +209,18 @@ async function atomicWrite(target: string, content: string, noClobber: boolean):
   } finally {
     await fs.rm(tmp, { force: true });
   }
+}
+
+/** Copy `from`'s permission bits onto `to`. No-op when `from` does not exist. */
+async function keepMode(from: string, to: string): Promise<void> {
+  let mode: number;
+  try {
+    mode = (await fs.stat(from)).mode & 0o7777;
+  } catch (err: unknown) {
+    if (errCode(err) === 'ENOENT') return;
+    throw err;
+  }
+  await fs.chmod(to, mode);
 }
 
 function errCode(err: unknown): string | undefined {
