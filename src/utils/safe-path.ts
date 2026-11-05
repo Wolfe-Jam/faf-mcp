@@ -178,3 +178,63 @@ export function confinePath(input: unknown, opts: ConfineOptions = {}): string {
 
   return resolved;
 }
+
+/**
+ * Roots for `faf_write`. Stricter than fileOpRoots(): the project (cwd) only,
+ * no OS temp dir. An operator can still set an explicit boundary with
+ * `FAF_ALLOWED_ROOTS`.
+ */
+export function writeOpRoots(): string[] {
+  const opt = allowedRoots();
+  if (opt.length) return opt;
+  return [path.resolve(process.cwd())];
+}
+
+/** The birth certificate. Written once by faf_dna, never by faf_write. */
+export function isFafDnaFile(p: string): boolean {
+  return path.basename(p).toLowerCase() === '.faf-dna';
+}
+
+/** True when any segment of `p` below its root is a `.git` directory (any case). */
+function insideGitDir(p: string, roots: string[]): boolean {
+  const root = roots.find((r) => p === r || p.startsWith(r + path.sep));
+  const rel = root ? path.relative(root, p) : p;
+  return rel.split(/[\\/]+/).some((seg) => seg.toLowerCase() === '.git');
+}
+
+/**
+ * Confine a `faf_write` target. Resolves the real path (through symlinks) and
+ * refuses:
+ *   - anything outside writeOpRoots() (cwd by default),
+ *   - anything inside a `.git/` directory,
+ *   - `.faf-dna`, by its lexical name or by the name of its real target, so a
+ *     symlink to the birth certificate is refused too.
+ * Returns the canonical path to write.
+ */
+export function confineWriteOp(input: unknown): string {
+  if (typeof input !== 'string' || input.length === 0) {
+    throw new PathConfinementError('path must be a non-empty string');
+  }
+  if (input.includes('\0')) {
+    throw new PathConfinementError('path contains a null byte');
+  }
+  const lexical = path.resolve(expandTilde(input));
+  const resolved = canonicalize(lexical);
+
+  if (isFafDnaFile(lexical) || isFafDnaFile(resolved)) {
+    throw new PathConfinementError(
+      `refusing to write .faf-dna: "${input}". The birth certificate is written once by faf_dna and never changed.`,
+    );
+  }
+  const roots = writeOpRoots().map(canonicalize);
+  const lexicalRoots = writeOpRoots().map((r) => path.resolve(r));
+  if (insideGitDir(lexical, lexicalRoots) || insideGitDir(resolved, roots)) {
+    throw new PathConfinementError(`refusing to write inside a .git directory: "${input}".`);
+  }
+  if (!withinRoots(resolved, roots)) {
+    throw new PathConfinementError(
+      `path escapes the project root (cwd${allowedRoots().length ? ' / FAF_ALLOWED_ROOTS' : ''}): "${input}".`,
+    );
+  }
+  return resolved;
+}

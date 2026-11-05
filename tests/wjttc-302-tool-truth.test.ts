@@ -434,7 +434,7 @@ describe('🏁 WJTTC — tool truth (checker list, tools.ts)', () => {
     expect(tool('faf_write').annotations?.title).toBe('Write Project File');
     expect(tool('faf_list').annotations?.title).toBe('List Directories');
     for (const name of ['faf_read', 'faf_write']) {
-      expect(tool(name).description).toContain('(cwd, the OS temp dir, or FAF_ALLOWED_ROOTS)');
+      expect(tool(name).description).toContain(name === 'faf_read' ? '(cwd, the OS temp dir, or FAF_ALLOWED_ROOTS)' : '(cwd, or FAF_ALLOWED_ROOTS when set)');
     }
   });
 
