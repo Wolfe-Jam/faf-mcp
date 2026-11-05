@@ -376,6 +376,7 @@ describe('🏁 WJTTC — faf_dna birth certificate (B2)', () => {
   test('F1/F2: pack truncated → refused', async () => {
     const dir = committedThenDeleted();
     const pack = packFile(dir);
+    fs.chmodSync(pack, 0o644); // git writes packs 0444; non-root cannot truncate them
     fs.truncateSync(pack, 40);
     expectRefused(await dna(dir), dir);
   });
