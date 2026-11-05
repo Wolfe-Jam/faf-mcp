@@ -854,7 +854,8 @@ describe('🏁 WJTTC — round 3: reflog, shared clones, broken symlinked folder
     const first = git(d, 'log', '--all', '--reflog', '--diff-filter=AM', '--oneline', '--', '.faf-dna').trim().split('\n')[0];
     const sha = first.split(' ')[0];
     git(d, 'checkout', sha, '--', '.faf-dna');
-    expect(fs.readFileSync(path.join(d, '.faf-dna'), 'utf-8')).toBe(CERT);
+    // git on Windows may check the file out with CRLF line endings (core.autocrlf).
+    expect(fs.readFileSync(path.join(d, '.faf-dna'), 'utf-8').replace(/\r\n/g, '\n')).toBe(CERT);
   });
 
   describe('N3: faf_write through a broken symlinked folder', () => {
