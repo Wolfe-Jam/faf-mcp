@@ -231,7 +231,7 @@ The 15 Core tools, shown by default:
 | `faf_gemini` | Import GEMINI.md into `project.faf`, or write it from `project.faf` |
 | `faf_git` | Author a `project.faf` from a public GitHub repo URL |
 
-**+14 more with `FAF_TOOLS=all`:** `faf_status` · `faf_what` · `faf_guide` · `faf_debug` · `faf_clear` · `faf_list` · `faf_read` (read a file within the allowed roots: cwd, the OS temp dir, or `FAF_ALLOWED_ROOTS`) · `faf_write` (write a file within the same roots) · `faf_readme` · `faf_human_add` · `faf_quick` · `faf_formats` · `faf_dna` · `faf_conductor`
+**+14 more with `FAF_TOOLS=all`:** `faf_status` · `faf_what` · `faf_guide` · `faf_debug` · `faf_clear` · `faf_list` · `faf_read` (read a file within the allowed roots: cwd, the OS temp dir, or `FAF_ALLOWED_ROOTS`) · `faf_write` (write a file within cwd or `FAF_ALLOWED_ROOTS`; never `.faf-dna` or `.git/`; an existing `*.faf`, `CLAUDE.md` or `AGENTS.md` needs `overwrite: true`) · `faf_readme` · `faf_human_add` · `faf_quick` · `faf_formats` · `faf_dna` · `faf_conductor`
 
 **Built on faf-cli.** Every tool composes the bundled [faf-cli](https://www.npmjs.com/package/faf-cli) in-process — the same scorer, the same renderers, the same block injector the CLI uses. Nothing shells out to a `faf` on your PATH.
 

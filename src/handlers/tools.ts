@@ -2,6 +2,7 @@ import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import { FafEngineAdapter } from './engine-adapter';
 import { fileHandlers } from './fileHandler';
 import * as fs from 'fs';
+import { gitEverTracked } from '../utils/git-history';
 import * as os from 'os';
 import * as pathModule from 'path';
 import { findFafFile } from '../utils/faf-file-finder.js';
@@ -268,7 +269,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_write',
-          description: 'Write a file within the allowed roots (cwd, the OS temp dir, or FAF_ALLOWED_ROOTS). Paths outside them are refused.',
+          description: 'Write a file within the project root (cwd, or FAF_ALLOWED_ROOTS when set). Paths outside it, inside .git/, and .faf-dna (the birth certificate) are always refused. An existing *.faf, CLAUDE.md or AGENTS.md is not replaced unless overwrite is true. Writes via temp file + rename.',
           annotations: {
             title: 'Write Project File',
             readOnlyHint: false,
@@ -281,6 +282,10 @@ export class FafToolHandler {
               path: {
                 type: 'string',
                 description: 'Absolute or relative file path to write'
+              },
+              overwrite: {
+                type: 'boolean',
+                description: 'Set true to replace an existing *.faf, CLAUDE.md or AGENTS.md. Without it, faf_write refuses and leaves the file unchanged. Never applies to .faf-dna.'
               },
               content: {
                 type: 'string',
@@ -2171,6 +2176,35 @@ Call these MCP tools:
           };
         }
 
+        // A .faf-dna that was ever committed is a birth that already happened.
+        // Reissuing would replace the certificate; restore it from git instead.
+        const history = gitEverTracked(dnaPath);
+        if (history.status === 'found') {
+          const committed = history.where;
+          return {
+            content: [{
+              type: 'text',
+              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing, but git shows it existed (${committed}).\nThe birth certificate is issued once and is not reissued.\n\n💡 Restore it from git instead:\n   git log --all --oneline -- .faf-dna      (find the last commit that has it)\n   git checkout <sha> -- .faf-dna           (restore that version)`
+            }],
+            isError: true
+          };
+        }
+        // Fail closed: if git history could not be read in full, a deleted
+        // certificate cannot be ruled out, so none is issued.
+        if (history.status === 'unknown') {
+          return {
+            content: [{
+              type: 'text',
+              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing and git history could not be checked (${history.reason}).\nThe birth certificate is issued once and is not reissued, so faf_dna did not create one.\n\n💡 If .faf-dna existed before, restore it from git:\n   git log --all --oneline -- .faf-dna      (find the last commit that has it)\n   git checkout <sha> -- .faf-dna           (restore that version)\n💡 If this really is a brand-new project, create the first one with faf-cli:\n   faf init`
+            }],
+            isError: true
+          };
+        }
+        // Outside git there is no history to check: say so in the reply.
+        const noHistoryNote = history.status === 'not-a-repo'
+          ? `\n\n⚠️ Not a git repository: no history could be checked, so a lost .faf-dna cannot be told apart from a new project. If this project had a .faf-dna before, replace this one with the restored original.`
+          : '';
+
         // .faf exists but no DNA - create initial DNA. Real scorer — same
         // one faf_score reads — never a local pseudo-score (v3.0 fix).
         const { readFafRaw, scoreFafYaml } = await fafCli;
@@ -2195,12 +2229,29 @@ Call these MCP tools:
           format: 'faf-dna-v1'
         };
 
-        fs.writeFileSync(dnaPath, JSON.stringify(dna, null, 2));
+        // Exclusive create (O_EXCL): the birth certificate is written once.
+        // If another call created it in the meantime, that one stands and is
+        // the one reported — never a second certificate.
+        try {
+          fs.writeFileSync(dnaPath, JSON.stringify(dna, null, 2), { flag: 'wx' });
+        } catch (err: unknown) {
+          if ((err as NodeJS.ErrnoException)?.code !== 'EEXIST') throw err;
+          const existing = JSON.parse(fs.readFileSync(dnaPath, 'utf-8')) as {
+            birthCertificate?: { birthDNA?: number; born?: string; certificate?: string };
+          };
+          const bc = existing.birthCertificate ?? {};
+          return {
+            content: [{
+              type: 'text',
+              text: `🧬 FAF DNA Journey\n\n🎫 Birth Certificate already exists — not reissued.\n\n📊 Birth DNA: ${bc.birthDNA ?? 0}%\n📅 Born: ${String(bc.born ?? '').split('T')[0]}\n🎫 Certificate: ${bc.certificate ?? 'unknown'}`
+            }]
+          };
+        }
 
         return {
           content: [{
             type: 'text',
-            text: `🧬 FAF DNA Journey\n\n🐣 Birth Certificate Created!\n\n📊 Birth DNA: ${currentScore}%\n📅 Born: ${new Date().toISOString().split('T')[0]}\n🎫 Certificate: ${dna.birthCertificate.certificate}\n\n💡 Your journey begins here! Run faf_auto or faf_go to grow.`
+            text: `🧬 FAF DNA Journey\n\n🐣 Birth Certificate Created!\n\n📊 Birth DNA: ${currentScore}%\n📅 Born: ${new Date().toISOString().split('T')[0]}\n🎫 Certificate: ${dna.birthCertificate.certificate}\n\n💡 Your journey begins here! Run faf_auto or faf_go to grow.${noHistoryNote}`
           }]
         };
       }
@@ -2226,7 +2277,12 @@ Call these MCP tools:
           const now = new Date().toISOString();
           dna.current = { ...(dna.current ?? {}), score: live, lastSync: now };
           milestones.push({ type: 'sync', score: live, date: now, version: dna.current.version ?? 'v1.0.0' });
-          fs.writeFileSync(dnaPath, JSON.stringify(dna, null, 2));
+          // birthCertificate is carried over unchanged; temp + rename so a
+          // crash mid-write cannot truncate the certificate.
+          const tmpDna = `${dnaPath}.tmp-${process.pid}-${Date.now()}`;
+          fs.writeFileSync(tmpDna, JSON.stringify(dna, null, 2), { flag: 'wx' });
+          fs.chmodSync(tmpDna, fs.statSync(dnaPath).mode & 0o7777); // keep the certificate's mode
+          fs.renameSync(tmpDna, dnaPath);
           currentScore = live;
         }
       }

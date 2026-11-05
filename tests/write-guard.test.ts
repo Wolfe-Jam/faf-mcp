@@ -5,6 +5,10 @@
  * through injectFafBlock (non-destructive). This guard fails the build if any
  * `fs.writeFile` / `writeFileSync` targets a context file directly — so the
  * file-wipe bug physically cannot be reintroduced. The code is not allowed to.
+ *
+ * This is a source-text regex. It cannot see writes that go through a generic
+ * variable such as faf_write's `filePath`. Behaviour tests that run faf_write
+ * and faf_dna against real temp dirs live in wjttc-faf-write-brake.test.ts.
  */
 import { describe, test } from 'bun:test';
 import { readdirSync, readFileSync, statSync } from 'fs';
