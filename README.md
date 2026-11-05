@@ -28,7 +28,11 @@
 
 ---
 
-## What's New in 4.1.1 — The Instructions Edition
+## What's New in 4.1.2 — The Instructions Edition
+
+**faf_write can no longer overwrite the birth certificate or your context files, and faf_dna never issues a second one.** `.faf-dna` is refused in every spelling and route, existing context files need `overwrite: true`, and `faf_dna` refuses rather than reissue when git shows a certificate existed.
+
+## 4.1.1
 
 **One rule for project questions: read project.faf first.**
 
