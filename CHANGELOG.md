@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v4.1.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.1.2 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,16 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.1.2] - 2026-11-05 — The Instructions Edition
+
+**faf_write can no longer overwrite the birth certificate or your context files, and faf_dna never issues a second one.**
+
+### Fixed
+- **`faf_write` refuses `.faf-dna`** in every spelling and route (case, `..`, absolute paths, symlinks, symlinked folders, `.faf-dna/x`), with or without `overwrite: true` ([#110](https://github.com/Wolfe-Jam/faf-mcp/pull/110)).
+- **Existing `project.faf`, `*.faf`, `CLAUDE.md` and `AGENTS.md` need `overwrite: true`.** New files write as before. Writes stay inside the project folder, never in `.git/`, checked on the resolved real path, and land atomically with file permissions kept.
+- **`faf_dna` issues one birth certificate, once.** Concurrent calls create exactly one. If `.faf-dna` is missing but git history shows it existed (any branch, the reflog, a stash, a linked worktree, a `--shared` clone's source), it refuses and prints the restore steps. If history can't be checked, it refuses rather than guess ([#110](https://github.com/Wolfe-Jam/faf-mcp/pull/110), [#111](https://github.com/Wolfe-Jam/faf-mcp/pull/111)).
+- **Restore steps** list the latest version first: `git log --all --reflog --diff-filter=AM --oneline -- .faf-dna`, then `git checkout <sha> -- .faf-dna`.
 
 ## [4.1.1] - 2026-10-28 — The Instructions Edition
 
