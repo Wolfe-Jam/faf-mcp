@@ -207,10 +207,40 @@ function hasSegment(p: string, roots: string[], name: string): boolean {
 }
 
 /**
+ * The first folder on the way to `p` that is a symlink whose target cannot be
+ * resolved (dangling or a loop), or null. canonicalize() walks past such a
+ * link as if it were a missing folder, so it must be refused explicitly.
+ */
+function brokenSymlinkFolder(p: string): string | null {
+  const folders: string[] = [];
+  for (let cur = path.dirname(p); ; cur = path.dirname(cur)) {
+    folders.push(cur);
+    if (path.dirname(cur) === cur) break;
+  }
+  for (const folder of folders.reverse()) {
+    let isLink = false;
+    try {
+      isLink = fs.lstatSync(folder).isSymbolicLink();
+    } catch {
+      continue; // absent: mkdir creates it
+    }
+    if (!isLink) continue;
+    try {
+      fs.realpathSync(folder);
+    } catch {
+      return folder;
+    }
+  }
+  return null;
+}
+
+/**
  * Confine a `faf_write` target. Resolves the real path (through symlinks) and
  * refuses:
  *   - anything outside writeOpRoots() (cwd by default),
  *   - anything inside a `.git/` directory,
+ *   - a path through a folder that is a broken symlink (refused here, before
+ *     faf_write reaches mkdir),
  *   - `.faf-dna` as the file or as any path segment (any case), by its
  *     lexical path or its real target, so `.faf-dna/x` and a symlink to the
  *     birth certificate are refused too.
@@ -239,6 +269,12 @@ export function confineWriteOp(input: unknown): string {
   }
   if (hasSegment(lexical, lexicalRoots, '.git') || hasSegment(resolved, roots, '.git')) {
     throw new PathConfinementError(`refusing to write inside a .git directory: "${input}".`);
+  }
+  const broken = brokenSymlinkFolder(lexical);
+  if (broken) {
+    throw new PathConfinementError(
+      `refusing to write through a broken symlinked folder: "${input}" (${broken} points to a target that does not exist).`,
+    );
   }
   if (!withinRoots(resolved, roots)) {
     throw new PathConfinementError(
