@@ -2184,7 +2184,7 @@ Call these MCP tools:
           return {
             content: [{
               type: 'text',
-              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing, but git shows it existed (${committed}).\nThe birth certificate is issued once and is not reissued.\n\n💡 Restore it from git instead:\n   git log --all --reflog --oneline -- .faf-dna   (find the last commit that has it, reflog included)\n   git checkout <sha> -- .faf-dna                 (restore that version)`
+              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing, but git shows it existed (${committed}).\nThe birth certificate is issued once and is not reissued.\n\n💡 Restore it from git instead:\n   git log --all --reflog --diff-filter=AM --oneline -- .faf-dna   (the first line is the latest version, reflog included)\n   git checkout <sha> -- .faf-dna                 (restore that version)`
             }],
             isError: true
           };
@@ -2195,7 +2195,7 @@ Call these MCP tools:
           return {
             content: [{
               type: 'text',
-              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing and git history could not be checked (${history.reason}).\nThe birth certificate is issued once and is not reissued, so faf_dna did not create one.\n\n💡 If .faf-dna existed before, restore it from git:\n   git log --all --reflog --oneline -- .faf-dna   (find the last commit that has it, reflog included)\n   git checkout <sha> -- .faf-dna                 (restore that version)\n💡 If this really is a brand-new project, create the first one with faf-cli:\n   faf init`
+              text: `🧬 FAF DNA Journey\n\n❌ .faf-dna is missing and git history could not be checked (${history.reason}).\nThe birth certificate is issued once and is not reissued, so faf_dna did not create one.\n\n💡 If .faf-dna existed before, restore it from git:\n   git log --all --reflog --diff-filter=AM --oneline -- .faf-dna   (the first line is the latest version, reflog included)\n   git checkout <sha> -- .faf-dna                 (restore that version)\n💡 If this really is a brand-new project, create the first one with faf-cli:\n   faf init`
             }],
             isError: true
           };

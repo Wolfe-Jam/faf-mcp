@@ -649,7 +649,7 @@ describe('🏁 WJTTC — round 3: reflog, shared clones, broken symlinked folder
   const expectFound = (res: ToolText, dir: string): void => {
     expect(res.isError).toBe(true);
     expect(textOf(res)).toContain('git shows it existed');
-    expect(textOf(res)).toContain('git log --all --reflog --oneline -- .faf-dna');
+    expect(textOf(res)).toContain('git log --all --reflog --diff-filter=AM --oneline -- .faf-dna');
     expect(textOf(res)).toContain('git checkout <sha> -- .faf-dna');
     expect(textOf(res)).not.toContain('Birth Certificate Created');
     expect(fs.existsSync(path.join(dir, '.faf-dna'))).toBe(false);
@@ -797,6 +797,65 @@ describe('🏁 WJTTC — round 3: reflog, shared clones, broken symlinked folder
   });
 
   // ── N3: broken symlinked folder ─────────────────────────────────────────
+
+  describe('N1b: linked worktrees (round 4)', () => {
+    /** Main repo plus a detached linked worktree that commits .faf-dna. */
+    const withWorktree = (): { main: string; wt: string } => {
+      const main = repo();
+      const wt = path.join(tmp('faf-dna-wt-'), 'wt');
+      git(main, 'worktree', 'add', '-q', '--detach', wt);
+      fs.writeFileSync(path.join(wt, '.faf-dna'), CERT);
+      git(wt, 'add', '.faf-dna');
+      git(wt, 'commit', '-q', '-m', 'birth');
+      return { main, wt };
+    };
+
+    test('detached linked worktree holds the birth commit → refused from the main worktree', async () => {
+      const { main } = withWorktree();
+      expectFound(await dna(main), main);
+    });
+
+    test('detached linked worktree: birth then reset --hard → refused from the main worktree', async () => {
+      const { main, wt } = withWorktree();
+      git(wt, 'reset', '-q', '--hard', 'HEAD~1');
+      expect(git(main, 'log', '--all', '--oneline', '--', '.faf-dna').trim()).toBe('');
+      expectFound(await dna(main), main);
+    });
+
+    test('same after git gc --prune=now → still refused (git keeps the commit)', async () => {
+      const { main, wt } = withWorktree();
+      git(wt, 'reset', '-q', '--hard', 'HEAD~1');
+      git(main, 'gc', '-q', '--prune=now');
+      expectFound(await dna(main), main);
+    });
+
+    // Root can list a mode-000 directory, so this only runs as a normal user (CI).
+    test.skipIf(process.getuid?.() === 0 || process.platform === 'win32')(
+      'a worktrees dir that cannot be listed → unknown → refused', async () => {
+        const { main } = withWorktree();
+        const wtAdmin = path.join(main, '.git', 'worktrees');
+        fs.chmodSync(wtAdmin, 0o000);
+        try {
+          expectUnknown(await dna(main), main);
+        } finally {
+          fs.chmodSync(wtAdmin, 0o755);
+        }
+      });
+  });
+
+  test('restore step: with a delete commit in history, the first line printed restores .faf-dna', async () => {
+    const d = repo();
+    fs.writeFileSync(path.join(d, '.faf-dna'), CERT);
+    git(d, 'add', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'birth');
+    git(d, 'rm', '-q', '.faf-dna');
+    git(d, 'commit', '-q', '-m', 'remove');
+    expectFound(await dna(d), d);
+    const first = git(d, 'log', '--all', '--reflog', '--diff-filter=AM', '--oneline', '--', '.faf-dna').trim().split('\n')[0];
+    const sha = first.split(' ')[0];
+    git(d, 'checkout', sha, '--', '.faf-dna');
+    expect(fs.readFileSync(path.join(d, '.faf-dna'), 'utf-8')).toBe(CERT);
+  });
 
   describe('N3: faf_write through a broken symlinked folder', () => {
     let originalCwd: string;

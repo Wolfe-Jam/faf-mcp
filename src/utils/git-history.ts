@@ -327,6 +327,24 @@ function treeEntry(tree: Buffer, name: string): string | null {
   return null;
 }
 
+/**
+ * The admin dirs of linked worktrees: <commonDir>/worktrees/<id>/. Each holds
+ * that worktree's own HEAD and logs/HEAD, which git counts as reachable (gc
+ * keeps them, `git log --all --reflog` walks them). No worktrees dir is fine;
+ * one that exists but cannot be listed throws.
+ */
+function linkedWorktreeDirs(commonDir: string): string[] {
+  const dir = path.join(commonDir, 'worktrees');
+  let entries: fs.Dirent[] = [];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (err) {
+    if (isAbsent(err)) return [];
+    throw new HistoryUnreadable(`cannot list worktrees: ${(err as Error).message}`);
+  }
+  return entries.filter((e) => e.isDirectory()).map((e) => path.join(dir, e.name));
+}
+
 function refTips(commonDir: string, gitDir: string): string[] {
   const tips = new Set<string>();
   const packed = new Map<string, string>();
@@ -376,14 +394,24 @@ function refTips(commonDir: string, gitDir: string): string[] {
   walk(path.join(commonDir, 'refs'));
   const head = readRef(gitDir, 'HEAD');
   if (head) tips.add(head);
+  // Every linked worktree's HEAD, wherever faf_dna was called from: a detached
+  // worktree can hold the only commit with .faf-dna.
+  for (const w of linkedWorktreeDirs(commonDir)) {
+    const h = readRef(w, 'HEAD');
+    if (h) tips.add(h);
+  }
+  if (commonDir !== gitDir) {
+    const mainHead = readRef(commonDir, 'HEAD');
+    if (mainHead) tips.add(mainHead);
+  }
   return [...tips];
 }
 
 const ZERO_SHA = '0'.repeat(40);
 
 /**
- * Every commit a reflog names: logs/HEAD of this worktree and of the common
- * dir, and every file under logs/refs/. A commit dropped by `reset --hard`,
+ * Every commit a reflog names: logs/HEAD of this worktree, of the common dir
+ * and of every linked worktree, and every file under logs/refs/. A commit dropped by `reset --hard`,
  * `commit --amend` or a deleted branch is reachable only from here until the
  * reflog expires. No logs directory is fine (core.logAllRefUpdates=false);
  * a reflog that exists but cannot be read or parsed throws.
@@ -416,6 +444,9 @@ function reflogTips(commonDir: string, gitDir: string): string[] {
   };
   readLog(path.join(gitDir, 'logs', 'HEAD'));
   if (commonDir !== gitDir) readLog(path.join(commonDir, 'logs', 'HEAD'));
+  for (const w of linkedWorktreeDirs(commonDir)) {
+    if (w !== gitDir) readLog(path.join(w, 'logs', 'HEAD'));
+  }
   walk(path.join(commonDir, 'logs', 'refs'));
   return [...tips];
 }
