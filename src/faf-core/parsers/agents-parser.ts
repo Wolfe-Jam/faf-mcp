@@ -251,10 +251,13 @@ export async function agentsExport(
   // block is injected with faf-cli's injector (whole-line markers). Nothing
   // is ported here any more — a port drifted (thinner sections, a prose
   // decoy) and this is the fix.
-  const { renderAgentsMd, enrichFromRepo, injectFafBlock } = await fafCli;
+  const { renderAgentsMd, enrichFromRepo, injectFafBlock, legacyStampNoteAt } = await fafCli;
   const dir = path.dirname(outputPath);
-  injectFafBlock(outputPath, renderAgentsMd(enrichFromRepo(dir, fafContent ?? {})));
-  return { success: true, filePath: outputPath, warnings: [] };
+  // faf-cli's note when its block goes on top of older faf text (asked before
+  // the write, which changes the file); root keeps links inside the project.
+  const note = legacyStampNoteAt(outputPath, 'AGENTS.md', undefined, undefined, { root: dir });
+  injectFafBlock(outputPath, renderAgentsMd(enrichFromRepo(dir, fafContent ?? {})), undefined, undefined, { root: dir });
+  return { success: true, filePath: outputPath, warnings: note ? [note] : [] };
 }
 
 // ============================================================================

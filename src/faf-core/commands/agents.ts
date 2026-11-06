@@ -161,7 +161,7 @@ export async function agentsExportCommand(
     success: result.success,
     action: 'export',
     message: result.success
-      ? `Exported project.faf to AGENTS.md`
+      ? `Exported project.faf to AGENTS.md` + (result.warnings.length ? `\n${result.warnings.join('\n')}` : '')
       : 'Export failed',
     data: { filePath: result.filePath },
     warnings: result.warnings,

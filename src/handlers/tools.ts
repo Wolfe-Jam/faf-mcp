@@ -2077,6 +2077,7 @@ Call these MCP tools:
         writeFaf,
         renderClaudeMd,
         writeClaudeMd,
+        legacyStampNoteAt,
       } = await fafCli;
 
       // Step 1: locate any existing .faf and its real "before" score.
@@ -2103,8 +2104,10 @@ Call these MCP tools:
       // Step 3: CLAUDE.md — faf-cli's render of the file just written (the
       // same bytes `faf sync` writes), injected non-destructively.
       const claudeExisted = fs.existsSync(path.join(cwd, 'CLAUDE.md'));
+      const stampNote = claudeExisted ? legacyStampNoteAt(path.join(cwd, 'CLAUDE.md'), 'CLAUDE.md') : null;
       writeClaudeMd(cwd, renderClaudeMd(readFaf(fafPath)));
       steps.push(claudeExisted ? '✅ Updated CLAUDE.md (faf-managed block)' : '✅ Created CLAUDE.md');
+      if (stampNote) {steps.push(`ℹ️ ${stampNote}`);}
 
       // Step 4: final score — same real scorer faf_score reads, on the file
       // just written. By construction this can never disagree with faf_score.

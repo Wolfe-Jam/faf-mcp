@@ -296,9 +296,11 @@ export async function cursorExport(
 ): Promise<CursorExportResult> {
   // Composed from faf-cli (7.12.0+): the same bytes `faf export --cursor`
   // writes (no repo enrichment for .cursorrules, matching faf-cli).
-  const { renderCursorrules, injectFafBlock } = await fafCli;
-  injectFafBlock(outputPath, renderCursorrules(fafContent ?? {}), '# faf:start', '# faf:end');
-  return { success: true, filePath: outputPath, warnings: [] };
+  const { renderCursorrules, injectFafBlock, legacyStampNoteAt } = await fafCli;
+  const dir = path.dirname(outputPath);
+  const note = legacyStampNoteAt(outputPath, '.cursorrules', '# faf:start', '# faf:end', { root: dir });
+  injectFafBlock(outputPath, renderCursorrules(fafContent ?? {}), '# faf:start', '# faf:end', { root: dir });
+  return { success: true, filePath: outputPath, warnings: note ? [note] : [] };
 }
 
 // ============================================================================

@@ -225,10 +225,11 @@ export async function geminiExport(
   outputPath: string
 ): Promise<GeminiExportResult> {
   // Composed from faf-cli (7.12.0+): the same bytes `faf export --gemini` writes.
-  const { renderGeminiMd, enrichFromRepo, injectFafBlock } = await fafCli;
+  const { renderGeminiMd, enrichFromRepo, injectFafBlock, legacyStampNoteAt } = await fafCli;
   const dir = path.dirname(outputPath);
-  injectFafBlock(outputPath, renderGeminiMd(enrichFromRepo(dir, fafContent ?? {})));
-  return { success: true, filePath: outputPath, warnings: [] };
+  const note = legacyStampNoteAt(outputPath, 'GEMINI.md', undefined, undefined, { root: dir });
+  injectFafBlock(outputPath, renderGeminiMd(enrichFromRepo(dir, fafContent ?? {})), undefined, undefined, { root: dir });
+  return { success: true, filePath: outputPath, warnings: note ? [note] : [] };
 }
 
 // ============================================================================

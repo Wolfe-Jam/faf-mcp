@@ -70,7 +70,8 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
     parseYAML(fafContent); // still validates the YAML before anything is written
     // The score in the message is the real one — faf-cli's scorer on the
     // bytes read — not a `faf_score` key nothing ever writes.
-    const { scoreFafYaml, readFaf, renderClaudeMd, writeClaudeMd } = await fafCli;
+    const { scoreFafYaml, readFaf, renderClaudeMd, writeClaudeMd, legacyStampNoteAt } = await fafCli;
+    const notes: string[] = [];
     let currentScore = 'unknown';
     try {
       currentScore = `${scoreFafYaml(fafContent).score}%`;
@@ -93,7 +94,10 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
       // CLAUDE.md is faf-cli's render of project.faf — the same bytes
       // `faf sync` writes — injected with faf-cli's injector. The pre-v3
       // template that lived here dropped Stack and every human_context slot.
+      // faf-cli's note is asked before the write, which changes the file.
+      const stampNote = legacyStampNoteAt(claudeMdPath, 'CLAUDE.md');
       writeClaudeMd(projectDir, renderClaudeMd(readFaf(fafPath)));
+      if (stampNote) {notes.push(stampNote);}
 
       result.success = true;
       result.direction = 'faf-to-claude';
@@ -111,9 +115,13 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
         const agentsResult = await agentsExportCommand(projectDir, { force: true });
         if (agentsResult.success) {
           result.filesChanged.push('AGENTS.md');
+          notes.push(...(agentsResult.warnings ?? []));
+        } else {
+          notes.push(`AGENTS.md not written: ${agentsResult.message}`);
         }
-      } catch {
-        // Non-fatal — the CLAUDE.md write already succeeded
+      } catch (error) {
+        // The CLAUDE.md write already succeeded; say what was not written.
+        notes.push(`AGENTS.md not written: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -122,9 +130,13 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
         const cursorResult = await cursorExportCommand(projectDir, { force: true });
         if (cursorResult.success) {
           result.filesChanged.push('.cursorrules');
+          notes.push(...(cursorResult.warnings ?? []));
+        } else {
+          notes.push(`.cursorrules not written: ${cursorResult.message}`);
         }
-      } catch {
-        // Non-fatal
+      } catch (error) {
+        // The CLAUDE.md write already succeeded; say what was not written.
+        notes.push(`.cursorrules not written: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -133,14 +145,21 @@ export async function claudeExportCommand(projectPath?: string, _options: Claude
         const geminiResult = await geminiExportCommand(projectDir, { force: true });
         if (geminiResult.success) {
           result.filesChanged.push('GEMINI.md');
+          notes.push(...(geminiResult.warnings ?? []));
+        } else {
+          notes.push(`GEMINI.md not written: ${geminiResult.message}`);
         }
-      } catch {
-        // Non-fatal
+      } catch (error) {
+        // The CLAUDE.md write already succeeded; say what was not written.
+        notes.push(`GEMINI.md not written: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
     if (result.filesChanged.length > 1) {
       result.message += ` | Also wrote: ${result.filesChanged.filter(f => f !== 'CLAUDE.md').join(', ')}`;
+    }
+    if (notes.length) {
+      result.message += `\n${notes.join('\n')}`;
     }
 
     result.duration = Date.now() - startTime;
