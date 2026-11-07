@@ -28,7 +28,11 @@
 
 ---
 
-## What's New in 4.1.2 — The Instructions Edition
+## What's New in 4.1.3 — The Instructions Edition
+
+**faf-mcp now says what faf-cli's writer did: the note when faf's block goes above older faf text, and each file it could not write.** When a context file starts with older faf text, the reply carries faf-cli's note that the old text is left as you had it; `faf_claude` names any chained file it could not write, with the reason.
+
+## 4.1.2
 
 **faf_write can no longer overwrite the birth certificate or your context files, and faf_dna never issues a second one.** `.faf-dna` is refused in every spelling and route, existing context files need `overwrite: true`, and `faf_dna` refuses rather than reissue when git shows a certificate existed.
 

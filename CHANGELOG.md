@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v4.1.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.1.3 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,15 @@ All notable changes to faf-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.1.3] - 2026-11-06 — The Instructions Edition
+
+**faf-mcp now says what faf-cli's writer did: the note when faf's block goes above older faf text, and each file it could not write.**
+
+### Fixed
+- **The legacy-stamp note reaches the reply** ([#113](https://github.com/Wolfe-Jam/faf-mcp/pull/113)). When AGENTS.md, GEMINI.md, .cursorrules or CLAUDE.md starts with older faf text, faf's block goes on top and every line is kept; `faf_agents`, `faf_gemini`, `faf_cursor`, `faf_claude` and `faf_auto` now add faf-cli's note ("…left as you had it — delete it by hand if you no longer want it"). Before, the reply said only "Exported". The note is asked before the write, and the writer gets the project root explicitly (faf-cli's default too).
+- **`faf_claude` names a chained file it could not write.** With `agents`, `cursor` or `gemini`, a refused file (not UTF-8, a link out of the project) used to be dropped without a word (`catch {}`). Now the reply says "AGENTS.md not written: <reason>"; CLAUDE.md is still written and reported.
+- Two independent reviews (claude, goose), both merge; see #113.
 
 ## [4.1.2] - 2026-11-05 — The Instructions Edition
 

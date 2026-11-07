@@ -18,6 +18,8 @@ import { agentsExportCommand } from '../src/faf-core/commands/agents.js';
 import { geminiExportCommand } from '../src/faf-core/commands/gemini.js';
 import { cursorExportCommand } from '../src/faf-core/commands/cursor.js';
 import { claudeExportCommand } from '../src/faf-core/commands/claude.js';
+import { FafToolHandler } from '../src/handlers/tools.js';
+import { FafEngineAdapter } from '../src/handlers/engine-adapter.js';
 
 const FAF = 'faf_version: "3.3"\nproject:\n  name: probe\n  goal: test the reply\n';
 const HAND = 'Never deploy on Friday.';
@@ -138,5 +140,38 @@ describe('faf_claude with every chained file stamped: one note per file', () => 
     } finally {
       fs.rmSync(out, { recursive: true, force: true });
     }
+  });
+});
+
+describe('faf_auto (through the tool handler)', () => {
+  const run = async () => {
+    const handler = new FafToolHandler(new FafEngineAdapter('native'));
+    const r: any = await handler.callTool('faf_auto', { path: dir });
+    return r.content.map((c: any) => c.text).join('\n');
+  };
+
+  test('a stamped CLAUDE.md: the note is a step, every line kept', async () => {
+    fs.writeFileSync(path.join(dir, 'CLAUDE.md'), stamped(MD_STAMP));
+    expect(await run()).toMatch(/CLAUDE\.md: .*left as you had it/);
+    expect(fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf-8')).toContain(HAND);
+  });
+
+  test('no CLAUDE.md: created, no note', async () => {
+    const out = await run();
+    expect(out).toContain('Created CLAUDE.md');
+    expect(out).not.toMatch(/left as you had it/);
+  });
+});
+
+describe('boundary: a .cursorrules stamped "# faf:" (not "<!-- faf:")', () => {
+  // faf-cli's legacyStampNoteAt recognises only "<!-- faf:" on line 1, so this
+  // file gets no note. The lines are still kept. If faf-cli learns the "#"
+  // form, this test turns red and should flip to expect the note.
+  test('kept, no note today', async () => {
+    fs.writeFileSync(path.join(dir, '.cursorrules'), stamped('# faf: probe | TypeScript | an old stamp'));
+    const r = await cursorExportCommand(dir, { force: true });
+    expect(r.success).toBe(true);
+    expect(r.message).not.toMatch(/left as you had it/);
+    expect(fs.readFileSync(path.join(dir, '.cursorrules'), 'utf-8')).toContain(HAND);
   });
 });
