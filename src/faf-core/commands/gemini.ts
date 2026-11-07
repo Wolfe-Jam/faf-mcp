@@ -155,7 +155,7 @@ export async function geminiExportCommand(
     success: result.success,
     action: 'export',
     message: result.success
-      ? `Exported project.faf to GEMINI.md`
+      ? `Exported project.faf to GEMINI.md` + (result.warnings.length ? `\n${result.warnings.join('\n')}` : '')
       : 'Export failed',
     data: { filePath: result.filePath },
     warnings: result.warnings,
