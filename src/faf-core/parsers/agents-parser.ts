@@ -254,7 +254,8 @@ export async function agentsExport(
   const { renderAgentsMd, enrichFromRepo, injectFafBlock, legacyStampNoteAt } = await fafCli;
   const dir = path.dirname(outputPath);
   // faf-cli's note when its block goes on top of older faf text (asked before
-  // the write, which changes the file); root keeps links inside the project.
+  // the write, which changes the file). root is explicit; it is faf-cli's
+  // default too (the file's own folder).
   const note = legacyStampNoteAt(outputPath, 'AGENTS.md', undefined, undefined, { root: dir });
   injectFafBlock(outputPath, renderAgentsMd(enrichFromRepo(dir, fafContent ?? {})), undefined, undefined, { root: dir });
   return { success: true, filePath: outputPath, warnings: note ? [note] : [] };

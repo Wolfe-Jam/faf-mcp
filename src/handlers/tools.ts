@@ -2107,7 +2107,7 @@ Call these MCP tools:
       const stampNote = claudeExisted ? legacyStampNoteAt(path.join(cwd, 'CLAUDE.md'), 'CLAUDE.md') : null;
       writeClaudeMd(cwd, renderClaudeMd(readFaf(fafPath)));
       steps.push(claudeExisted ? '✅ Updated CLAUDE.md (faf-managed block)' : '✅ Created CLAUDE.md');
-      if (stampNote) {steps.push(`ℹ️ ${stampNote}`);}
+      if (stampNote) {steps.push(stampNote);}
 
       // Step 4: final score — same real scorer faf_score reads, on the file
       // just written. By construction this can never disagree with faf_score.

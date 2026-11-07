@@ -55,6 +55,12 @@ describe('legacy stamp: the note reaches the reply, every line is kept', () => {
     expect(fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf-8')).toContain(HAND);
   });
 
+  test('a stamped file: the note shows once, then a second run is silent', async () => {
+    fs.writeFileSync(path.join(dir, 'GEMINI.md'), stamped(MD_STAMP));
+    expect((await geminiExportCommand(dir, { force: true })).message).toMatch(/left as you had it/);
+    expect((await geminiExportCommand(dir, { force: true })).message).not.toMatch(/left as you had it/);
+  });
+
   test('a file faf wrote itself gets no note', async () => {
     expect((await agentsExportCommand(dir, { force: true })).message).not.toMatch(/left as you had it/);
     const again = await agentsExportCommand(dir, { force: true });
@@ -67,11 +73,20 @@ describe('.cursorrules uses its own markers', () => {
     fs.writeFileSync(path.join(dir, '.cursorrules'), `# Team rules\n${HAND}\n`);
     const r = await cursorExportCommand(dir, { force: true });
     expect(r.success).toBe(true);
+    expect(r.message).not.toMatch(/left as you had it/);
     expect(fs.readFileSync(path.join(dir, '.cursorrules'), 'utf-8')).toContain(HAND);
+  });
+
+  test('an old faf stamp on line 1: kept, note shown, second run silent', async () => {
+    fs.writeFileSync(path.join(dir, '.cursorrules'), stamped(MD_STAMP));
+    const r = await cursorExportCommand(dir, { force: true });
+    expect(r.message).toMatch(/left as you had it/);
+    expect(fs.readFileSync(path.join(dir, '.cursorrules'), 'utf-8')).toContain(HAND);
+    expect((await cursorExportCommand(dir, { force: true })).message).not.toMatch(/left as you had it/);
   });
 });
 
-describe('links out of the project are refused (root passed to the writer)', () => {
+describe('links out of the project are refused (regression)', () => {
   test('AGENTS.md linked outside: refused, target untouched', async () => {
     const out = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'faf-out-')));
     try {
@@ -94,5 +109,34 @@ describe('faf_claude says which chained file was not written', () => {
     expect(r.message).toMatch(/AGENTS\.md not written: .*not UTF-8/);
     expect(fs.readFileSync(path.join(dir, 'AGENTS.md')).equals(bad)).toBe(true);
     expect(fs.existsSync(path.join(dir, 'CLAUDE.md'))).toBe(true);
+  });
+});
+
+describe('faf_claude with every chained file stamped: one note per file', () => {
+  test('CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules', async () => {
+    for (const f of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.cursorrules']) {
+      fs.writeFileSync(path.join(dir, f), stamped(MD_STAMP));
+    }
+    const r = await claudeExportCommand(dir, { force: true, all: true });
+    expect(r.success).toBe(true);
+    for (const f of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.cursorrules']) {
+      const lines = r.message.split('\n').filter(l => l.startsWith(`${f}:`) && /left as you had it/.test(l));
+      expect(lines.length).toBe(1);
+      expect(fs.readFileSync(path.join(dir, f), 'utf-8')).toContain(HAND);
+    }
+  });
+
+  test('GEMINI.md linked out of the project: named, target untouched', async () => {
+    const out = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'faf-out-')));
+    try {
+      fs.writeFileSync(path.join(out, 't.md'), 'outside\n');
+      fs.symlinkSync(path.join(out, 't.md'), path.join(dir, 'GEMINI.md'));
+      const r = await claudeExportCommand(dir, { force: true, gemini: true });
+      expect(r.success).toBe(true);
+      expect(r.message).toMatch(/GEMINI\.md not written: .*outside .*refused/);
+      expect(fs.readFileSync(path.join(out, 't.md'), 'utf-8')).toBe('outside\n');
+    } finally {
+      fs.rmSync(out, { recursive: true, force: true });
+    }
   });
 });
