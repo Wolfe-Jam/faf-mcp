@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Not changed yet
 - **`faf_git`** still authors from the GitHub API and writes `goal` and `what` from the repo description. It moves to faf-cli's `faf git` pipeline once faf-cli exports the clone step (faf-mcp keeps no subprocesses).
 
+### Security
+- hono 4.13.13 → 4.13.18 (transitive; clears a moderate advisory against `hono <=4.13.15`).
+
 ### Added
 - A daily CI run of the suite against the newest faf-cli 8.x (`faf-cli@^8`), so a faf-cli release that changes what a tool returns shows here first.
 

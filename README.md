@@ -38,8 +38,7 @@
 - **`faf_go` answers are real slots, as text.** Any other key refuses the call and nothing is written.
 - **faf-cli 8.10.0 inside.** Not changed yet: `faf_git` still writes the goal from the GitHub description; it moves to faf-cli's pipeline in a later release.
 
-## 4.1.3
-
+## 4.1.3 — The Instructions Edition
 
 **faf-mcp now says what faf-cli's writer did: the note when faf's block goes above older faf text, and each file it could not write.** When a context file starts with older faf text, the reply carries faf-cli's note that the old text is left as you had it; `faf_claude` names any chained file it could not write, with the reason.
 

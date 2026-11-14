@@ -14,10 +14,11 @@ Product playbook for **faf-mcp** (`one.faf/faf-mcp`) — IANA `.faf` project con
 | Tool | When |
 |------|------|
 | `faf_auto` | Zero → context in one shot (init or merge, detect, CLAUDE.md, score) |
-| `faf_init` | Create a new `project.faf` (use `faf_auto` to enhance an existing one) |
+| `faf_init` | Create a new `project.faf` (use `faf_auto` to fill an existing one) |
+| `faf_go` | The goal and six W's: faf-cli's suggestions with their source; ask the user, write only what they confirm |
 | `faf_score` | AI-readiness 0–100% + gaps |
 | `faf_context` | Set or show the active project path |
-| `faf_sync` | Reconcile `project.faf` with package.json (dry-run; `apply:true` writes) |
+| `faf_sync` | Reconcile `project.faf` with package.json: name and stack, never the goal (dry-run; `apply:true` writes) |
 | `faf_claude` | Write CLAUDE.md + IDE format files from `project.faf` |
 | `faf_cursor` | Cursor / `.cursorrules` interop |
 | `faf_agents` | `AGENTS.md` interop |
