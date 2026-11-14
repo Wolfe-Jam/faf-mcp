@@ -224,7 +224,7 @@ The 15 Core tools, shown by default:
 |------|---------|
 | `faf_init` | Create a new `project.faf` (use `faf_auto` to enhance an existing one) |
 | `faf_auto` | One-call setup: init or merge, stack detection, CLAUDE.md, score |
-| `faf_go` | Guided interview that fills the missing human-context and goal fields toward 100% |
+| `faf_go` | The goal and six W's: each empty one with faf-cli's suggestion and its source, for you to confirm; only what you confirm is written |
 | `faf_score` | AI-readiness score (0-100%) and tier; `details:true` adds a slot-by-slot breakdown |
 | `faf_doctor` | Diagnose a low score: missing files, slot counts, config issues, each with a fix |
 | `faf_check` | Rate each `human_context` field empty / generic / good |

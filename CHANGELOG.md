@@ -8,6 +8,29 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**AI suggests, you confirm. faf-mcp no longer writes your project's goal or six W's: faf_go shows each suggestion with its source, and only what you confirm is written.**
+
+### Changed
+- **faf-cli ^8.10.0** (was ^8.5.0, [#115](https://github.com/Wolfe-Jam/faf-mcp/issues/115)). faf-cli 8.10.0 no longer writes the goal or six W's: AI suggests them, a person confirms each one. `faf_init` and `faf_auto` leave them empty, so a new project.faf scores lower, honestly. Files you already have are not changed.
+- **`faf_go` offers the suggestions.** Called without answers, each empty goal or W comes with faf-cli's suggestion (`suggested`) and where it came from (`source`: `README.md § Why`, `package.json description`), or empty strings when the repo has none. The instructions say to send back only what the user confirms.
+- **`faf_readme` suggests and never writes.** It lists faf-cli's suggestions for the goal and six W's, each with its source, from README.md, package.json or Cargo.toml (no README needed). `apply` and `force` are still accepted and write nothing; confirmed text goes in with `faf_go` answers. The tool is now marked read-only. Its own README pattern-matcher is gone.
+- `faf_init` and `faf_auto` say how many suggestions are waiting, or which of the goal and six W's are still empty.
+- **`faf_sync` no longer writes the goal.** `apply: true` used to copy the package.json description into `project.goal`, over a goal the user had confirmed. Now the reply lists faf-cli's suggestions for `faf_go` instead. `project.name` still follows package.json (a repo fact).
+- **`faf_go` answers: real slots, text only.** Any other key (`__proto__.x`, `human_context`, a made-up path) or a non-text answer refuses the whole call and nothing is written. Before, `__proto__.x` left the server unresponsive and `human_context` replaced all six W's. A slot path such as `stack.database` still works.
+- `faf_check` points to `faf_go` for empty slots (it said `faf_readme`).
+- The server instructions name the goal and six W's as the user's; `faf_go`, `faf_human_add` and `faf_quick` say they take text the user has confirmed.
+- 100% is Trophy in `faf_go`'s replies (it said "Gold Code").
+
+### Not changed yet
+- **`faf_git`** still authors from the GitHub API and writes `goal` and `what` from the repo description. It moves to faf-cli's `faf git` pipeline once faf-cli exports the clone step (faf-mcp keeps no subprocesses).
+
+### Added
+- A daily CI run of the suite against the newest faf-cli 8.x (`faf-cli@^8`), so a faf-cli release that changes what a tool returns shows here first.
+
+**Compose floor:** `faf-cli ^8.10.0`. Re-runnable proof: `tests/wjttc-810-human-slots.test.ts`. Reviewed by Fable 5.2 before release (#116).
+
 ## [4.1.3] - 2026-11-06 — The Instructions Edition
 
 **faf-mcp now says what faf-cli's writer did: the note when faf's block goes above older faf text, and each file it could not write.**

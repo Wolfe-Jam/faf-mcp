@@ -409,7 +409,7 @@ describe('🏁 WJTTC — tool truth (checker list, tools.ts)', () => {
     const dir = tmp({ 'project.faf': PARTIAL_FAF });
     const body = JSON.parse(firstText(await call('faf_go', { path: dir })));
     expect(body.needsInput).toBe(true);
-    expect(body.instructions).toBe('Ask the user these questions, then call faf_go again with the answers parameter.');
+    expect(body.instructions).toBe('Ask the user each question, offering the suggestion (and its source) where there is one, then call faf_go again with the answers parameter: only what the user confirms or writes, never a suggestion they have not confirmed.');
     expect(toolsSrc).not.toContain('AskUserQuestion');
   });
 

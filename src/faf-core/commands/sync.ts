@@ -124,22 +124,15 @@ async function detectProjectChanges(fafData: any, projectRoot: string): Promise<
         changes.push({
           path: 'project.name',
           description: 'Project name changed in package.json',
-          oldValue: fafData.project?.name || 'undefined',
+          oldValue: fafData.project?.name ?? '',
           newValue: packageData.name,
           confidence: 'high'
         });
       }
 
-      // Description/goal change
-      if (packageData.description && packageData.description !== fafData.project?.goal) {
-        changes.push({
-          path: 'project.goal',
-          description: 'Project description changed in package.json',
-          oldValue: fafData.project?.goal || 'undefined',
-          newValue: packageData.description,
-          confidence: 'medium'
-        });
-      }
+      // project.goal is never synced: since faf-cli 8.10.0 the goal and six
+      // W's are the user's. faf_sync's reply lists faf-cli's suggestions for
+      // them (the package.json description among the sources), for faf_go.
 
       // Dependencies changes - detect frameworks
       const deps = {

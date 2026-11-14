@@ -221,14 +221,14 @@ describe('🏁 faf_sync — a dry run lists the fields and names the apply param
 
     const r = await syncFafFile(dir, { json: true });
     expect(r.success).toBe(true);
-    expect(r.changesDetected).toBe(3);
+    // project.goal is never synced (faf-cli 8.10.0: the goal is the user's).
+    expect(r.changesDetected).toBe(2);
     expect(r.changesApplied).toBe(0);
     expect(r.changes).toEqual([
       { path: 'project.name', oldValue: 'old-name', newValue: 'new-name' },
-      { path: 'project.goal', oldValue: 'Old goal', newValue: 'New goal' },
       { path: 'stack.frontend', oldValue: '', newValue: 'React' },
     ]);
-    expect(r.message).toBe('Would update 3 field(s). Pass apply: true to write them.');
+    expect(r.message).toBe('Would update 2 field(s). Pass apply: true to write them.');
     expect(r.message).not.toContain('--auto');
     expect(fs.readFileSync(path.join(dir, 'project.faf'), 'utf-8')).toBe(before);
   });
@@ -251,11 +251,12 @@ describe('🏁 faf_sync — a dry run lists the fields and names the apply param
     const dir = syncFixture();
     const r = await syncFafFile(dir, { auto: true, json: true });
     expect(r.success).toBe(true);
-    expect(r.changesApplied).toBe(3);
-    expect(r.message).toBe('Applied 3 changes to project.faf');
+    expect(r.changesApplied).toBe(2);
+    expect(r.message).toBe('Applied 2 changes to project.faf');
     const after = fs.readFileSync(path.join(dir, 'project.faf'), 'utf-8');
     expect(after).toContain('new-name');
     expect(after).toContain('React');
+    expect(after).toContain('goal: Old goal');
   });
 });
 
