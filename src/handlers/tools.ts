@@ -1059,10 +1059,14 @@ export class FafToolHandler {
         ? result.data
         : result.data?.output || JSON.stringify(result.data, null, 2);
 
+    // The goal and six W's are never synced (faf-cli 8.10.0): say what faf-cli
+    // suggests for them, for the user to confirm with faf_go.
+    const note = await this.suggestionLine(this.engineAdapter.getWorkingDirectory());
+
     return {
       content: [{
         type: 'text',
-        text: `🔄 FAF Sync:\n\n${output}`
+        text: `🔄 FAF Sync:\n\n${output}${note ? `\n\n${note}` : ''}`
       }]
     };
   }
@@ -1738,7 +1742,7 @@ Call these MCP tools:
         output += `🔒 _protected_fields (advisory, not enforced): ${protectedFields.join(', ')}\n`;
       }
       if (emptyCount > 0) {
-        output += `\n💡 Use faf_readme or faf_human_add to fill empty slots`;
+        output += `\n💡 faf_go asks the user for the empty slots, with faf-cli's suggestions`;
       }
 
       return { content: [{ type: 'text', text: output }] };
@@ -1862,7 +1866,8 @@ Call these MCP tools:
         let current = obj;
         for (let i = 0; i < parts.length - 1; i++) {
           const part = parts[i];
-          if (!(part in current)) {
+          // Checked above: a missing or empty parent becomes a block.
+          if (!Object.hasOwn(current, part) || current[part] === null || current[part] === '') {
             current[part] = {};
           }
           current = current[part];
@@ -1886,15 +1891,76 @@ Call these MCP tools:
         score >= 70 ? '● Green — solid foundation' : '📈 Keep going!';
 
       // PHASE 2: Apply answers if provided
-      if (args?.answers && typeof args.answers === 'object') {
-        const answers = args.answers as Record<string, string>;
-        let appliedCount = 0;
-
-        for (const [fieldPath, answer] of Object.entries(answers)) {
-          if (answer && answer.trim()) {
-            setNestedValue(fafData, fieldPath, answer.trim());
-            appliedCount++;
+      if (args?.answers !== undefined) {
+        // Only real slots, only text, and never through __proto__,
+        // constructor or prototype. One bad key refuses the whole call and
+        // nothing is written (as claude-faf-mcp 7.2.1).
+        const { SLOT_BY_PATH } = await fafCli;
+        const FORBIDDEN = new Set(['__proto__', 'constructor', 'prototype']);
+        const answers: unknown = args.answers;
+        const rejected: string[] = [];
+        const entries: Array<{ path: string; value: string }> = [];
+        if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
+          rejected.push('answers must be an object: slot path → answer text');
+        } else {
+          const seen = new Map<string, string>();
+          for (const [key, value] of Object.entries(answers as Record<string, unknown>)) {
+            const segments = key.split('.');
+            const safe = !segments.some((seg) => seg === '' || FORBIDDEN.has(seg));
+            const slot = safe ? SLOT_BY_PATH.get(key) : undefined;
+            const asked = safe && Object.hasOwn(QUESTION_REGISTRY, key);
+            if (!slot && !asked) {
+              rejected.push(`${JSON.stringify(key)} is not a slot faf_go fills (use a slot path such as "project.goal", "human_context.why" or "stack.database")`);
+              continue;
+            }
+            if (typeof value !== 'string') {
+              rejected.push(`${key}: the answer must be text, not ${Array.isArray(value) ? 'a list' : value === null ? 'null' : typeof value}`);
+              continue;
+            }
+            if (value.trim() === '') {continue;}
+            // The kernel scores the on-wire key: a Mk4 name is written there.
+            const onWire = slot ? slot.path : key;
+            const other = seen.get(onWire);
+            if (other !== undefined) {
+              rejected.push(`${other} and ${key} both answer ${onWire}; send one`);
+              continue;
+            }
+            // A parent that holds text (human_context: "…") is the user's:
+            // refused, never replaced with a block.
+            const parts = onWire.split('.');
+            let node: unknown = fafData;
+            let blocked: string | null = null;
+            for (let i = 0; i < parts.length - 1 && !blocked; i++) {
+              const next = node && typeof node === 'object' ? (node as Record<string, unknown>)[parts[i]] : undefined;
+              const isBlock = next !== null && typeof next === 'object' && !Array.isArray(next);
+              const isEmpty = next === undefined || next === null || next === '';
+              if (!isBlock && !isEmpty) {blocked = parts.slice(0, i + 1).join('.');}
+              node = next;
+            }
+            if (blocked) {
+              rejected.push(`${key}: ${blocked} in the file holds a value, not a block of fields; fix the file first`);
+              continue;
+            }
+            seen.set(onWire, key);
+            entries.push({ path: onWire, value: value.trim() });
           }
+        }
+        if (rejected.length > 0) {
+          return {
+            content: [{ type: 'text', text: `🎯 FAF Go:\n\n❌ Nothing was written:\n${rejected.map((r) => `  • ${r}`).join('\n')}` }],
+            isError: true
+          };
+        }
+        if (entries.length === 0) {
+          return {
+            content: [{ type: 'text', text: `🎯 FAF Go:\n\nNo answers to write: nothing was written. Send each slot path with the text the user confirmed.` }]
+          };
+        }
+
+        let appliedCount = 0;
+        for (const { path: fieldPath, value } of entries) {
+          setNestedValue(fafData, fieldPath, value);
+          appliedCount++;
         }
 
         // Write updated file, then score the bytes that were written.
@@ -2043,7 +2109,8 @@ Call these MCP tools:
 
       // Step 2: exactly what faf-cli's own `faf auto` does — an existing file
       // is updated with updateExistingFaf (existing values win; interrogated →
-      // detected → Turbo-Cat → Relentless fill the empties), a new one is
+      // detected → Turbo-Cat fill the empty stack slots; since faf-cli 8.10.0
+      // the goal and six W's stay empty for the user), a new one is
       // assembled with assembleFreshFaf — and written with faf-cli's writer,
       // so the bytes match `faf auto` (no runtime `_meta` block, same layout).
       let fafPath: string;

@@ -1,9 +1,10 @@
-name: faf-cli@latest
+name: faf-cli newest 8.x
 
 # The suite against the faf-cli a fresh install gets. package.json pins a
 # caret range (^8.10.0) and npm ci installs the lockfile's version, so the
 # main CI tests one faf-cli and users can run a newer one. This job runs the
-# same suite on faf-cli@latest every day, so a faf-cli release that changes
+# same suite on the newest faf-cli 8.x every day (^8, not @latest: a 9.0 is
+# outside the range users get), so a faf-cli release that changes
 # what a tool returns shows here first (faf-mcp#115).
 
 on:
@@ -35,9 +36,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install faf-cli@latest (package.json and the lockfile are not changed)
+      - name: Install faf-cli@^8, the newest a fresh install gets (package.json and the lockfile are not changed)
         run: |
-          npm install --no-save faf-cli@latest
+          npm install --no-save "faf-cli@^8"
           echo "faf-cli $(node -p "require('./node_modules/faf-cli/package.json').version")" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build

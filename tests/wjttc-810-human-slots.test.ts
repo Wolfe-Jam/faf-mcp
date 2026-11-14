@@ -123,3 +123,96 @@ describe('H5 100% is Trophy, never Gold Code', () => {
     expect(src).not.toMatch(/gold code/i);
   });
 });
+
+// ── Review of #116 (Fable 5.2): F1 faf_sync, F2 faf_go keys, F6 guards ──────
+
+describe('H6 faf_sync never writes the goal (F1)', () => {
+  test('empty goal: apply leaves it empty; the reply points at faf_go', async () => {
+    await call('faf_init', { path: dir });
+    const dry = textOf(await call('faf_sync', { path: dir }));
+    expect(dry).not.toContain('project.goal');
+    expect(dry).not.toContain('undefined');
+    expect(dry).toContain('faf_go');
+    await call('faf_sync', { path: dir, apply: true });
+    expect(slot(fafText(), 'project', 'goal')).toBe('');
+  });
+
+  test('a confirmed goal survives apply byte for byte', async () => {
+    await call('faf_init', { path: dir });
+    await call('faf_go', { path: dir, answers: { 'project.goal': 'Charts from CSV for my team' } });
+    await call('faf_sync', { path: dir, apply: true });
+    expect(slot(fafText(), 'project', 'goal')).toBe('Charts from CSV for my team');
+  });
+});
+
+describe('H7 faf_go answers: real slots, text only, all or nothing (F2)', () => {
+  const refused = async (answers: unknown) => {
+    await call('faf_init', { path: dir });
+    const before = fafText();
+    const r = await call('faf_go', { path: dir, answers });
+    expect(r.isError).toBe(true);
+    expect(textOf(r)).toContain('Nothing was written');
+    expect(fafText()).toBe(before);
+    return textOf(r);
+  };
+
+  test('__proto__ is refused and nothing reaches Object.prototype', async () => {
+    await refused({ '__proto__.polluted': 'yes', 'project.goal': 'ok' });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    // The server still answers.
+    expect((await call('faf_score', { path: dir })).isError).toBeFalsy();
+  });
+  test('a block name, a made-up path and a number are refused', async () => {
+    await refused({ human_context: 'one string' });
+    await refused({ 'totally.made.up': 'x' });
+    expect(await refused({ 'project.goal': 42 })).toContain('must be text');
+  });
+  test('a parent that holds text is refused, never replaced', async () => {
+    fs.writeFileSync(path.join(dir, 'project.faf'), 'faf_version: "3.0"\nproject:\n  name: demo-app\nhuman_context: kept as the user wrote it\n');
+    const before = fafText();
+    const r = await call('faf_go', { path: dir, answers: { 'human_context.why': 'x' } });
+    expect(r.isError).toBe(true);
+    expect(fafText()).toBe(before);
+  });
+  test('{} writes nothing and says so', async () => {
+    await call('faf_init', { path: dir });
+    const before = fafText();
+    const r = await call('faf_go', { path: dir, answers: {} });
+    expect(textOf(r)).toContain('nothing was written');
+    expect(fafText()).toBe(before);
+  });
+  test('valid answers still write, a stack slot included', async () => {
+    await call('faf_init', { path: dir });
+    const r = await call('faf_go', { path: dir, answers: { 'project.goal': 'Charts from CSV', 'stack.database': 'SQLite' } });
+    expect(r.isError).toBeFalsy();
+    expect(slot(fafText(), 'project', 'goal')).toBe('Charts from CSV');
+    expect(slot(fafText(), 'stack', 'database')).toBe('SQLite');
+  });
+});
+
+describe('H8 faf_quick writes only what the user typed (F6)', () => {
+  test('name and goal as typed, no W\'s', async () => {
+    fs.rmSync(path.join(dir, 'README.md'));
+    fs.rmSync(path.join(dir, 'package.json'));
+    const r = await call('faf_quick', { path: dir, input: 'quickapp, books tables for a cafe, typescript' });
+    expect(r.isError).toBeFalsy();
+    const yaml = fafText();
+    expect(slot(yaml, 'project', 'goal')).toBe('books tables for a cafe');
+    for (const w of ['who', 'what', 'why', 'where', 'when', 'how']) {expect(slot(yaml, 'human_context', w)).toBe('');}
+  });
+});
+
+describe('H9 a legacy file keeps its words (F6)', () => {
+  const LEGACY = 'faf_version: "3.0"\nproject:\n  name: demo-app\n  goal: Filled by faf-cli 8.5.0\n  main_language: TypeScript\nhuman_context:\n  what: Legacy what\n  how: npm install demo-app\n';
+  test('faf_readme and faf_go (no answers) leave it byte for byte; faf_auto keeps every value', async () => {
+    fs.writeFileSync(path.join(dir, 'project.faf'), LEGACY);
+    await call('faf_readme', { path: dir, apply: true });
+    await call('faf_go', { path: dir });
+    expect(fafText()).toBe(LEGACY);
+    await call('faf_auto', { path: dir });
+    const yaml = fafText();
+    expect(slot(yaml, 'project', 'goal')).toBe('Filled by faf-cli 8.5.0');
+    expect(slot(yaml, 'human_context', 'what')).toBe('Legacy what');
+    expect(slot(yaml, 'human_context', 'how')).toBe('npm install demo-app');
+  });
+});
