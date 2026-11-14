@@ -1891,7 +1891,9 @@ Call these MCP tools:
         score >= 70 ? '● Green — solid foundation' : '📈 Keep going!';
 
       // PHASE 2: Apply answers if provided
-      if (args?.answers !== undefined) {
+      // null is no answers, as before (a client may send null for an unused
+      // optional argument): the questions come back.
+      if (args?.answers !== undefined && args?.answers !== null) {
         // Only real slots, only text, and never through __proto__,
         // constructor or prototype. One bad key refuses the whole call and
         // nothing is written (as claude-faf-mcp 7.2.1).

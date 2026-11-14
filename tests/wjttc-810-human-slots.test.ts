@@ -174,6 +174,14 @@ describe('H7 faf_go answers: real slots, text only, all or nothing (F2)', () => 
     expect(r.isError).toBe(true);
     expect(fafText()).toBe(before);
   });
+  test('answers: null is no answers: the questions come back (N1)', async () => {
+    await call('faf_init', { path: dir });
+    const before = fafText();
+    const r = await call('faf_go', { path: dir, answers: null });
+    expect(r.isError).toBeFalsy();
+    expect(JSON.parse(textOf(r)).needsInput).toBe(true);
+    expect(fafText()).toBe(before);
+  });
   test('{} writes nothing and says so', async () => {
     await call('faf_init', { path: dir });
     const before = fafText();
