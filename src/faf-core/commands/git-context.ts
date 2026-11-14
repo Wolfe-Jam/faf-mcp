@@ -1,116 +1,177 @@
 /**
- * Git Context Command — Interop (faf-mcp 2.0.0; ported from faf-cli 4.5.0 via claude-faf-mcp 4.5.0)
+ * faf_git — a project.faf for a repository you name by URL, composed from
+ * faf-cli's `faf git`.
  *
- * Author project.faf from a GitHub repository URL.
- * Fetches metadata, README, package.json — no cloning needed.
- * Bundled command — no CLI dependency required.
+ * faf-cli's pure `faf git` helpers do the work: normalizeGitUrl checks the URL
+ * (no shell characters, a strict allow-list) and authorFafFromRepo runs the
+ * same pipeline `faf auto` runs (assembleFreshFaf) on the fetched folder. The
+ * fetch is the one step faf-cli leaves to its consumer, and it is the only
+ * network use in faf-mcp's faf_git: a shallow `git clone --depth 1` of the URL,
+ * run without a shell, into a new temp folder that is removed afterwards.
+ * Symbolic links in the repo are checked out as plain files, so a link in it
+ * can never make faf read a file outside the clone. The score is faf-cli's
+ * scoreFafYaml on the exact bytes written (or that would be written).
  *
- * The score it reports is faf-cli's scorer on the exact bytes authored —
- * the same number faf_score gives that file. The ported slot counter that
- * used to supply it credited defaults and 'slotignored' slots that were
- * never written, so a 10% file was announced as 100% (Trophy).
+ * Without force, faf_git writes only a new file: when the folder already has
+ * a project.faf (or .faf) it refuses before anything is fetched, and points to
+ * faf_auto. With force it replaces project.faf, and only if the file is still
+ * the one read before the clone.
+ *
+ * Ported from claude-faf-mcp 7.2.1 in faf-mcp 4.2.0. The GitHub-API extractor
+ * it replaces is kept at the git tag archive/faf-git-github-api-extractor.
  */
 
-import path from 'path';
-import { promises as fs } from 'fs';
-import {
-  parseGitHubUrl,
-  fetchGitHubMetadata,
-  fetchGitHubFileTree,
-} from '../parsers/github-extractor.js';
-import { generateEnhancedFaf } from '../parsers/faf-git-generator.js';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { fafCli } from '../../utils/faf-cli-bridge.js';
 
-export interface GitContextOptions {
-  /** Replace an existing <outputPath>/project.faf. Without it the command refuses. */
-  force?: boolean;
+/** The first line of an error, for a one-line reply. */
+function oneLine(error: unknown): string {
+  return (error instanceof Error ? error.message : String(error)).split('\n')[0].trim();
 }
+
+const execFileAsync = promisify(execFile);
+
+/** How long the clone may take before faf gives up on it. */
+const CLONE_TIMEOUT_MS = 120_000;
 
 export interface GitContextResult {
   success: boolean;
   message: string;
   data?: {
-    owner: string;
-    repo: string;
+    repoUrl: string;
     score: number;
     tier: string;
     fafContent: string;
     filePath?: string;
+    /** The repo's suggestions for the goal and 6 Ws (faf-cli 8.10.0), to confirm with faf_go answers. */
+    suggestions?: Array<{ slot: string; value: string; source: string }>;
   };
 }
 
+/** True when something is at `p` — a file, a folder or a link (dangling included). */
+function present(p: string): boolean {
+  try {
+    fs.lstatSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Author project.faf from a GitHub URL
+ * The argv for the clone: shallow, quiet, symbolic links as plain files, and
+ * `--` so the URL is never read as an option.
  */
+export function cloneArgs(repoUrl: string, dir: string): string[] {
+  return ['-c', 'core.symlinks=false', 'clone', '--depth', '1', '--quiet', '--', repoUrl, dir];
+}
+
+/**
+ * Author project.faf from a repository URL. With `outputDir` it is written to
+ * `<outputDir>/project.faf` (a new file only); without it nothing is written
+ * and the content is returned.
+ */
+export interface GitContextOptions {
+  /** Replace an existing project.faf in outputDir. */
+  force?: boolean;
+}
+
 export async function gitContextCommand(
   url: string,
-  outputPath?: string,
-  options: GitContextOptions = {}
+  outputDir?: string,
+  options: GitContextOptions = {},
 ): Promise<GitContextResult> {
-  // Parse the URL
-  const parsed = parseGitHubUrl(url);
-  if (!parsed) {
-    return {
-      success: false,
-      message: `Invalid GitHub URL: ${url}. Expected format: https://github.com/owner/repo or owner/repo`,
-    };
+  const { normalizeGitUrl, authorFafFromRepo, serializeFaf, scoreFafYaml, scoreText, safeWriteFile, suggestIntent } = await fafCli;
+
+  let repoUrl: string;
+  try {
+    repoUrl = normalizeGitUrl(url);
+  } catch (error) {
+    return { success: false, message: `${oneLine(error)} Expected owner/repo or https://github.com/owner/repo.` };
   }
 
-  const { owner, repo } = parsed;
-
-  // Never replace an existing project.faf unless asked — checked before any
-  // network call, so a refusal costs nothing and writes nothing.
-  if (outputPath && !options.force) {
-    const existing = path.join(outputPath, 'project.faf');
-    const exists = await fs.access(existing).then(() => true, () => false);
-    if (exists) {
+  // Without force, a new file only. One already there is the user's: refused
+  // before anything is fetched, and left exactly as it is. With force, the
+  // bytes read now are what the write expects to replace.
+  const target = outputDir ? path.join(outputDir, 'project.faf') : undefined;
+  let expectBytes: Buffer | null = null;
+  if (outputDir && target) {
+    const existing = [target, path.join(outputDir, '.faf')].find(present);
+    if (existing && !options.force) {
       return {
         success: false,
-        message: `project.faf already exists at ${outputPath}. Pass force: true to overwrite.`,
+        message: `${existing} already exists; faf_git wrote nothing. Pass force: true to replace project.faf, or use faf_auto, which writes each fact from repo into the file you have (existing values kept).`,
       };
+    }
+    if (present(target)) {
+      try {
+        expectBytes = fs.readFileSync(target);
+      } catch (error) {
+        return { success: false, message: `Could not read ${target}: ${oneLine(error)}. Nothing was written.` };
+      }
     }
   }
 
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-git-'));
+  const cloneDir = path.join(tmp, 'repo');
   try {
-    // Fetch metadata with file checks
-    const metadata = await fetchGitHubMetadata(owner, repo, true);
+    try {
+      await execFileAsync('git', cloneArgs(repoUrl, cloneDir), {
+        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+        timeout: CLONE_TIMEOUT_MS,
+        maxBuffer: 1024 * 1024,
+        windowsHide: true,
+      });
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException & { stderr?: string; killed?: boolean };
+      if (err.code === 'ENOENT') {
+        return { success: false, message: `faf_git fetches the repo with git, and no git was found on PATH. Clone ${repoUrl} yourself and run faf_auto in it.` };
+      }
+      const reason = err.killed
+        ? `the clone took longer than ${CLONE_TIMEOUT_MS / 1000}s`
+        : (err.stderr ?? '').trim().split('\n').slice(-2).join(' ').trim() || oneLine(error);
+      return { success: false, message: `Could not clone ${repoUrl}: ${reason}` };
+    }
 
-    // Fetch file tree
-    const files = await fetchGitHubFileTree(owner, repo, metadata.defaultBranch);
+    // faf-cli's `faf git` pipeline on the clone: the same .faf `faf git` writes.
+    const data = authorFafFromRepo(cloneDir, { repoUrl });
+    const fafContent = serializeFaf(data);
+    // faf-cli 8.10.0 leaves the goal and 6 Ws empty. Return what the repo
+    // suggests now, with sources: the clone is gone once this call returns.
+    const suggested = suggestIntent(cloneDir, data) as Record<string, { value: string; source: string }>;
+    const suggestions = Object.entries(suggested).map(([slot, s]) => ({ slot, value: s.value, source: s.source }));
+    const waiting = suggestions.length;
+    const intentNote = waiting === 0
+      ? "The goal and six W's are empty: fill them with faf_go in a clone."
+      : `The goal and six W's are empty: ${waiting} ${waiting === 1 ? 'suggestion waits' : 'suggestions wait'} in the repo, for the user to confirm with faf_go answers:\n${suggestions.map((x) => `  ${x.slot}: ${x.value}  (${x.source})`).join('\n')}`;
 
-    // Author the .faf content
-    const { content } = await generateEnhancedFaf(metadata, files);
+    const score = scoreFafYaml(fafContent);
 
-    // One scorer: faf-cli's, on the bytes authored.
-    const { scoreFafYaml } = await fafCli;
-    const scored = scoreFafYaml(content);
-    const score = scored.score;
-    const tier = scored.tier.name;
-
-    // Write to file if output path provided
     let filePath: string | undefined;
-    if (outputPath) {
-      filePath = path.join(outputPath, 'project.faf');
-      await fs.writeFile(filePath, content, 'utf-8');
+    if (outputDir && target) {
+      try {
+        // faf-cli's safe write: inside the folder, atomic, and refused if the
+        // file changed (or appeared) since it was read above.
+        safeWriteFile(target, fafContent, { root: outputDir, expect: expectBytes });
+        filePath = target;
+      } catch (error) {
+        return { success: false, message: `${target} was not written: ${oneLine(error)}` };
+      }
     }
 
     return {
       success: true,
-      message: `Authored project.faf for ${owner}/${repo} — Score: ${score}% (${tier})`,
-      data: {
-        owner,
-        repo,
-        score,
-        tier,
-        fafContent: content,
-        filePath,
-      },
+      message: filePath
+        ? `Wrote ${filePath} for ${repoUrl} — faf-cli scores it ${scoreText(score)} (${score.tier.name}). ${intentNote}`
+        : `Authored project.faf for ${repoUrl} (preview, nothing written) — faf-cli scores it ${scoreText(score)} (${score.tier.name}). ${intentNote}`,
+      data: { repoUrl, score: score.score, tier: score.tier.name, fafContent, filePath, suggestions },
     };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    return {
-      success: false,
-      message: `Failed to fetch GitHub metadata: ${errorMessage}`,
-    };
+  } finally {
+    // The temp folder is this call's own (mkdtemp); nothing else is in it.
+    fs.rmSync(tmp, { recursive: true, force: true });
   }
 }

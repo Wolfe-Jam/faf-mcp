@@ -16,13 +16,16 @@
  *   no-faf errors — name the MCP tool (faf_init), not the CLI
  *   cli.ts        — stdout stays the JSON-RPC stream
  *
- * GitHub is mocked (globalThis.fetch) so faf_git runs offline and
- * deterministically. Every write goes to mkdtemp dirs under os.tmpdir().
+ * faf_git clones with git. The GitHub URL is pointed at a local repo made
+ * here (git's url.<local>.insteadOf through GIT_CONFIG_COUNT, git 2.31+), so
+ * it runs offline and deterministically. Every write goes to mkdtemp dirs under os.tmpdir().
  */
 import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { execFileSync } from 'child_process';
+import { pathToFileURL } from 'url';
 import { FafMcpServer } from '../src/server.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -63,9 +66,8 @@ human_context:
 `;
 
 // ---------------------------------------------------------------------------
-// GitHub mock — the handful of endpoints github-extractor calls
+// GitHub, offline: https://github.com/acme/demo resolves to a local repo
 // ---------------------------------------------------------------------------
-const GH = 'https://api.github.com/repos/acme/demo';
 const README = [
   '# demo',
   '',
@@ -77,35 +79,33 @@ const README = [
   '',
 ].join('\n');
 const PKG = JSON.stringify({ name: 'demo', version: '1.0.0', dependencies: { express: '^4.0.0' } });
-const b64 = (s: string): string => Buffer.from(s, 'utf-8').toString('base64');
 
-function mockGitHub(): { calls: string[]; restore: () => void } {
-  const real = globalThis.fetch;
-  const calls: string[] = [];
-  const json = (body: unknown, status = 200): Response =>
-    new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
-  const fake = async (input: unknown): Promise<Response> => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
-    calls.push(url);
-    if (url === GH) {
-      return json({
-        description: 'A tiny demo service',
-        topics: [],
-        stargazers_count: 3,
-        forks_count: 0,
-        license: { spdx_id: 'MIT' },
-        default_branch: 'main',
-        languages_url: `${GH}/languages`,
-      });
-    }
-    if (url === `${GH}/languages`) return json({ TypeScript: 900, JavaScript: 100 });
-    if (url.startsWith(`${GH}/contents/README.md`)) return json({ content: b64(README), encoding: 'base64' });
-    if (url.startsWith(`${GH}/contents/package.json`)) return json({ content: b64(PKG), encoding: 'base64' });
-    if (url.startsWith(`${GH}/contents/?`)) return json([{ path: 'README.md', type: 'file', size: 64, html_url: '' }]);
-    return json({ message: 'Not Found' }, 404);
+let demoRepo: string | undefined;
+function demoRepoUrl(): string {
+  if (!demoRepo) {
+    demoRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-mcp-git-src-'));
+    fs.writeFileSync(path.join(demoRepo, 'README.md'), README);
+    fs.writeFileSync(path.join(demoRepo, 'package.json'), PKG);
+    const git = (...a: string[]): void => { execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false', ...a], { cwd: demoRepo, stdio: 'ignore' }); };
+    git('init', '-q');
+    git('add', '.');
+    git('commit', '-q', '-m', 'fixture');
+  }
+  return pathToFileURL(demoRepo).href;
+}
+
+/** Point https://github.com/acme/demo at the local repo (or at nothing, to
+ *  prove a call never cloned). restore() puts the environment back. */
+function mockGitHub(target: 'demo' | 'nowhere' = 'demo'): { restore: () => void } {
+  const keys = ['GIT_CONFIG_COUNT', 'GIT_CONFIG_KEY_0', 'GIT_CONFIG_VALUE_0'] as const;
+  const prev = keys.map((k) => process.env[k]);
+  const href = target === 'demo' ? demoRepoUrl() : pathToFileURL(path.join(os.tmpdir(), 'faf-mcp-no-such-repo')).href;
+  process.env.GIT_CONFIG_COUNT = '1';
+  process.env.GIT_CONFIG_KEY_0 = `url.${href}.insteadOf`;
+  process.env.GIT_CONFIG_VALUE_0 = 'https://github.com/acme/demo.git'; // faf-cli's normalizeGitUrl adds .git
+  return {
+    restore: () => keys.forEach((k, i) => { if (prev[i] === undefined) {delete process.env[k];} else {process.env[k] = prev[i];} }),
   };
-  globalThis.fetch = fake as unknown as typeof fetch;
-  return { calls, restore: () => { globalThis.fetch = real; } };
 }
 
 // ---------------------------------------------------------------------------
@@ -117,44 +117,45 @@ describe('🏁 faf_git — one scorer, no silent overwrite', () => {
   afterEach(() => gh.restore());
 
   test('the reported score is faf-cli scoreFafYaml of the authored bytes', async () => {
-    const { scoreFafYaml } = await fafCliPromise;
+    const { scoreFafYaml, scoreText } = await fafCliPromise;
     const r = await gitContextCommand('acme/demo');
     expect(r.success).toBe(true);
     const s = scoreFafYaml(r.data!.fafContent);
     expect(r.data!.score).toBe(s.score);
     expect(r.data!.tier).toBe(s.tier.name);
-    expect(r.message).toContain(`Score: ${s.score}% (${s.tier.name})`);
+    expect(r.message).toContain(`faf-cli scores it ${scoreText(s)} (${s.tier.name})`);
   });
 
-  test('the authored file uses the .faf spec slots faf-cli scores (goal, main_language, human_context)', async () => {
+  test('faf-cli 8.10.0: the goal and six W\'s are left empty and returned as suggestions with sources', async () => {
     const { parse } = await import('yaml');
     const r = await gitContextCommand('acme/demo');
     const doc = parse(r.data!.fafContent);
-    expect(doc.project.goal).toBe('A tiny demo service');
-    expect(doc.project.main_language).toBe('TypeScript');
-    expect(doc.project.description).toBeUndefined();
-    expect(doc.project.language).toBeUndefined();
-    expect(typeof doc.human_context).toBe('object');
-    expect(doc.human_context.what).toBeTruthy();
-    expect(doc.context).toBeUndefined();
+    expect(doc.project.goal || '').toBe('');
+    for (const w of ['who', 'what', 'why', 'where', 'when', 'how']) {expect(doc.human_context?.[w] || '').toBe('');}
+    const goal = r.data!.suggestions!.find((x) => x.slot === 'project.goal');
+    expect(goal?.value).toBe('A tiny demo service that answers health checks for the test suite.');
+    expect(goal?.source).toContain('README.md');
+    expect(r.message).toContain('faf_go answers');
+    expect(r.message).toContain('A tiny demo service that answers health checks');
   });
 
-  test('the authored file carries authored_by, not generated_by', async () => {
+  test('the authored file is faf-cli\'s: no generated_by block', async () => {
     const r = await gitContextCommand('acme/demo');
-    expect(r.data!.fafContent).toMatch(/^authored_by:/m);
     expect(r.data!.fafContent).not.toContain('generated_by');
   });
 
   test('refuses to replace an existing project.faf without force — writes nothing, fetches nothing', async () => {
+    gh.restore();
+    gh = mockGitHub('nowhere'); // a clone would fail with "Could not clone"
     const dir = tmp('git');
     const original = 'faf_version: "3.0"\nproject:\n  name: keep-me\n';
     fs.writeFileSync(path.join(dir, 'project.faf'), original);
 
     const r = await gitContextCommand('acme/demo', dir);
     expect(r.success).toBe(false);
-    expect(r.message).toBe(`project.faf already exists at ${dir}. Pass force: true to overwrite.`);
+    expect(r.message).toContain('already exists; faf_git wrote nothing. Pass force: true to replace project.faf');
+    expect(r.message).not.toContain('Could not clone');
     expect(fs.readFileSync(path.join(dir, 'project.faf'), 'utf-8')).toBe(original);
-    expect(gh.calls).toEqual([]);
   });
 
   test('force: true replaces it with the authored bytes', async () => {
@@ -489,7 +490,7 @@ describe('🏁 MCP round trip — tool text tells the truth', () => {
       const r = (await client.callTool({ name: 'faf_git', arguments: { url: 'acme/demo', path: dir } })) as ToolText;
       expect(r.isError).toBe(true);
       expect(firstText(r)).toContain('already exists');
-      expect(firstText(r)).toContain('Pass force: true to overwrite.');
+      expect(firstText(r)).toContain('Pass force: true to replace project.faf');
       expect(fs.readFileSync(path.join(dir, 'project.faf'), 'utf-8')).toBe(original);
     } finally {
       gh.restore();
@@ -499,12 +500,12 @@ describe('🏁 MCP round trip — tool text tells the truth', () => {
   test('faf_git preview reports the same score faf-cli gives the authored bytes', async () => {
     const gh = mockGitHub();
     try {
-      const { scoreFafYaml } = await fafCliPromise;
+      const { scoreFafYaml, scoreText } = await fafCliPromise;
       const expected = scoreFafYaml((await gitContextCommand('acme/demo')).data!.fafContent);
 
       const r = (await client.callTool({ name: 'faf_git', arguments: { url: 'acme/demo' } })) as ToolText;
       expect(r.isError).toBeFalsy();
-      expect(firstText(r)).toContain(`Score: ${expected.score}% (${expected.tier.name})`);
+      expect(firstText(r)).toContain(`faf-cli scores it ${scoreText(expected)} (${expected.tier.name})`);
     } finally {
       gh.restore();
     }
