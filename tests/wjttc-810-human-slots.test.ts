@@ -1,0 +1,125 @@
+/**
+ * 🏁 WJTTC: the goal and six W's are human slots (faf-cli 8.10.0)
+ *
+ * faf-cli 8.10.0 stopped writing the goal and the six W's: they are the user's
+ * to give. faf-cli suggests them (suggestIntent: value + source) and the person
+ * confirms. faf-mcp must carry that through:
+ *
+ *   H1  faf_init leaves them empty and says how many suggestions wait for faf_go.
+ *   H2  faf_auto does the same, on a new file and on an existing one.
+ *   H3  faf_go questions carry faf-cli's suggestion and its source, and tell the
+ *       caller to write only what the user confirms.
+ *   H4  faf_readme suggests (with sources) and writes nothing, apply or not.
+ *   H5  "Gold Code" is never the name for 100%: it's Trophy.
+ */
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { FafToolHandler } from '../src/handlers/tools';
+import { FafEngineAdapter } from '../src/handlers/engine-adapter';
+
+type ToolText = { isError?: boolean; content: Array<{ type: string; text?: string }> };
+const textOf = (r: ToolText): string => (r.content ?? []).map((c) => c.text ?? '').join('\n');
+
+const PKG = JSON.stringify({ name: 'demo-app', version: '1.0.0', description: 'A tiny tool that turns CSV files into charts' });
+const README = '# demo-app\n\nTurns CSV files into charts.\n\n## Why\n\nMaking a chart from a CSV takes too many steps.\n';
+
+let dir: string;
+let handler: FafToolHandler;
+const call = async (name: string, args: Record<string, unknown>) =>
+  (await handler.callTool(name, args)) as ToolText;
+
+beforeEach(() => {
+  dir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-810-'));
+  fs.writeFileSync(path.join(dir, 'package.json'), PKG);
+  fs.writeFileSync(path.join(dir, 'README.md'), README);
+  handler = new FafToolHandler(new FafEngineAdapter('native'));
+});
+afterEach(() => {
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+const fafText = () => fs.readFileSync(path.join(dir, 'project.faf'), 'utf-8');
+/** The value of `key:` inside `block:` in the YAML, '' when empty or absent. */
+const slot = (yaml: string, block: string, key: string): string => {
+  const m = yaml.match(new RegExp(`^${block}:\\n((?:[ \\t]+.*\\n?)*)`, 'm'));
+  const line = m?.[1].match(new RegExp(`^[ \\t]+${key}:[ \\t]*(.*)$`, 'm'));
+  return (line?.[1] ?? '').replace(/^["']|["']$/g, '').trim();
+};
+
+describe('H1 faf_init: human slots empty, suggestions announced', () => {
+  test('goal and W\'s are empty; the reply counts the suggestions and names faf_go', async () => {
+    const r = await call('faf_init', { path: dir });
+    expect(r.isError).toBeFalsy();
+    const yaml = fafText();
+    expect(slot(yaml, 'project', 'goal')).toBe('');
+    expect(slot(yaml, 'human_context', 'why')).toBe('');
+    const text = textOf(r);
+    expect(text).toMatch(/\d+ suggestions? for the goal and the six W's/);
+    expect(text).toContain('faf_go');
+    expect(text).not.toContain("'faf go'");
+  });
+});
+
+describe('H2 faf_auto: human slots empty, suggestions announced', () => {
+  test('new file', async () => {
+    const r = await call('faf_auto', { path: dir });
+    expect(r.isError).toBeFalsy();
+    expect(slot(fafText(), 'project', 'goal')).toBe('');
+    expect(textOf(r)).toMatch(/\d+ suggestions? for the goal and the six W's/);
+  });
+
+  test('existing file: a confirmed goal is kept and not counted', async () => {
+    fs.writeFileSync(path.join(dir, 'project.faf'), 'faf_version: "3.0"\nproject:\n  name: demo-app\n  goal: Charts from CSV for analysts\n');
+    const r = await call('faf_auto', { path: dir });
+    expect(r.isError).toBeFalsy();
+    expect(slot(fafText(), 'project', 'goal')).toBe('Charts from CSV for analysts');
+    expect(textOf(r)).toContain('faf_go');
+  });
+});
+
+describe('H3 faf_go: suggestions with sources, confirm first', () => {
+  test('each empty slot carries faf-cli\'s suggestion and source', async () => {
+    await call('faf_init', { path: dir });
+    const r = await call('faf_go', { path: dir });
+    const body = JSON.parse(textOf(r));
+    const goal = body.questions.find((q: any) => q.field === 'project.goal');
+    expect(goal.suggested).toBe('Turns CSV files into charts.');
+    expect(goal.source).toBeTruthy();
+    const why = body.questions.find((q: any) => q.field === 'human_context.why');
+    expect(why.suggested).toContain('too many steps');
+    expect(body.instructions).toMatch(/confirm/i);
+    // A slot the repo can't suggest says so with an empty suggestion.
+    for (const q of body.questions) {expect(typeof q.suggested).toBe('string');}
+  });
+});
+
+describe('H4 faf_readme: suggests, never writes', () => {
+  test('apply: true leaves project.faf byte for byte', async () => {
+    await call('faf_init', { path: dir });
+    const before = fafText();
+    const r = await call('faf_readme', { path: dir, apply: true });
+    expect(r.isError).toBeFalsy();
+    expect(fafText()).toBe(before);
+    const text = textOf(r);
+    expect(text).toContain('Turns CSV files into charts.');
+    expect(text).toContain('README.md');
+    expect(text).toContain('faf_go');
+  });
+
+  test('a repo with no README still gets its package.json suggestion', async () => {
+    fs.rmSync(path.join(dir, 'README.md'));
+    await call('faf_init', { path: dir });
+    const r = await call('faf_readme', { path: dir });
+    expect(r.isError).toBeFalsy();
+    expect(textOf(r)).toContain('package.json');
+  });
+});
+
+describe('H5 100% is Trophy, never Gold Code', () => {
+  test('no "Gold Code" in the tool source', () => {
+    const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'handlers', 'tools.ts'), 'utf-8');
+    expect(src).not.toMatch(/gold code/i);
+  });
+});

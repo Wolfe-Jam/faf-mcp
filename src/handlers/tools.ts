@@ -348,18 +348,18 @@ export class FafToolHandler {
         },
         {
           name: 'faf_readme',
-          description: 'Extract 6 Ws (Who/What/Why/Where/When/How) from README.md into human_context - Smart pattern matching',
+          description: 'Suggest the goal and the 6 Ws (Who/What/Why/Where/When/How) from README.md, package.json and Cargo.toml with faf-cli\'s suggestIntent: each with its source, for the user to confirm. These are human slots: nothing is written here. Confirmed text goes in with faf_go answers.',
           annotations: {
-            title: 'Extract from README',
-            readOnlyHint: false,
+            title: 'Suggest from README',
+            readOnlyHint: true,
             destructiveHint: false,
             openWorldHint: false
           },
           inputSchema: {
             type: 'object',
             properties: {
-              apply: { type: 'boolean', description: 'Apply extracted content to project.faf (default: preview only)' },
-              force: { type: 'boolean', description: 'Overwrite existing human_context values (default: only fill empty slots)' },
+              apply: { type: 'boolean', description: 'Accepted for compatibility. Since faf-cli 8.10.0 the goal and 6 Ws are confirmed by a person, so nothing is written either way: confirm each suggestion with the user, then pass it to faf_go answers.' },
+              force: { type: 'boolean', description: 'Accepted for compatibility; nothing is written.' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             additionalProperties: false
@@ -367,7 +367,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_human_add',
-          description: 'Add a human_context field (who/what/why/where/when/how) - Non-interactive for MCP',
+          description: 'Add a human_context field (who/what/why/where/when/how) with text the user has confirmed - Non-interactive for MCP',
           annotations: {
             title: 'Add Human Context',
             readOnlyHint: false,
@@ -382,7 +382,7 @@ export class FafToolHandler {
                 enum: ['who', 'what', 'why', 'where', 'when', 'how'],
                 description: 'The 6 W field to set'
               },
-              value: { type: 'string', description: 'The value to set for the field' },
+              value: { type: 'string', description: 'The text the user confirmed for the field' },
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' }
             },
             required: ['field', 'value'],
@@ -426,7 +426,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_go',
-          description: 'Drive a project.faf to 100% through a guided interview — returns the next questions for the missing human-context and goal fields, then applies the answers passed back. Returns the updated score after each round. Use this to close the gap to a complete context when auto-detection cannot fill the human slots.',
+          description: 'Drive a project.faf to 100% through a guided interview — returns the next questions for the missing human-context and goal fields, each with faf-cli\'s suggestion from the repo and its source, then applies the answers the user confirmed. Returns the updated score after each round. Use this to close the gap to a complete context when auto-detection cannot fill the human slots.',
           annotations: {
             title: 'Guided Setup',
             readOnlyHint: false,
@@ -439,7 +439,7 @@ export class FafToolHandler {
               path: { type: 'string', description: 'Project path. Sets session context for subsequent calls.' },
               answers: {
                 type: 'object',
-                description: 'Answers to apply. Keys are field paths (e.g., "project.goal", "human_context.why"), values are the answers. If provided, applies answers and returns new score.',
+                description: 'Answers to apply. Keys are field paths (e.g., "project.goal", "human_context.why"), values are the text the user confirmed. If provided, applies answers and returns new score.',
                 additionalProperties: { type: 'string' }
               }
             },
@@ -502,7 +502,7 @@ export class FafToolHandler {
         },
         {
           name: 'faf_quick',
-          description: 'Lightning-fast .faf creation - One-liner format: "name, description, language, framework, hosting"',
+          description: 'Lightning-fast .faf creation - One-liner format: "name, description, language, framework, hosting" (the description is the goal: the user\'s own words; faf_go asks for the six W\'s)',
           annotations: {
             title: 'Quick Create',
             readOnlyHint: false,
@@ -943,10 +943,12 @@ export class FafToolHandler {
         ? `\n\n💡 Smart resolution: "${userInput}" → ${targetDir}`
         : '';
 
+      const initNote = await this.suggestionLine(targetDir, fafPath);
+
       return {
         content: [{
           type: 'text',
-          text: `🚀 FAF Initialization:\n\n✅ Created project.faf\n📊 ${score.score}/100 (${score.populated}/${score.active} slots populated) — ${score.tier.name}\n\n${pathConfirmation}${sourceExplanation}\n\n🍊 Vitamin Context activated!\n⚡ FAFFLESS AI ready!\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_claude to write CLAUDE.md\n  • Run faf_go to fill the gaps`
+          text: `🚀 FAF Initialization:\n\n✅ Created project.faf\n📊 ${score.score}/100 (${score.populated}/${score.active} slots populated) — ${score.tier.name}\n${initNote ? `\n${initNote}\n` : ''}\n${pathConfirmation}${sourceExplanation}\n\n🍊 Vitamin Context activated!\n⚡ FAFFLESS AI ready!\n\n🏁 Next steps:\n  • Run faf_score for AI-readiness score\n  • Run faf_claude to write CLAUDE.md\n  • Run faf_go to fill the gaps`
         }]
       };
     } catch (error: any) {
@@ -1519,24 +1521,30 @@ Call these MCP tools:
   // Human Context Tools (parity with faf-cli v3.2.0)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  /** What the reply says about the goal and 6 Ws (faf-cli 8.10.0): faf-cli's
+   *  note when suggestions wait, pointed at faf_go; otherwise which are still
+   *  empty; '' when all seven hold words. */
+  private async suggestionLine(dir: string, fafPath?: string): Promise<string> {
+    const { suggestionNote, readFaf, isPlaceholder } = await fafCli;
+    let faf: Record<string, unknown> | undefined;
+    try { faf = readFaf(fafPath ?? pathModule.join(dir, 'project.faf')) as unknown as Record<string, unknown>; } catch { faf = undefined; }
+    const note = suggestionNote(dir, faf as any);
+    if (note) {return note.replace("'faf go'", 'faf_go');}
+    const mapping = (v: unknown): Record<string, unknown> => (v && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : {});
+    const project = mapping(faf?.project);
+    const hc = mapping(faf?.human_context);
+    const values = [project.goal, ...['who', 'what', 'why', 'where', 'when', 'how'].map((w) => hc[w])];
+    const empty = values.filter((v) => v === undefined || v === null || (typeof v === 'string' && (v.trim() === '' || isPlaceholder(v)))).length;
+    if (empty === 0) {return '';}
+    if (empty === 7) {return "The goal and six W's are empty: faf_go asks for them.";}
+    return `${empty} of the goal and six W's ${empty === 1 ? 'is' : 'are'} empty: faf_go asks for ${empty === 1 ? 'it' : 'them'}.`;
+  }
+
   private async handleFafReadme(args: any): Promise<CallToolResult> {
     try {
-      const path = await import('path');
       const cwd = this.getProjectPath(args?.path);
 
-      // Find README.md
-      const readmePath = path.join(cwd, 'README.md');
-      if (!fs.existsSync(readmePath)) {
-        return {
-          content: [{
-            type: 'text',
-            text: `📖 FAF README Extraction:\n\n❌ No README.md found in ${cwd}\n💡 Create a README.md first`
-          }],
-          isError: true
-        };
-      }
-
-      // Find project.faf
+      // The .faf the suggestions read: slots that already hold words are skipped.
       const fafResult = await findFafFile(cwd);
       if (!fafResult) {
         return {
@@ -1548,91 +1556,31 @@ Call these MCP tools:
         };
       }
 
-      // Read README content
-      const readmeContent = fs.readFileSync(readmePath, 'utf-8');
+      // faf-cli 8.10.0: the goal and 6 Ws are the user's. suggestIntent reads
+      // README.md, package.json and Cargo.toml and returns each suggestion with
+      // its source. Nothing is written, apply or not.
+      const { suggestIntent, readFaf } = await fafCli;
+      let faf: Record<string, unknown> | undefined;
+      try { faf = readFaf(fafResult.path) as unknown as Record<string, unknown>; } catch { faf = undefined; }
+      const suggested = Object.entries(suggestIntent(cwd, faf as any) as Record<string, { value: string; source: string }>);
 
-      // Extract 6 Ws using simple pattern matching
-      const extracted = this.extractSixWsFromReadme(readmeContent);
-
-      if (!args?.apply) {
-        // Preview mode
-        let output = `📖 FAF README Extraction (Preview)\n\n`;
-        output += `Found in README.md:\n`;
-        for (const [field, value] of Object.entries(extracted)) {
-          if (value) {
-            output += `  ${field.toUpperCase()}: ${value}\n`;
-          }
-        }
-        output += `\n💡 Use apply: true to save to project.faf`;
-        return { content: [{ type: 'text', text: output }] };
-      }
-
-      // Apply mode - update project.faf
-      const fafContent = fs.readFileSync(fafResult.path, 'utf-8');
-      const yaml = await import('yaml');
-      const fafData = yaml.parse(fafContent) || {};
-
-      if (!fafData.human_context) {
-        fafData.human_context = {};
-      }
-
-      let appliedCount = 0;
-      for (const [field, value] of Object.entries(extracted)) {
-        if (value) {
-          const existingValue = fafData.human_context[field];
-          if (!existingValue || args?.force) {
-            fafData.human_context[field] = value;
-            appliedCount++;
-          }
+      let output = `📖 FAF README Extraction\n\n`;
+      if (suggested.length === 0) {
+        output += `No suggestions for the empty goal or six W's in this repo.\n`;
+      } else {
+        output += `Suggestions for the goal and six W's (from the repo, not yet confirmed):\n`;
+        for (const [slot, sug] of suggested) {
+          output += `  ${slot}: ${sug.value}  (${sug.source})\n`;
         }
       }
-
-      fs.writeFileSync(fafResult.path, yaml.stringify(fafData), 'utf-8');
-
-      return {
-        content: [{
-          type: 'text',
-          text: `📖 FAF README Extraction:\n\n✅ Applied ${appliedCount} field(s) to human_context\n📁 Updated: ${fafResult.filename}`
-        }]
-      };
+      output += `\n💡 These are the user's slots: nothing was written${args?.apply || args?.force ? ' (apply and force are accepted and write nothing since faf-cli 8.10.0)' : ''}. Ask the user, then send only what they confirm as faf_go answers.`;
+      return { content: [{ type: 'text', text: output }] };
     } catch (error: any) {
       return {
         content: [{ type: 'text', text: `📖 FAF README Extraction:\n\n❌ Error: ${error.message}` }],
         isError: true
       };
     }
-  }
-
-  private extractSixWsFromReadme(content: string): Record<string, string | null> {
-    const result: Record<string, string | null> = {
-      who: null, what: null, why: null, where: null, when: null, how: null
-    };
-
-    // WHAT: First paragraph after title
-    const whatMatch = content.match(/^#\s+[^\n]+\n+(?:\*\*[^*]+\*\*\n+)?([A-Z][^#\n]{30,})/m);
-    if (whatMatch) result.what = whatMatch[1].trim().substring(0, 200);
-
-    // WHO: Look for "team", "company", "by", "for"
-    const whoMatch = content.match(/(?:built by|created by|maintained by|for|team)\s+([^\n.]{10,50})/i);
-    if (whoMatch) result.who = whoMatch[1].trim();
-
-    // WHY: Look for "because", "to", benefits
-    const whyMatch = content.match(/(?:because|to help|enables|allows|makes it)\s+([^\n.]{15,100})/i);
-    if (whyMatch) result.why = whyMatch[1].trim();
-
-    // WHERE: Look for deployment/runtime mentions
-    const whereMatch = content.match(/(?:runs on|deployed to|works with|for)\s+(browser|server|edge|npm|cargo|cloud|local)/i);
-    if (whereMatch) result.where = whereMatch[0].trim();
-
-    // WHEN: Look for version, date
-    const whenMatch = content.match(/(?:version|v)\s*(\d+\.\d+(?:\.\d+)?)/i);
-    if (whenMatch) result.when = `v${whenMatch[1]}`;
-
-    // HOW: Look for install/run commands
-    const howMatch = content.match(/(?:npm install|cargo|pip install|brew install)\s+[^\n]+/i);
-    if (howMatch) result.how = howMatch[0].trim();
-
-    return result;
   }
 
   private async handleFafHumanAdd(args: any): Promise<CallToolResult> {
@@ -1836,7 +1784,7 @@ Call these MCP tools:
   }
 
   /**
-   * faf_go - Guided interview to Gold Code
+   * faf_go - Guided interview to 100% (Trophy)
    *
    * Two-phase operation:
    * 1. Without answers: Returns questions for missing fields
@@ -1858,7 +1806,7 @@ Call these MCP tools:
               needsInit: true,
               context: 'faf_go',
               message: 'No project.faf found. Run faf_init first to create project DNA.',
-              suggestion: 'Use faf_init to create project.faf, then use faf_go to reach Gold Code.'
+              suggestion: 'Use faf_init to create project.faf, then use faf_go to reach 100%.'
             }, null, 2)
           }]
         };
@@ -1873,7 +1821,7 @@ Call these MCP tools:
       // they're SOURCED by Turbo-Cat (faf-cli's separate STACK_INTERVIEW if ever
       // needed), never asked of a human. (Decision: single-source the 8-Q 6Ws
       // Interview, wolfejam 2026-06-10 — language is not on the human side.)
-      const { SIX_WS_INTERVIEW, isPlaceholder, scoreFafYaml } = await fafCli;
+      const { SIX_WS_INTERVIEW, isPlaceholder, scoreFafYaml, suggestIntent } = await fafCli;
       const QUESTION_REGISTRY: Record<string, (typeof SIX_WS_INTERVIEW)[number]> =
         Object.fromEntries(SIX_WS_INTERVIEW.map((q) => [q.path, q]));
 
@@ -1957,7 +1905,7 @@ Call these MCP tools:
         return {
           content: [{
             type: 'text',
-            text: `🎯 FAF Go - Answers Applied!\n\n✅ Updated ${appliedCount} field(s) in ${fafResult.filename}\n📊 New Score: ${newScore}%\n${celebration}\n\n${newScore < 100 ? '💡 Run faf_go again to continue to Gold Code!' : '✨ Your AI now has complete context!'}`
+            text: `🎯 FAF Go - Answers Applied!\n\n✅ Updated ${appliedCount} field(s) in ${fafResult.filename}\n📊 New Score: ${newScore}%\n${celebration}\n\n${newScore < 100 ? '💡 Run faf_go again to continue to 100%.' : '✨ Your AI now has complete context!'}`
           }]
         };
       }
@@ -1979,7 +1927,7 @@ Call these MCP tools:
             text: JSON.stringify({
               complete: true,
               score: 100,
-              message: '✪ GOLD CODE ACHIEVED! Your project has 100% AI-Readiness.',
+              message: '✪ Trophy: 100% AI-Readiness.',
               context: 'faf_go'
             }, null, 2)
           }]
@@ -2010,11 +1958,19 @@ Call these MCP tools:
         return aIdx - bIdx;
       });
 
+      // faf-cli 8.10.0: the goal and 6 Ws are the user's. Each question carries
+      // faf-cli's suggestion from the repo and its source ('' when none), to
+      // offer the user; only what they confirm comes back as answers.
+      const repoSuggestions = suggestIntent(cwd, fafData) as Record<string, { value: string; source: string }>;
+
       // Build questions
       const questions = prioritizedFields.map(field => {
         const reg = QUESTION_REGISTRY[field];
+        const fromRepo = repoSuggestions[field];
         return {
           field,
+          suggested: fromRepo?.value ?? '',
+          source: fromRepo?.source ?? '',
           question: reg.question,
           header: reg.header,
           type: reg.type,
@@ -2028,12 +1984,12 @@ Call these MCP tools:
           type: 'text',
           text: JSON.stringify({
             needsInput: true,
-            context: 'faf_go - guided path to Gold Code',
+            context: 'faf_go - guided path to 100%',
             currentScore,
             targetScore: 100,
             questionsRemaining: questions.length,
             questions,
-            instructions: 'Ask the user these questions, then call faf_go again with the answers parameter.'
+            instructions: 'Ask the user each question, offering the suggestion (and its source) where there is one, then call faf_go again with the answers parameter: only what the user confirms or writes, never a suggestion they have not confirmed.'
           }, null, 2)
         }]
       };
@@ -2141,6 +2097,9 @@ Call these MCP tools:
       } else {
         output += `🚀 Good start! Run faf_go for guided improvement.\n`;
       }
+
+      const autoNote = await this.suggestionLine(cwd, fafPath);
+      if (autoNote) {output += `\n${autoNote}\n`;}
 
       output += `\n💡 Next: faf_score | faf_go | faf_claude`;
 
