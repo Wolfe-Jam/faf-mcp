@@ -1,5 +1,5 @@
 <!-- faf: faf-mcp | TypeScript | mcp | The Interop MCP for Context — the Cursor / IDE Edition. Persistent context for Cursor, VS Code, and every MCP-compatible IDE. IANA-registered application/vnd.faf+yaml. Start with "Use FAF". -->
-<!-- faf: doc=changelog | latest=v4.1.3 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v4.2.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,7 +8,7 @@ All notable changes to faf-mcp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.2.0] - 2026-11-13 — The Human Slots Edition
 
 **AI suggests, you confirm. faf-mcp no longer writes your project's goal or six W's: faf_go shows each suggestion with its source, and only what you confirm is written.**
 
@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Not changed yet
 - **`faf_git`** still authors from the GitHub API and writes `goal` and `what` from the repo description. It moves to faf-cli's `faf git` pipeline once faf-cli exports the clone step (faf-mcp keeps no subprocesses).
+
+### Security
+- hono 4.13.13 → 4.13.18 (transitive; clears a moderate advisory against `hono <=4.13.15`).
 
 ### Added
 - A daily CI run of the suite against the newest faf-cli 8.x (`faf-cli@^8`), so a faf-cli release that changes what a tool returns shows here first.

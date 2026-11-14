@@ -28,7 +28,17 @@
 
 ---
 
-## What's New in 4.1.3 — The Instructions Edition
+## What's New in 4.2.0 — The Human Slots Edition
+
+**AI suggests, you confirm. faf-mcp no longer writes your project's goal or six W's: faf_go shows each suggestion with its source, and only what you confirm is written.**
+
+- **`faf_go` offers the suggestions.** Each empty goal or W comes with faf-cli's suggestion and where it came from (`README.md § Why`, `package.json description`). Your editor's AI asks you; only the answers you confirm are written.
+- **`faf_init` and `faf_auto` leave them empty** and say how many suggestions are waiting, so a new project.faf scores lower, honestly. Files you already have are not changed.
+- **`faf_readme` suggests and never writes; `faf_sync` never writes the goal.** `faf_sync` still updates the name and stack from package.json.
+- **`faf_go` answers are real slots, as text.** Any other key refuses the call and nothing is written.
+- **faf-cli 8.10.0 inside.** Not changed yet: `faf_git` still writes the goal from the GitHub description; it moves to faf-cli's pipeline in a later release.
+
+## 4.1.3 — The Instructions Edition
 
 **faf-mcp now says what faf-cli's writer did: the note when faf's block goes above older faf text, and each file it could not write.** When a context file starts with older faf text, the reply carries faf-cli's note that the old text is left as you had it; `faf_claude` names any chained file it could not write, with the reason.
 
@@ -95,7 +105,7 @@ You maintain `.cursorrules`. Your teammate uses `AGENTS.md`. Someone on the team
 
 **faf-mcp is the dedicated MCP server for Cursor, Windsurf, Cline, VS Code, and every non-Claude platform.** One `.faf` file in your repo, synced to every format your team needs.
 
-**Context for Cursor & IDE agents:** faf-cli (v7.12) authors the files this server syncs — `bunx faf export --agents`, zero-install and git-native. See [FAF-CLI for Cursor & IDE agents 👀](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
+**Context for Cursor & IDE agents:** faf-cli authors the files this server syncs — `bunx faf export --agents`, zero-install and git-native. See [FAF-CLI for Cursor & IDE agents 👀](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/faf-cli-for-agents.md).
 
 ```
                       project.faf
@@ -151,7 +161,7 @@ faf-mcp runs locally over stdio. Point your IDE at one of these commands.
 | `faf_cursor` | Cursor IDE | Import/export/sync .cursorrules |
 | `faf_gemini` | Google Gemini | Import/export/sync GEMINI.md |
 | `faf_conductor` | Conductor | Import/export directory structure |
-| `faf_git` | GitHub | Author .faf from any repo URL |
+| `faf_git` | GitHub | Author .faf from a public GitHub repo URL |
 
 ```text
 # MCP tool calls — ask your IDE's AI
@@ -162,16 +172,16 @@ faf_claude { all: true }
 faf_git { url: "https://github.com/facebook/react" }
 ```
 
-**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **26 test suites** · **7 bundled parsers**
+**Core tier:** 15 essential tools shown by default; set `FAF_TOOLS=all` for the full **29** (every tool stays callable by name either way) · **7 bundled parsers**
 
 ---
 
 ## Eternal Sync
 
-`project.faf` is the source. faf-mcp writes every tool's context file from it in milliseconds.
+`project.faf` is the source. faf-mcp writes every tool's context file from it.
 
 ```
-project.faf  ──── 8ms ───→  CLAUDE.md / AGENTS.md / .cursorrules / GEMINI.md
+project.faf  ──────────→  CLAUDE.md / AGENTS.md / .cursorrules / GEMINI.md
                     Single source of truth
 ```
 
@@ -209,7 +219,7 @@ AI assistants forget. They drift. Every new session, AI starts guessing again. O
 Use FAF to initialize my project
 Use FAF to score my AI-readiness
 Use FAF to sync my context
-Use FAF to enhance my project
+Use FAF to ask me for my goal
 ```
 
 Works on all platforms — stops web search, forces tool usage.
@@ -222,14 +232,14 @@ The 15 Core tools, shown by default:
 
 | Tool | Purpose |
 |------|---------|
-| `faf_init` | Create a new `project.faf` (use `faf_auto` to enhance an existing one) |
+| `faf_init` | Create a new `project.faf` (use `faf_auto` to fill an existing one) |
 | `faf_auto` | One-call setup: init or merge, stack detection, CLAUDE.md, score |
 | `faf_go` | The goal and six W's: each empty one with faf-cli's suggestion and its source, for you to confirm; only what you confirm is written |
 | `faf_score` | AI-readiness score (0-100%) and tier; `details:true` adds a slot-by-slot breakdown |
 | `faf_doctor` | Diagnose a low score: missing files, slot counts, config issues, each with a fix |
 | `faf_check` | Rate each `human_context` field empty / generic / good |
 | `faf_trust` | Validate the required fields and `about.*` block with faf-cli's validator |
-| `faf_sync` | Reconcile `project.faf` with package.json (dry-run; `apply:true` writes) |
+| `faf_sync` | Reconcile `project.faf` with package.json: name and stack, never the goal (dry-run; `apply:true` writes) |
 | `faf_context` | Set or show the active project path |
 | `faf_about` | What the IANA-registered `.faf` format is, in plain language |
 | **Interop Tools** | |
