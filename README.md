@@ -259,7 +259,7 @@ The 15 Core tools, shown by default:
 
 - **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — Claude Desktop
 - **[faf-cli](https://npmjs.com/package/faf-cli)** — Terminal CLI
-- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
+- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK
 - **[faf-wasm-gen](https://www.npmjs.com/package/faf-wasm-gen)** — Rust→WASM `project.faf` authoring engine, browser/edge (faf-wasm's authoring sibling)
 - **[faf-trinity](https://github.com/Wolfe-Jam/faf-trinity)** — reference MCP server exposing all three IANA FAF formats (context/memory/agent) together
 - **[faf.one](https://faf.one)** — Official website
