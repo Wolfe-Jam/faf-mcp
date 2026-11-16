@@ -5,8 +5,10 @@ name: 📡 MCP Registry Publish (DNS)
 # authorises one.faf/*. Fires on every release so the registry stays current
 # automatically; no manual `mcp-publisher login dns` step in /pubpro.
 #
-# Requires repo secret FAF_ONE_MCP_PRIVATE_KEY = the ed25519 private key (64-hex)
-# whose public key is the `v=MCPv1; k=ed25519; p=...` TXT record at the faf.one apex.
+# The faf.one DNS key is not in this repo. After its checks, the last
+# step hands off to Wolfe-Jam/mcp-registry-publisher (repo secret
+# REGISTRY_PUBLISHER_DISPATCH_TOKEN), which holds the key and publishes after
+# your approval there.
 # Same pattern as claude-faf-mcp; faf-mcp ships one npm package and no mcpb.
 
 on:
@@ -32,13 +34,6 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '22.x'
-
-      - name: Require the DNS key secret
-        env:
-          KEY: ${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}
-        run: |
-          [ -n "$KEY" ] || { echo "::error::FAF_ONE_MCP_PRIVATE_KEY is not set in this repo — one.faf/* cannot be published without it."; exit 1; }
-          echo "✓ FAF_ONE_MCP_PRIVATE_KEY present (${#KEY} chars)"
 
       - name: Install mcp-publisher (pinned, checksum verified)
         run: |
@@ -93,57 +88,13 @@ jobs:
           done
           echo "::error::${PKG}@${VER} is not on npm after 10 minutes: publish it, then re-run this workflow"; exit 1
 
-      - name: Login via DNS (one.faf namespace; the key from the environment)
+      - name: Hand off to mcp-registry-publisher (the key lives there; publish waits for approval)
         if: steps.served.outputs.already != 'true'
         env:
-          MCP_PRIVATE_KEY: ${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}
-        run: node .github/scripts/registry-login.mjs --domain faf.one
-
-      - name: Publish to MCP Registry (with retry on 5xx / timeout)
-        if: steps.served.outputs.already != 'true'
-        env:
-          MCP_PRIVATE_KEY: ${{ secrets.FAF_ONE_MCP_PRIVATE_KEY }}
+          GH_TOKEN: ${{ secrets.REGISTRY_PUBLISHER_DISPATCH_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          set +e
-          MAX_ATTEMPTS=5
-          for attempt in $(seq 1 $MAX_ATTEMPTS); do
-            echo "::group::Publish attempt $attempt/$MAX_ATTEMPTS"
-            OUTPUT=$(./mcp-publisher publish server.json 2>&1)
-            EXIT_CODE=$?
-            echo "$OUTPUT"
-            echo "::endgroup::"
-            if [ $EXIT_CODE -eq 0 ]; then
-              echo "✓ Published to MCP Registry"
-              exit 0
-            fi
-            # Detect transient errors (5xx, gateway timeouts, network)
-            if echo "$OUTPUT" | grep -qE '50[0-9] Gateway|504|timeout|network|temporarily'; then
-              SLEEP=$((attempt * attempt * 10))  # 10s, 40s, 90s, 160s, 250s — gives MCP Registry time to recover
-              echo "Transient failure (attempt $attempt). Sleeping ${SLEEP}s then retrying..."
-              sleep $SLEEP
-              # Refresh the registry token in case it aged out during the wait
-              node .github/scripts/registry-login.mjs --domain faf.one
-              continue
-            fi
-            echo "::error::Non-transient publish failure on attempt $attempt — aborting."
-            exit $EXIT_CODE
-          done
-          echo "::error::Publish failed after $MAX_ATTEMPTS attempts"
-          exit 1
-
-      - name: Round-trip verify (registry serves this version)
-        run: |
-          NAME=$(jq -r '.name' server.json)
-          VER=$(jq -r '.version' server.json)
-          ENC=$(jq -rn --arg n "$NAME" '$n|@uri')
-          for i in $(seq 1 10); do
-            BODY=$(curl -s "https://registry.modelcontextprotocol.io/v0.1/servers/${ENC}/versions/${VER}")
-            GOT=$(echo "$BODY" | jq -r '.server.version // empty')
-            if [ "$GOT" = "$VER" ]; then
-              echo "✓ registry serves $NAME@$VER"
-              echo "$BODY" | jq -r '.server._meta["io.modelcontextprotocol.registry/publisher-provided"]["one.faf/context"] // "no one.faf/context _meta"' | head -20
-              exit 0
-            fi
-            echo "⏳ registry not serving $VER yet (attempt $i/10)"; sleep 6
-          done
-          echo "::error::registry never served $NAME@$VER"; exit 1
+          [ -n "$GH_TOKEN" ] || { echo "::error::REGISTRY_PUBLISHER_DISPATCH_TOKEN is not set in this repo"; exit 1; }
+          VER=$(jq -r .version server.json)
+          gh workflow run publish.yml -R Wolfe-Jam/mcp-registry-publisher -f repo="$REPO" -f tag="v$VER"
+          echo "::notice::Handed off $REPO v$VER. Approve it at https://github.com/Wolfe-Jam/mcp-registry-publisher/actions"
