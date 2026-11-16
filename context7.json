@@ -1,0 +1,24 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "faf-mcp",
+  "description": "MCP server for Cursor, Windsurf, Cline, VS Code and other MCP-compatible IDEs. Keeps a project's facts (stack, goal, commands) in project.faf, an IANA-registered YAML file (application/vnd.faf+yaml), with tools to create, score and fill it and to write CLAUDE.md, AGENTS.md, .cursorrules and GEMINI.md from it.",
+  "excludeFolders": ["tests", "scripts", "assets", ".github", "dist", "node_modules", "archive", "deprecated", "legacy"],
+  "excludeFiles": [
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "GEMINI.md",
+    "THE-MISSING-FORMAT.md",
+    "THE-MISSING-FORMAT-SOCIAL.md",
+    "style-source.html"
+  ],
+  "includeExtensions": [".faf"],
+  "rules": [
+    "Call faf_auto to create or fill project.faf from the repo, then faf_score to see which slots are empty; faf_go suggests the goal and six W's for the user to confirm.",
+    "Treat project.faf as the source of the project's facts; faf_claude writes CLAUDE.md from it, and with all: true also AGENTS.md, .cursorrules and GEMINI.md.",
+    "A core set of tools is listed by default; set FAF_TOOLS=all to list the rest. Every tool is callable by name either way."
+  ]
+}
